@@ -1,0 +1,32 @@
+specifikáció:
+
+A HotelGuru rendszer egy komplex szállodai menedzsment platform, amely a szobafoglalási folyamatok teljes körű kezelését támogatja.
+A rendszer célja, hogy egyszerűvé és átláthatóvá tegye a foglalások adminisztrációját, valamint hatékony együttműködést biztosítson a vendégek, 
+a recepciósok és az adminisztrátorok között. A különböző szerepkörök eltérő jogosultságokkal rendelkeznek, ezáltal biztosítva a feladatok 
+egyértelmű elhatárolását és a rendszer biztonságos működését.
+A vendégek számára a rendszer lehetőséget biztosít regisztrációra és bejelentkezésre.
+A regisztrált felhasználók saját fiókkal rendelkeznek, ahol személyes adataikat – például telefonszámukat, 
+lakcímüket és e-mail címüket – bármikor módosíthatják. A szobák listája bejelentkezés nélkül is megtekinthető, 
+így az érdeklődők előzetesen tájékozódhatnak az elérhető lehetőségekről. Foglalást azonban csak bejelentkezett 
+felhasználók kezdeményezhetnek. A rendszer áttekinthető felületen jeleníti meg a szabad szobákat a kiválasztott 
+időszakra vonatkozóan, valamint a foglalás részleteit, például az árakat és a szoba felszereltségét. A vendégek a 
+foglalásukat meghatározott feltételek mellett – például egy előre rögzített lemondási határidőn belül – vissza is mondhatják. 
+A szállodai tartózkodás ideje alatt a vendégek különféle kiegészítő szolgáltatásokat (például reggeli, wellness, parkolás) rendelhetnek, 
+amelyek költsége automatikusan hozzáadódik a számlájukhoz.
+A foglalási igény elküldését követően a recepciósok veszik át a folyamat kezelését. 
+Feladatuk a beérkező foglalások ellenőrzése és visszaigazolása. A jóváhagyás során megvizsgálják a 
+foglalás részleteit, és megerősítik, hogy a kiválasztott szoba az adott időszakban valóban rendelkezésre áll. 
+A vendég érkezésekor a recepciós végzi el a bejelentkezési (check-in) folyamatot, amely során a vendég hivatalosan 
+elfoglalhatja a szobáját. A tartózkodás végén a recepciós elvégzi a kijelentkezési (check-out) folyamatot, 
+és kiállítja a végszámlát, amely tartalmazza a szállásdíjat, valamint az igénybe vett extra szolgáltatások 
+költségeit.
+Az adminisztrátorok a rendszerben a szobák adatainak kezeléséért felelnek. Jogosultságuk kiterjed új szobák 
+rögzítésére, meglévő szobák adatainak módosítására, valamint szükség esetén azok törlésére. A szobaadatok 
+kezelése magában foglalja a felszereltség, az ár, a férőhelyek száma és egyéb jellemzők frissítését. 
+Ez biztosítja, hogy a vendégek mindig pontos és naprakész információk alapján hozhassanak döntést foglaláskor. 
+Az adminisztrátorok továbbá módosíthatják a szobák foglalhatósági állapotát is, például karbantartás vagy egyéb 
+ok miatt ideiglenesen nem elérhetővé tehetnek egy szobát.
+A HotelGuru rendszer célja egy olyan integrált platform biztosítása, amely támogatja a szálloda mindennapi 
+működését a foglalások kezelésétől kezdve a vendégek kiszolgálásán át az adminisztratív feladatokig. 
+A szerepkörök elkülönítése és a folyamatok digitalizálása hozzájárul a hatékony, átlátható és felhasználóbarát 
+működéshez, mind a vendégek, mind a szállodai személyzet számára
