@@ -1,0 +1,42 @@
+{
+  "users": [
+    {
+      "username": "admin_janos",
+      "email": "admin@hotelguru.hu",
+      "role": "admin",
+      "password": "admin123"
+    },
+    {
+      "username": "recepcios_kati",
+      "email": "kati@hotelguru.hu",
+      "role": "receptionist",
+      "password": "rec123"
+    },
+    {
+      "username": "vendeg_bela",
+      "email": "bela@gmail.com",
+      "role": "guest",
+      "password": "user123"
+    }
+  ],
+  "rooms": [
+    {
+      "room_number": "101",
+      "capacity": 2,
+      "price_per_night": 15000.0,
+      "is_available": true
+    },
+    {
+      "room_number": "102",
+      "capacity": 2,
+      "price_per_night": 18500.0,
+      "is_available": true
+    },
+    {
+      "room_number": "201",
+      "capacity": 4,
+      "price_per_night": 35000.0,
+      "is_available": false
+    }
+  ]
+}
