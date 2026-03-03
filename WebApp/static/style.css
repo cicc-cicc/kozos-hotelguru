@@ -1,0 +1,43 @@
+body {
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    background-color: #f4f7f6;
+    margin: 40px;
+    color: #333;
+}
+
+h1 { color: #2c3e50; text-align: center; }
+
+.container {
+    max-width: 1000px;
+    margin: auto;
+    background: white;
+    padding: 20px;
+    border-radius: 8px;
+    box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+}
+
+table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 20px;
+}
+
+th, td {
+    padding: 12px;
+    text-align: left;
+    border-bottom: 1px solid #ddd;
+}
+
+th {
+    background-color: #3498db;
+    color: white;
+    text-transform: uppercase;
+    font-size: 14px;
+}
+
+tr:hover { background-color: #f1f1f1; }
+
+.status-ok { color: #27ae60; font-weight: bold; }
+.status-no { color: #e74c3c; font-weight: bold; }
+
+.price { font-family: 'Courier New', monospace; font-weight: bold; }
