@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html lang="hu">
+<head>
+    <meta charset="UTF-8">
+    <title>HotelGuru - Szobalista</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+    <div class="container">
+        <h1>HotelGuru Szobakínálat</h1>
+        <table>
+            <thead>
+                <tr>
+                    <th>Szobaszám</th>
+                    <th>Férőhely</th>
+                    <th>Ár / éjszaka</th>
+                    <th>Állapot</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for room in rooms %}
+                <tr>
+                    <td><strong>{{ room.room_number }}</strong></td>
+                    <td>{{ room.capacity }} fő</td>
+                    <td class="price">{{ "{:,.0f}".format(room.price_per_night).replace(',', ' ') }} Ft</td>
+                    <td>
+                        {% if room.is_available %}
+                            <span class="status-ok">Szabad</span>
+                        {% else %}
+                            <span class="status-no">Foglalt / Karbantartás</span>
+                        {% endif %}
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</body>
+</html>

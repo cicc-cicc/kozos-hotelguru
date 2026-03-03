@@ -2,6 +2,7 @@ from flask import Flask
 from flask_sqlalchemy import SQLAlchemy
 from flask_migrate import Migrate
 
+
 # Globális objektumok
 db = SQLAlchemy()
 migrate = Migrate()
@@ -24,3 +25,4 @@ def create_app():
         from . import routes
 
     return app
+
