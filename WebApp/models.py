@@ -122,10 +122,8 @@ class Booking(db.Model):
 
     # --- Foglalás állapotkezelő segédfüggvények a frontendhez ---
     def confirm(self):
-        """Foglalás megerősítése; ellenőrzi az ütközést és státuszt állít.
-        Ajánlott hívni a service rétegben tranzakcióban.
-        """
-        if Booking.has_conflict(self.room_id, self.check_in, self.check_out):
+        """Foglalás megerősítése; ellenőrzi az ütközést és státuszt állít."""
+        if Booking.has_conflict(self.room_id, self.check_in, self.check_out, exclude_booking_id=self.id):
             raise ValueError("Ütköző foglalás miatt nem erősíthető meg.")
         self.status = BookingStatus.confirmed
 
@@ -139,46 +137,19 @@ class Booking(db.Model):
         self.status = BookingStatus.checked_out
 
     @classmethod
-    def has_conflict(cls, room_id, new_check_in, new_check_out):
-        """
-        Visszaadja True-t, ha a `room_id`-hez tartozó meglévő foglalások átfedik a megadott időszakot [new_check_in, new_check_out).
-        Ütközés szabálya: existing.check_in < new_check_out ÉS existing.check_out > new_check_in
-        A lemondott (cancelled) foglalásokat kihagyjuk az ütközés ellenőrzéséből.
-        """
-        conflict = (
-            db.session.query(cls)
-            .filter(
-                cls.room_id == room_id,
-                cls.check_in < new_check_out,
-                cls.check_out > new_check_in,
-                cls.status != BookingStatus.cancelled,
-            )
-            .first()
+    def has_conflict(cls, room_id, new_check_in, new_check_out, exclude_booking_id=None):
+        query = cls.query.filter(
+            cls.room_id == room_id,
+            cls.check_in < new_check_out,
+            cls.check_out > new_check_in,
+            cls.status != BookingStatus.cancelled,
         )
-        return conflict is not None
+        if exclude_booking_id:
+            query = query.filter(cls.id != exclude_booking_id)
+        return query.first() is not None
+                    
 
-
-class ExtraService(db.Model):
-    __tablename__ = "extraservices"
-
-    id = db.Column(db.Integer, primary_key=True)
-    name = db.Column(db.String(120), nullable=False)
-    description = db.Column(db.Text, nullable=True)
-    price = db.Column(db.Float, nullable=False)
-
-    # Asszociációs objektumok
-    booking_services = db.relationship("BookingService", back_populates="service", cascade="all, delete-orphan")
-
-    # Kényelmi, csak olvasható kapcsolat a Booking objektumokhoz az asszociációs táblán keresztül
-    bookings = db.relationship(
-        "Booking",
-        secondary="booking_services",
-        back_populates="extra_services",
-        viewonly=True,
-    )
-
-    def __repr__(self):
-        return f"<ExtraService id={self.id} name={self.name} price={self.price}>"
+    # ...existing code...
 
 
 class BookingService(db.Model):
@@ -196,6 +167,25 @@ class BookingService(db.Model):
     def __repr__(self):
         return f"<BookingService id={self.id} booking_id={self.booking_id} service_id={self.service_id} qty={self.quantity}>"
 
+class ExtraService(db.Model):
+    __tablename__ = "extraservices"
+
+    id = db.Column(db.Integer, primary_key=True)
+    name = db.Column(db.String(120), unique=True, nullable=False)
+    price = db.Column(db.Float, nullable=False)
+    description = db.Column(db.Text, nullable=True)
+
+    # Kapcsolatok
+    booking_services = db.relationship("BookingService", back_populates="service", cascade="all, delete-orphan")
+    bookings = db.relationship(
+        "Booking",
+        secondary="booking_services",
+        back_populates="extra_services",
+        viewonly=True,
+    )
+
+    def __repr__(self):
+        return f"<ExtraService id={self.id} name={self.name} price={self.price}>"
 
 class Invoice(db.Model):
     __tablename__ = "invoices"

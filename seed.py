@@ -30,8 +30,13 @@ def parse_dt(value):
 
 def seed_database():
     with app.app_context():
+        # Fejlesztői fallback: ha nincsenek migrációk lefuttatva, biztosítjuk, hogy a táblák létrejöjjenek.
+        # Ez helyben gyorsan segít elkerülni a "Table doesn't exist" hibát. Production környezetben
+        # érdemes migrációkat használni és ezt a sort eltávolítani.
+        db.create_all()
+        print("db.create_all() futtatva — a táblák biztosítva.")
+
         # Foglalások törlése, hogy ne legyenek idegen kulcs hibák
-        from WebApp.models import Booking, BookingService, Invoice, ExtraService
         Invoice.query.delete()
         db.session.commit()
         BookingService.query.delete()
@@ -43,12 +48,6 @@ def seed_database():
         ExtraService.query.delete()
         db.session.commit()
         print("Invoice, BookingService, Booking, Room és ExtraService tábla kiürítve.")
-
-        # Fejlesztői fallback: ha nincsenek migrációk lefuttatva, biztosítjuk, hogy a táblák létrejöjjenek.
-        # Ez helyben gyorsan segít elkerülni a "Table doesn't exist" hibát. Production környezetben
-        # érdemes migrációkat használni és ezt a sort eltávolítani.
-        db.create_all()
-        print("db.create_all() futtatva — a táblák biztosítva.")
 
         json_path = os.path.join(os.path.dirname(__file__), "data.json")
 
