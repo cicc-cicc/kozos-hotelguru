@@ -24,10 +24,12 @@
                     <td>{{ room.capacity }} fő</td>
                     <td class="price">{{ "{:,.0f}".format(room.price_per_night).replace(',', ' ') }} Ft</td>
                     <td>
-                        {% if room.is_available %}
+                        {% if room.status and room.status.value == 'available' %}
                             <span class="status-ok">Szabad</span>
+                        {% elif room.status and room.status.value == 'maintenance' %}
+                            <span class="status-no">Karbantartás</span>
                         {% else %}
-                            <span class="status-no">Foglalt / Karbantartás</span>
+                            <span class="status-no">Foglalt / Nem elérhető</span>
                         {% endif %}
                     </td>
                 </tr>
