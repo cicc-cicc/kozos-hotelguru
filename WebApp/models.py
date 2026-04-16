@@ -29,7 +29,7 @@ class User(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     username = db.Column(db.String(80), unique=True, nullable=False)
     email = db.Column(db.String(120), unique=True, nullable=False)
-    password_hash = db.Column(db.String(255), nullable=True)
+    password_hash = db.Column(db.String(255), nullable=False)
     phone = db.Column(db.String(50), nullable=True)
     address = db.Column(db.String(255), nullable=True)
     role = db.Column(db.Enum(Role), nullable=False, default=Role.guest)
@@ -50,11 +50,22 @@ class Room(db.Model):
     capacity = db.Column(db.Integer, nullable=False)
     price_per_night = db.Column(db.Float, nullable=False)
     description = db.Column(db.Text, nullable=True)
+    equipment = db.Column(db.Text, nullable=True)  # Felszereltség, vesszővel elválasztva
     status = db.Column(db.Enum(RoomStatus), nullable=False, default=RoomStatus.available)
 
     # Kapcsolatok
     bookings = db.relationship("Booking", back_populates="room", cascade="all, delete-orphan")
 
+    @property
+    def equipment_list(self):
+        if not self.equipment:
+            return []
+        return [item.strip() for item in self.equipment.split(",") if item.strip()]
+
+    @property
+    def is_available(self):
+        return self.status == RoomStatus.available
+    
     def __repr__(self):
         return f"<Room id={self.id} number={self.room_number} status={self.status.value}>"
 
@@ -148,8 +159,6 @@ class Booking(db.Model):
             query = query.filter(cls.id != exclude_booking_id)
         return query.first() is not None
                     
-
-    # ...existing code...
 
 
 class BookingService(db.Model):
