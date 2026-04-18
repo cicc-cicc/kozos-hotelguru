@@ -1,8 +1,26 @@
 from . import db
 from datetime import datetime
 from flask_login import UserMixin
+from enum import Enum, auto, unique
 
+class Role(Enum):
+    guest = "guest"
+    receptionist = "receptionist"
+    manager = "manager"
+    admin = "admin"
+    
+class RoomStatus(Enum):
+    available = "available"
+    occupied = "occupied"
+    maintenance = "maintenance"
+    unavailable = "unavailable"
 
+class BookingStatus(Enum):
+    pending = "pending"
+    confirmed = "confirmed"
+    cancelled = "cancelled"
+    checked_in = "checked_in"
+    checked_out = "checked_out"
 
 class User(db.Model, UserMixin  ):
     __tablename__ = 'users'

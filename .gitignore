@@ -65,7 +65,7 @@ coverage.xml
 .pytest_cache/
 
 # Migrations (local)
-migrations/versions/
+#migrations/versions/
 
 # OS
 Thumbs.db
