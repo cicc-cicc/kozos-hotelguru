@@ -4,39 +4,104 @@
       "username": "admin_janos",
       "email": "admin@hotelguru.hu",
       "role": "admin",
-      "password": "admin123"
+      "password": "admin123",
+      "phone": "+36-30-111-2222",
+      "address": "Budapest, Fő utca 1"
     },
     {
       "username": "recepcios_kati",
       "email": "kati@hotelguru.hu",
       "role": "receptionist",
-      "password": "rec123"
+      "password": "rec123",
+      "phone": "+36-20-333-4444",
+      "address": "Budapest, Kossuth tér 5"
     },
     {
       "username": "vendeg_bela",
       "email": "bela@gmail.com",
       "role": "guest",
-      "password": "user123"
+      "password": "user123",
+      "phone": "+36-70-555-6666",
+      "address": "Szeged, Petőfi sétány 2"
     }
   ],
+  
   "rooms": [
     {
       "room_number": "101",
       "capacity": 2,
       "price_per_night": 15000.0,
-      "is_available": true
+      "description": "Kényelmes kétágyas szoba, városi kilátással",
+      "status": "available"
     },
     {
       "room_number": "102",
       "capacity": 2,
       "price_per_night": 18500.0,
-      "is_available": true
+      "description": "Superior szoba nagyobb fürdőszobával",
+      "status": "available"
     },
     {
       "room_number": "201",
       "capacity": 4,
       "price_per_night": 35000.0,
-      "is_available": false
+      "description": "Családi lakosztály két szobával",
+      "status": "unavailable"
     }
-  ]
+    ,
+    {
+      "room_number": "103",
+      "capacity": 2,
+      "price_per_night": 16000.0,
+      "description": "Kényelmes kétágyas szoba erkéllyel",
+      "status": "maintenance"
+    }
+  ],
+
+  
+  "extraservices": [
+    {
+      "name": "breakfast",
+      "description": "Reggeli svédasztalos",
+      "price": 2000.0
+    },
+    {
+      "name": "parking",
+      "description": "Zárt parkolóhely",
+      "price": 1500.0
+    },
+    {
+      "name": "wellness",
+      "description": "Wellness belépő a fürdőbe",
+      "price": 5000.0
+    }
+  ],
+
+  "bookings": [
+    {
+      "username": "vendeg_bela",
+      "room_number": "101",
+      "check_in": "2026-03-10T14:00:00",
+      "check_out": "2026-03-12T11:00:00",
+      "status": "confirmed",
+      "extra_services": [
+        {"service_name": "breakfast", "quantity": 2}
+      ],
+      "invoice": {"total_amount": 34000.0, "paid": false}
+    },
+    {
+      "username": "vendeg_bela",
+      "room_number": "102",
+      "check_in": "2026-03-20T15:00:00",
+      "check_out": "2026-03-22T11:00:00",
+      "status": "pending",
+      "extra_services": [
+        {"service_name": "parking", "quantity": 1},
+        {"service_name": "breakfast", "quantity": 2}
+      ],
+      "invoice": {"total_amount": 43000.0, "paid": false}
+    }
+  ],
+
+  "invoices": []
 }
