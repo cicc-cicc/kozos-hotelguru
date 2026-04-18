@@ -1,0 +1,22 @@
+{% extends "base.html" %}
+{% block title %}Szabad szobák{% endblock %}
+
+{% block content %}
+<h2>Szabad szobák {{ arrival }} és {{ departure }} között</h2>
+<div class="room-grid">
+    {% for room in rooms %}
+    <div class="room-card">
+        <h3>{{ room.room_number }} szoba</h3>
+        <p>Férőhely: {{ room.capacity }} fő</p>
+        <p>Ár: {{ room.price_per_night }} Ft/éj</p>
+        <p>{{ room.description }}</p>
+        <form action="{{ url_for('book_room') }}" method="POST">
+            <input type="hidden" name="room_id" value="{{ room.id }}">
+            <input type="hidden" name="arrival" value="{{ arrival }}">
+            <input type="hidden" name="departure" value="{{ departure }}">
+            <button type="submit">Foglalás lefoglalása</button>
+        </form>
+    </div>
+    {% endfor %}
+</div>
+{% endblock %}

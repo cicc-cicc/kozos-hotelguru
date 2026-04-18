@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html lang="hu">
+<head>
+    <meta charset="UTF-8">
+    <title>HotelGuru - {% block title %}{% endblock %}</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+    <nav>
+        <div class="container">
+            <a href="{{ url_for('index') }}">Kezdőlap</a>
+            {% if current_user.is_authenticated %}
+                <a href="{{ url_for('profile') }}">Profil</a>
+                {% if current_user.role.value == 'receptionist' %}
+                    <a href="{{ url_for('reception_dashboard') }}">Recepció</a>
+                {% elif current_user.role.value == 'admin' %}
+                    <a href="{{ url_for('admin_dashboard') }}">Admin</a>
+                {% endif %}
+                <a href="{{ url_for('logout') }}">Kijelentkezés</a>
+            {% else %}
+                <a href="{{ url_for('login') }}">Bejelentkezés</a>
+                <a href="{{ url_for('register') }}">Regisztráció</a>
+            {% endif %}
+        </div>
+    </nav>
+
+    <div class="container">
+        {% with messages = get_flashed_messages() %}
+          {% if messages %}
+            {% for message in messages %}
+              <div class="flash">{{ message }}</div>
+            {% endfor %}
+          {% endif %}
+        {% endwith %}
+
+        {% block content %}{% endblock %}
+    </div>
+</body>
+</html>
