@@ -1,31 +1,11 @@
 from . import db
 from datetime import datetime
-from enum import Enum as PyEnum
+from flask_login import UserMixin
 
 
-class Role(PyEnum):
-    guest = "guest"
-    receptionist = "receptionist"
-    admin = "admin"
 
-
-class RoomStatus(PyEnum):
-    available = "available"
-    maintenance = "maintenance"
-    unavailable = "unavailable"
-
-
-class BookingStatus(PyEnum):
-    pending = "pending"
-    confirmed = "confirmed"
-    cancelled = "cancelled"
-    checked_in = "checked_in"
-    checked_out = "checked_out"
-
-
-class User(db.Model):
-    __tablename__ = "users"
-
+class User(db.Model, UserMixin  ):
+    __tablename__ = 'users'
     id = db.Column(db.Integer, primary_key=True)
     username = db.Column(db.String(80), unique=True, nullable=False)
     email = db.Column(db.String(120), unique=True, nullable=False)

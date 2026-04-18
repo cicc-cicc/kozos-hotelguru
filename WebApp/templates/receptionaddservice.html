@@ -1,0 +1,36 @@
+{% extends "base.html" %}
+
+{% block title %}Szolgáltatás hozzáadása - HotelGuru{% endblock %}
+
+{% block content %}
+<div style="max-width: 500px; margin: 0 auto; background: white; padding: 30px; border-radius: 8px; box-shadow: 0 2px 5px rgba(0,0,0,0.1);">
+    <h1>Tétel hozzáadása a számlához</h1>
+    <div style="background: #f1f2f6; padding: 15px; margin-bottom: 20px; border-radius: 5px;">
+        <p style="margin: 0 0 5px 0;"><strong>Foglalás:</strong> #{{ booking.id }}</p>
+        <p style="margin: 0 0 5px 0;"><strong>Vendég:</strong> {{ booking.user.username }}</p>
+        <p style="margin: 0;"><strong>Szoba:</strong> {{ booking.room.room_number }}</p>
+    </div>
+
+    <form method="POST">
+        {{ form.hidden_tag() }}
+        {{ form.booking_id(value=booking.id) }}
+
+        <div class="form-group">
+            {{ form.service_id.label(style="font-weight: bold;") }}<br>
+            {{ form.service_id(class="form-control") }}
+            {% for error in form.service_id.errors %}<span style="color:red; font-size: 0.9em;">{{ error }}</span>{% endfor %}
+        </div>
+
+        <div class="form-group">
+            {{ form.quantity.label(style="font-weight: bold;") }}<br>
+            {{ form.quantity(class="form-control", min="1") }}
+            {% for error in form.quantity.errors %}<span style="color:red; font-size: 0.9em;">{{ error }}</span>{% endfor %}
+        </div>
+
+        <div style="margin-top: 20px; display: flex; gap: 10px;">
+            {{ form.submit(class="btn btn-primary", style="flex: 1;") }}
+            <a href="{{ url_for('reception.reception_dashboard') }}" class="btn" style="background: #95a5a6; color: white; text-decoration: none; padding: 10px 20px;">Mégse</a>
+        </div>
+    </form>
+</div>
+{% endblock %}

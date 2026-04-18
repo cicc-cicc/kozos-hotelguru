@@ -1,0 +1,50 @@
+{% extends "base.html" %}
+
+{% block title %}Foglalásaim - HotelGuru{% endblock %}
+
+{% block content %}
+<h1>Saját foglalásaim</h1>
+
+<table class="table" style="width: 100%; border-collapse: collapse; margin-top: 20px;">
+    <thead>
+        <tr style="background: #3498db; color: white;">
+            <th style="padding: 12px; text-align: left;">Szoba</th>
+            <th style="padding: 12px; text-align: left;">Időszak</th>
+            <th style="padding: 12px; text-align: left;">Státusz</th>
+            <th style="padding: 12px; text-align: left;">Összeg (Számla)</th>
+            <th style="padding: 12px; text-align: center;">Műveletek</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for booking in bookings %}
+        <tr style="border-bottom: 1px solid #ddd;">
+            <td style="padding: 12px;">{{ booking.room.room_number }}</td>
+            <td style="padding: 12px;">{{ booking.check_in.strftime('%Y-%m-%d') }} - {{ booking.check_out.strftime('%Y-%m-%d') }}</td>
+            <td style="padding: 12px;">
+                <span class="status-{{ booking.status.value }}">
+                    {{ booking.status.value }}
+                </span>
+            </td>
+            <td style="padding: 12px;">
+                {% if booking.invoice %}
+                    <strong>{{ "{:,.0f}".format(booking.invoice.total_amount) }} Ft</strong>
+                    <br><small>({{ "Fizetve" if booking.invoice.paid else "Fizetésre vár" }})</small>
+                {% else %}
+                    Nincs számla
+                {% endif %}
+            </td>
+            <td style="padding: 12px; text-align: center;">
+                {% if booking.status.value == 'pending' or booking.status.value == 'confirmed' %}
+                    <a href="{{ url_for('guest.order_service', booking_id=booking.id) }}" class="btn" style="background: #27ae60; color: white; padding: 5px 10px; text-decoration: none; font-size: 0.9em; margin-right: 5px;">Szolgáltatás</a>
+                    <a href="{{ url_for('guest.cancel_booking', booking_id=booking.id) }}" class="btn" style="background: #e74c3c; color: white; padding: 5px 10px; text-decoration: none; font-size: 0.9em;">Lemondás</a>
+                {% endif %}
+            </td>
+        </tr>
+        {% else %}
+        <tr>
+            <td colspan="5" style="padding: 20px; text-align: center;">Még nincs foglalása.</td>
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
+{% endblock %}

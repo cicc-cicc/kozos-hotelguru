@@ -1,0 +1,50 @@
+{% extends "base.html" %}
+
+{% block title %}Admin Pult - HotelGuru{% endblock %}
+
+{% block content %}
+<div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+    <h1>Szobák és Erőforrások kezelése</h1>
+    <a href="{{ url_for('admin.add_room') }}" class="btn btn-primary" style="text-decoration: none;">+ Új Szoba Felvétele</a>
+</div>
+
+<table class="table" style="width: 100%; border-collapse: collapse; background: white; box-shadow: 0 1px 3px rgba(0,0,0,0.1);">
+    <thead>
+        <tr style="background: #2c3e50; color: white;">
+            <th style="padding: 12px; text-align: left;">Szobaszám</th>
+            <th style="padding: 12px; text-align: left;">Férőhely</th>
+            <th style="padding: 12px; text-align: left;">Ár / Éjszaka</th>
+            <th style="padding: 12px; text-align: left;">Felszereltség</th>
+            <th style="padding: 12px; text-align: left;">Státusz</th>
+            <th style="padding: 12px; text-align: center;">Műveletek</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for room in rooms %}
+        <tr style="border-bottom: 1px solid #ddd;">
+            <td style="padding: 12px;"><strong>{{ room.room_number }}</strong></td>
+            <td style="padding: 12px;">{{ room.capacity }} fő</td>
+            <td style="padding: 12px;">{{ "{:,.0f}".format(room.price_per_night) }} Ft</td>
+            <td style="padding: 12px;"><small>{{ room.equipment or '-' }}</small></td>
+            <td style="padding: 12px;">
+                {% if room.status.value == 'available' %}
+                    <span style="color: #27ae60; font-weight: bold;">Szabad</span>
+                {% elif room.status.value == 'maintenance' %}
+                    <span style="color: #f39c12; font-weight: bold;">Karbantartás</span>
+                {% else %}
+                    <span style="color: #e74c3c; font-weight: bold;">Nem elérhető</span>
+                {% endif %}
+            </td>
+            <td style="padding: 12px; text-align: center;">
+                <a href="{{ url_for('admin.edit_room', room_id=room.id) }}" class="btn" style="background: #f39c12; color: white; padding: 5px 10px; text-decoration: none; margin-right: 5px;">Szerkesztés</a>
+                <a href="{{ url_for('admin.delete_room', room_id=room.id) }}" class="btn" style="background: #c0392b; color: white; padding: 5px 10px; text-decoration: none;">Törlés</a>
+            </td>
+        </tr>
+        {% else %}
+        <tr>
+            <td colspan="6" style="padding: 20px; text-align: center;">Nincsenek szobák az adatbázisban.</td>
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
+{% endblock %}
