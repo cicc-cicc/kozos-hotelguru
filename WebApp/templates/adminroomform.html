@@ -1,0 +1,53 @@
+{% extends "base.html" %}
+
+{% block title %}{{ title }} - HotelGuru{% endblock %}
+
+{% block content %}
+<div style="max-width: 600px; margin: 0 auto; background: white; padding: 30px; border-radius: 8px; box-shadow: 0 2px 5px rgba(0,0,0,0.1);">
+    <h1>{{ title }}</h1>
+    
+    <form method="POST">
+        {{ form.hidden_tag() }}
+        
+        <div style="display: flex; gap: 15px;">
+            <div class="form-group" style="flex: 1;">
+                {{ form.room_number.label(style="font-weight: bold;") }}
+                {{ form.room_number(class="form-control") }}
+                {% for error in form.room_number.errors %}<span style="color:red; font-size:0.9em;">{{ error }}</span>{% endfor %}
+            </div>
+            <div class="form-group" style="flex: 1;">
+                {{ form.capacity.label(style="font-weight: bold;") }}
+                {{ form.capacity(class="form-control", min="1") }}
+                {% for error in form.capacity.errors %}<span style="color:red; font-size:0.9em;">{{ error }}</span>{% endfor %}
+            </div>
+        </div>
+
+        <div class="form-group">
+            {{ form.price_per_night.label(style="font-weight: bold;") }}
+            {{ form.price_per_night(class="form-control") }}
+            {% for error in form.price_per_night.errors %}<span style="color:red; font-size:0.9em;">{{ error }}</span>{% endfor %}
+        </div>
+        
+        <div class="form-group">
+            {{ form.status.label(style="font-weight: bold;") }}
+            {{ form.status(class="form-control") }}
+            {% for error in form.status.errors %}<span style="color:red; font-size:0.9em;">{{ error }}</span>{% endfor %}
+        </div>
+
+        <div class="form-group">
+            {{ form.equipment.label(style="font-weight: bold;") }}
+            {{ form.equipment(class="form-control", rows="2", placeholder="pl. Légkondi, TV, Minibár") }}
+        </div>
+
+        <div class="form-group">
+            {{ form.description.label(style="font-weight: bold;") }}
+            {{ form.description(class="form-control", rows="3") }}
+        </div>
+
+        <div style="margin-top: 20px; display: flex; gap: 10px;">
+            {{ form.submit(class="btn btn-primary", style="flex: 1;") }}
+            <a href="{{ url_for('admin.admin_dashboard') }}" class="btn" style="background: #95a5a6; color: white; text-decoration: none; padding: 10px 20px;">Vissza</a>
+        </div>
+    </form>
+</div>
+{% endblock %}

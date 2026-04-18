@@ -1,0 +1,22 @@
+{% extends "base.html" %}
+
+{% block title %}Szoba Törlése - HotelGuru{% endblock %}
+
+{% block content %}
+<div style="max-width: 500px; margin: 0 auto; text-align: center; background: white; padding: 40px; border-radius: 8px; box-shadow: 0 4px 10px rgba(0,0,0,0.1);">
+    <h1 style="color: #c0392b;">Figyelmeztetés!</h1>
+
+    <div class="alert alert-danger" style="margin: 20px 0; text-align: left;">
+        <p>Biztosan törölni szeretné a(z) <strong>{{ room.room_number }}</strong> számú szobát az adatbázisból?</p>
+        <p><strong>FONTOS:</strong> Ez a művelet visszavonhatatlan, és a rendszer automatikusan törölni fogja az összes ehhez a szobához tartozó korábbi és jövőbeli foglalást is!</p>
+    </div>
+
+    <form method="POST">
+        {{ form.hidden_tag() }}
+        <div style="display: flex; justify-content: center; gap: 15px; margin-top: 30px;">
+            <a href="{{ url_for('admin.admin_dashboard') }}" class="btn" style="background: #95a5a6; color: white; text-decoration: none; padding: 10px 30px;">Mégse, Vissza</a>
+            {{ form.submit(class="btn", style="background: #c0392b; color: white; padding: 10px 30px;") }}
+        </div>
+    </form>
+</div>
+{% endblock %}

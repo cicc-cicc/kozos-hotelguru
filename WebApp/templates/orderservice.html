@@ -1,0 +1,32 @@
+{% extends "base.html" %}
+
+{% block title %}Szolgáltatás rendelése - HotelGuru{% endblock %}
+
+{% block content %}
+<div style="max-width: 500px; margin: 0 auto;">
+    <h1>Extra szolgáltatás rendelése</h1>
+    <p>Foglalás: #{{ booking.id }} ({{ booking.room.room_number }} szoba)</p>
+
+    <form method="POST">
+        {{ form.hidden_tag() }}
+        {{ form.booking_id(value=booking.id) }}
+
+        <div class="form-group">
+            {{ form.service_id.label }}<br>
+            {{ form.service_id(class="form-control") }}
+            {% for error in form.service_id.errors %}<span style="color:red">{{ error }}</span>{% endfor %}
+        </div>
+
+        <div class="form-group">
+            {{ form.quantity.label }}<br>
+            {{ form.quantity(class="form-control", min="1") }}
+            {% for error in form.quantity.errors %}<span style="color:red">{{ error }}</span>{% endfor %}
+        </div>
+
+        <div style="margin-top: 20px;">
+            {{ form.submit(class="btn btn-primary") }}
+            <a href="{{ url_for('guest.my_bookings') }}" class="btn" style="background: #95a5a6; color: white; text-decoration: none;">Vissza</a>
+        </div>
+    </form>
+</div>
+{% endblock %}

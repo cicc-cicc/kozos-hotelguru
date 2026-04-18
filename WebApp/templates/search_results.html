@@ -1,22 +1,32 @@
 {% extends "base.html" %}
-{% block title %}Szabad szobák{% endblock %}
+
+{% block title %}Szabad szobák - HotelGuru{% endblock %}
 
 {% block content %}
-<h2>Szabad szobák {{ arrival }} és {{ departure }} között</h2>
-<div class="room-grid">
+<h1>Szabad szobák</h1>
+<p>{{ check_in.strftime('%Y-%m-%d') }} — {{ check_out.strftime('%Y-%m-%d') }} időszakra, {{ guests }} fő részére.</p>
+
+<div class="rooms-grid" style="display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 20px; margin-top: 30px;">
     {% for room in rooms %}
-    <div class="room-card">
+    <div class="room-card" style="border: 1px solid #ddd; border-radius: 8px; padding: 20px; background: white; box-shadow: 0 2px 4px rgba(0,0,0,0.1);">
         <h3>{{ room.room_number }} szoba</h3>
-        <p>Férőhely: {{ room.capacity }} fő</p>
-        <p>Ár: {{ room.price_per_night }} Ft/éj</p>
+        <p><strong>Férőhely:</strong> {{ room.capacity }} fő</p>
+        <p><strong>Ár:</strong> {{ "{:,.0f}".format(room.price_per_night) }} Ft / éjszaka</p>
         <p>{{ room.description }}</p>
-        <form action="{{ url_for('book_room') }}" method="POST">
+        {% if room.equipment %}
+            <p><small><strong>Felszereltség:</strong> {{ room.equipment }}</small></p>
+        {% endif %}
+
+        <form method="POST" action="{{ url_for('guest.book_room') }}">
+            {{ form.hidden_tag() }}
             <input type="hidden" name="room_id" value="{{ room.id }}">
-            <input type="hidden" name="arrival" value="{{ arrival }}">
-            <input type="hidden" name="departure" value="{{ departure }}">
-            <button type="submit">Foglalás lefoglalása</button>
+            <input type="hidden" name="arrival_date" value="{{ check_in.strftime('%Y-%m-%d') }}">
+            <input type="hidden" name="departure_date" value="{{ check_out.strftime('%Y-%m-%d') }}">
+            {{ form.submit(class="btn btn-primary", value="Lefoglalom", style="width: 100%;") }}
         </form>
     </div>
+    {% else %}
+        <p>Sajnos nincs szabad szobánk a megadott paraméterekkel.</p>
     {% endfor %}
 </div>
 {% endblock %}
