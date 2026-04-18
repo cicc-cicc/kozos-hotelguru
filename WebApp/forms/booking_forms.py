@@ -14,20 +14,23 @@ class RoomSearchForm(FlaskForm):
     departure_date = DateField('Távozás napja', 
                                format='%Y-%m-%d',
                                validators=[DataRequired(message="Kérjük, adja meg a távozás dátumát!")])
-    
-    def validate(self):
-        if not super().validate():
-            return False
-        if self.departure_date.data < self.arrival_date.data:
-            self.departure_date.errors.append("A távozás dátuma nem lehet korábbi, mint az érkezés dátuma.")
-            return False
-        return True
-
     guests = IntegerField('Vendégek száma', 
-                          default=1,
-                          validators=[DataRequired(), NumberRange(min=1, max=10)])
-    
+                          validators=[DataRequired(message="Kérjük, adja meg a vendégek számát!"), NumberRange(min=1, message="Legalább egy vendégnek kell lennie!")])
     submit = SubmitField('Szabad szobák keresése')
+
+
+    def validate(self, **kwargs):
+            # Az alapértelmezett validáció futtatása (és a paraméterek továbbadása)
+            if not super().validate(**kwargs):
+                return False
+                
+            # Dátumok ellenőrzése, de csak ha már mindkettő ki van töltve
+            if self.arrival_date.data and self.departure_date.data:
+                if self.departure_date.data <= self.arrival_date.data:
+                    self.departure_date.errors.append("A távozás dátuma későbbi kell legyen, mint az érkezés dátuma.")
+                    return False
+                    
+            return True
 
 class BookingRequestForm(FlaskForm):
     #űrlap a foglalás véglegesítéséhez

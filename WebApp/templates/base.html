@@ -1,6 +1,7 @@
 <!DOCTYPE html>
 <html lang="hu">
 <head>
+
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>{% block title %}HotelGuru{% endblock %}</title>
@@ -25,22 +26,22 @@
 <body>
     <nav>
         <div class="container">
-            <div class="logo"><a href="{{ url_for('guest.index') }}">HotelGuru</a></div>
-            <ul>
-                {% if current_user.is_authenticated %}
-                    {% if current_user.role.value == 'admin' %}
-                        <li><a href="{{ url_for('admin.admin_dashboard') }}">Admin Pult</a></li>
-                    {% elif current_user.role.value == 'receptionist' %}
-                        <li><a href="{{ url_for('reception.reception_dashboard') }}">Recepció</a></li>
-                    {% endif %}
-                    <li><a href="{{ url_for('guest.my_bookings') }}">Foglalásaim</a></li>
-                    <li><a href="{{ url_for('auth.profile') }}">Profil ({{ current_user.username }})</a></li>
-                    <li><a href="{{ url_for('auth.logout') }}">Kijelentkezés</a></li>
-                {% else %}
-                    <li><a href="{{ url_for('auth.login') }}">Bejelentkezés</a></li>
-                    <li><a href="{{ url_for('auth.register') }}">Regisztráció</a></li>
+            <a href="{{ url_for('guest.index') }}">Kezdőlap</a>
+
+            {% if current_user.is_authenticated %}
+                <a href="{{ url_for('auth.profile') }}">Profil</a>
+
+                {% if current_user.role.value == 'receptionist' %}
+                    <a href="{{ url_for('reception.reception_dashboard') }}">Recepció</a>
+                {% elif current_user.role.value == 'admin' %}
+                    <a href="{{ url_for('admin.admin_dashboard') }}">Admin</a>
                 {% endif %}
-            </ul>
+
+                <a href="{{ url_for('auth.logout') }}">Kijelentkezés</a>
+            {% else %}
+                <a href="{{ url_for('auth.login') }}">Bejelentkezés</a>
+                <a href="{{ url_for('auth.register') }}">Regisztráció</a>
+            {% endif %}
         </div>
     </nav>
 
