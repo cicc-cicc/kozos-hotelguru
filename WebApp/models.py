@@ -102,6 +102,7 @@ class Booking(db.Model):
     room_id = db.Column(db.Integer, db.ForeignKey("rooms.id"), nullable=False)
     check_in = db.Column(db.DateTime, nullable=False)
     check_out = db.Column(db.DateTime, nullable=False)
+    guests_count = db.Column(db.Integer, nullable=False, default=1)
     status = db.Column(db.Enum(BookingStatus), nullable=False, default=BookingStatus.pending)
     created_at = db.Column(db.DateTime, nullable=False, default=datetime.utcnow)
     total_price = db.Column(db.Float, nullable=True)

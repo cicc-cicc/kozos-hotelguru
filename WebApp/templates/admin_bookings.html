@@ -1,0 +1,48 @@
+{% extends "base.html" %}
+
+{% block title %}Foglalások - Admin{% endblock %}
+
+{% block content %}
+<h1>Foglalások kezelése</h1>
+
+{% if bookings %}
+<table style="width:100%; border-collapse:collapse">
+    <thead>
+        <tr>
+            <th style="padding:8px; border-bottom:1px solid #ddd">ID</th>
+            <th style="padding:8px; border-bottom:1px solid #ddd">Vendég</th>
+            <th style="padding:8px; border-bottom:1px solid #ddd">Szoba</th>
+            <th style="padding:8px; border-bottom:1px solid #ddd">Érkezés</th>
+            <th style="padding:8px; border-bottom:1px solid #ddd">Távozás</th>
+            <th style="padding:8px; border-bottom:1px solid #ddd">Összeg</th>
+            <th style="padding:8px; border-bottom:1px solid #ddd">Státusz</th>
+            <th style="padding:8px; border-bottom:1px solid #ddd">Műveletek</th>
+        </tr>
+    </thead>
+    <tbody>
+    {% for b in bookings %}
+        <tr>
+            <td style="padding:8px">{{ b.id }}</td>
+            <td style="padding:8px">{{ b.user.username if b.user else b.user_id }}</td>
+            <td style="padding:8px">{{ b.room.room_number if b.room else b.room_id }}</td>
+            <td style="padding:8px">{{ b.check_in.strftime('%Y-%m-%d') }}</td>
+            <td style="padding:8px">{{ b.check_out.strftime('%Y-%m-%d') }}</td>
+            <td style="padding:8px">{{ '%.0f' % (b.total_price or 0) }} Ft</td>
+            <td style="padding:8px">{{ b.status.value if b.status else '—' }}</td>
+            <td style="padding:8px">
+                <form method="POST" action="{{ url_for('admin.booking_action', booking_id=b.id) }}" style="display:inline">
+                    {{ forms[b.id].hidden_tag() }}
+                    {{ forms[b.id].action(class='form-control', style='display:inline-block; width:auto') }}
+                    {{ forms[b.id].submit(class='btn btn-primary', style='margin-left:6px') }}
+                </form>
+                <a href="{{ url_for('admin.admin_bookings') }}" style="margin-left:8px">Frissít</a>
+            </td>
+        </tr>
+    {% endfor %}
+    </tbody>
+</table>
+{% else %}
+<p>Nincsenek foglalások.</p>
+{% endif %}
+
+{% endblock %}

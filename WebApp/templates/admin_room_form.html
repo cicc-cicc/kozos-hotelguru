@@ -1,0 +1,41 @@
+{% extends "base.html" %}
+
+{% block title %}{{ title }} - Admin{% endblock %}
+
+{% block content %}
+<h1>{{ title }}</h1>
+<form method="POST">
+    {{ form.hidden_tag() }}
+    <div>
+        {{ form.room_number.label }}<br>
+        {{ form.room_number(class='form-control') }}
+        {% for err in form.room_number.errors %}<span style="color:red">{{ err }}</span>{% endfor %}
+    </div>
+    <div>
+        {{ form.capacity.label }}<br>
+        {{ form.capacity(class='form-control') }}
+        {% for err in form.capacity.errors %}<span style="color:red">{{ err }}</span>{% endfor %}
+    </div>
+    <div>
+        {{ form.price_per_night.label }}<br>
+        {{ form.price_per_night(class='form-control') }}
+        {% for err in form.price_per_night.errors %}<span style="color:red">{{ err }}</span>{% endfor %}
+    </div>
+    <div>
+        {{ form.equipment.label }}<br>
+        {{ form.equipment(class='form-control') }}
+    </div>
+    <div>
+        {{ form.description.label }}<br>
+        {{ form.description(class='form-control') }}
+    </div>
+    <div>
+        {{ form.status.label }}<br>
+        {{ form.status(class='form-control') }}
+    </div>
+    <div style="margin-top:10px">
+        {{ form.submit(class='btn btn-primary') }}
+        <a href="{{ url_for('admin.admin_dashboard') }}">Mégse</a>
+    </div>
+</form>
+{% endblock %}

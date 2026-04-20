@@ -23,3 +23,8 @@ def db_config(filename='config.ini', section='Database'):
         'database': config.get(section, 'database'),
         'port': int(config.get(section, 'port'))
     }
+
+# Árképzési viselkedés: ha True, akkor a `price_per_night` érték egy főre értendő
+# és a teljes ár: nights * price_per_night * guests. Ha False, akkor a price_per_night
+# a teljes szobára vonatkozik (nights * price_per_night).
+PRICE_PER_PERSON = False

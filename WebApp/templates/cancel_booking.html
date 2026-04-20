@@ -1,0 +1,25 @@
+{% extends "base.html" %}
+
+{% block title %}Foglalás lemondása - HotelGuru{% endblock %}
+
+{% block content %}
+<h1>Foglalás lemondása</h1>
+<p>Biztosan le szeretnéd mondani az alábbi foglalást?</p>
+<ul>
+    <li><strong>Szoba:</strong> {{ booking.room.room_number if booking.room else booking.room_id }}</li>
+    <li><strong>Érkezés:</strong> {{ booking.check_in.strftime('%Y-%m-%d') }}</li>
+    <li><strong>Távozás:</strong> {{ booking.check_out.strftime('%Y-%m-%d') }}</li>
+</ul>
+
+<form method="POST">
+    {{ form.hidden_tag() }}
+    <div>
+        {{ form.confirm.label }} {{ form.confirm() }}
+    </div>
+    <div style="margin-top:10px">
+        {{ form.submit(class="btn btn-primary") }}
+        <a href="{{ url_for('guest.my_bookings') }}">Mégse</a>
+    </div>
+</form>
+
+{% endblock %}

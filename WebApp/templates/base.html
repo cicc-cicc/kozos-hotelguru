@@ -30,6 +30,7 @@
 
             {% if current_user.is_authenticated %}
                 <a href="{{ url_for('auth.profile') }}">Profil</a>
+                <a href="{{ url_for('guest.my_bookings') }}">Foglalásaim</a>
 
                 {% if current_user.role.value == 'receptionist' %}
                     <a href="{{ url_for('reception.reception_dashboard') }}">Recepció</a>

@@ -1,0 +1,42 @@
+{% extends "base.html" %}
+
+{% block title %}Adminisztráció - Szobakezelés{% endblock %}
+
+{% block content %}
+<h1>Adminisztráció — Szobák</h1>
+<p>
+    <a href="{{ url_for('admin.add_room') }}" class="btn btn-primary">Új szoba hozzáadása</a>
+    <a href="{{ url_for('admin.admin_bookings') }}" class="btn btn-primary" style="margin-left:8px">Foglalások kezelése</a>
+</p>
+
+<table class="table" style="width:100%; border-collapse:collapse">
+    <thead>
+        <tr>
+            <th style="border-bottom:1px solid #ddd; text-align:left; padding:8px">Szám</th>
+            <th style="border-bottom:1px solid #ddd; text-align:left; padding:8px">Kapacitás</th>
+            <th style="border-bottom:1px solid #ddd; text-align:left; padding:8px">Ár/éj</th>
+            <th style="border-bottom:1px solid #ddd; text-align:left; padding:8px">Állapot</th>
+            <th style="border-bottom:1px solid #ddd; text-align:left; padding:8px">Felszereltség</th>
+            <th style="border-bottom:1px solid #ddd; text-align:left; padding:8px">Műveletek</th>
+        </tr>
+    </thead>
+    <tbody>
+    {% for room in rooms %}
+        <tr>
+            <td style="padding:8px">{{ room.room_number }}</td>
+            <td style="padding:8px">{{ room.capacity }}</td>
+            <td style="padding:8px">{{ '%.0f' % room.price_per_night }} Ft</td>
+            <td style="padding:8px">{{ room.status.value }}</td>
+            <td style="padding:8px">{% for item in room.equipment_list %}{{ item }}{% if not loop.last %}, {% endif %}{% endfor %}</td>
+            <td style="padding:8px">
+                <a href="{{ url_for('admin.edit_room', room_id=room.id) }}">Szerkeszt</a> |
+                <a href="{{ url_for('admin.delete_room', room_id=room.id) }}">Töröl</a>
+            </td>
+        </tr>
+    {% else %}
+        <tr><td colspan="6" style="padding:8px">Nincsenek szobák az adatbázisban.</td></tr>
+    {% endfor %}
+    </tbody>
+</table>
+
+{% endblock %}

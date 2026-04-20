@@ -2,12 +2,14 @@ from flask import Flask
 from flask_sqlalchemy import SQLAlchemy
 from flask_migrate import Migrate
 from flask_login import LoginManager # 1. Új import
+from flask_wtf import CSRFProtect
 
 
 # Globális objektumok
 db = SQLAlchemy()
 migrate = Migrate()
 login_manager = LoginManager() # 2. LoginManager inicializálása
+csrf = CSRFProtect()
 
 def create_app():
     app = Flask(__name__)
@@ -21,6 +23,7 @@ def create_app():
 
     db.init_app(app)
     migrate.init_app(app, db)
+    csrf.init_app(app)
     
     # 3. Flask-Login beállítása az app-hoz
     login_manager.init_app(app)
