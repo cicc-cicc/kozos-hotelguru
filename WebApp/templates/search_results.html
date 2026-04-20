@@ -18,11 +18,12 @@
         {% endif %}
 
         <form method="POST" action="{{ url_for('guest.book_room') }}">
-            {{ form.hidden_tag() }}
+            {{ form.csrf_token }}
             <input type="hidden" name="room_id" value="{{ room.id }}">
             <input type="hidden" name="arrival_date" value="{{ check_in.strftime('%Y-%m-%d') }}">
             <input type="hidden" name="departure_date" value="{{ check_out.strftime('%Y-%m-%d') }}">
-            {{ form.submit(class="btn btn-primary", value="Lefoglalom", style="width: 100%;") }}
+            <input type="hidden" name="guests" value="{{ guests }}">
+            <button type="submit" class="btn btn-primary" style="width:100%">Lefoglalom</button>
         </form>
     </div>
     {% else %}

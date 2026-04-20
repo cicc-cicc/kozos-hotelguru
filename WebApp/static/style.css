@@ -1,3 +1,27 @@
+nav a {
+    color: #fff !important;
+    background: none !important;
+    padding: 6px 16px;
+    border-radius: 4px;
+    transition: background 0.2s, color 0.2s;
+    font-weight: bold;
+    text-decoration: none;
+    display: inline-block;
+}
+
+nav a:hover, nav a:focus {
+    background: #3498db;
+    color: #fff !important;
+    text-decoration: none;
+}
+/* Override container styles when inside nav so links remain visible */
+nav .container {
+    background: transparent !important;
+    border-radius: 0 !important;
+    box-shadow: none !important;
+    padding: 0 !important;
+    margin: 0 !important;
+}
 body {
     font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
     background-color: #f4f7f6;
@@ -6,6 +30,10 @@ body {
 }
 
 h1 { color: #2c3e50; text-align: center; }
+h1 {
+    color: #2c3e50 !important;
+    text-shadow: 0 1px 4px rgba(0,0,0,0.08);
+}
 
 .container {
     max-width: 1000px;

@@ -1,0 +1,30 @@
+{% extends "base.html" %}
+
+{% block title %}Foglalás szerkesztése - HotelGuru{% endblock %}
+
+{% block content %}
+<h1>Foglalás szerkesztése</h1>
+<form method="POST">
+    {{ form.hidden_tag() }}
+    <div>
+        {{ form.arrival_date.label }}<br>
+        {{ form.arrival_date(class='form-control') }}
+        {% for error in form.arrival_date.errors %}<span style="color:red">{{ error }}</span>{% endfor %}
+    </div>
+    <div>
+        {{ form.departure_date.label }}<br>
+        {{ form.departure_date(class='form-control') }}
+        {% for error in form.departure_date.errors %}<span style="color:red">{{ error }}</span>{% endfor %}
+    </div>
+    <div>
+        {{ form.guests.label }}<br>
+        {{ form.guests(class='form-control', min='1') }}
+        {% for error in form.guests.errors %}<span style="color:red">{{ error }}</span>{% endfor %}
+    </div>
+    <div style="margin-top:10px">
+        {{ form.submit(class='btn btn-primary') }}
+        <a href="{{ url_for('guest.my_bookings') }}">Mégse</a>
+    </div>
+</form>
+
+{% endblock %}

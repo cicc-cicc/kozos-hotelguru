@@ -1,0 +1,17 @@
+{% extends "base.html" %}
+
+{% block title %}Szoba törlése - Admin{% endblock %}
+
+{% block content %}
+<h1>Szoba törlése: {{ room.room_number }}</h1>
+<p>Biztosan törölni szeretnéd a(z) <strong>{{ room.room_number }}</strong> szobát? A művelet az összes kapcsolódó foglalást is törli.</p>
+
+<form method="POST">
+    {{ form.hidden_tag() }}
+    <div>
+        {{ form.submit(class='btn btn-danger') }}
+        <a href="{{ url_for('admin.admin_dashboard') }}">Mégse</a>
+    </div>
+</form>
+
+{% endblock %}

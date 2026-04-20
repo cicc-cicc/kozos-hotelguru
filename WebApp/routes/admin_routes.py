@@ -3,8 +3,10 @@ from flask_login import login_required, current_user
 from functools import wraps
 
 from .. import db
-from ..models import Room, Role, RoomStatus
+from ..models import Room, Role, RoomStatus, Booking, BookingStatus
 from ..forms.admin_forms import RoomForm, RoomDeleteForm
+from ..forms.reception_forms import BookingActionForm
+from flask import current_app
 
 admin_bp = Blueprint('admin', __name__)
 
@@ -120,3 +122,56 @@ def delete_room(room_id):
         return redirect(url_for('admin.admin_dashboard'))
         
     return render_template('admin_delete_room.html', form=form, room=room)
+
+
+@admin_bp.route('/bookings')
+@login_required
+@admin_required
+def admin_bookings():
+    """Listázza az összes foglalást az admin számára és biztosít művelet végrehajtást."""
+    bookings = Booking.query.order_by(Booking.created_at.desc()).all()
+
+    # Készítsünk külön BookingActionForm példányt minden foglaláshoz,
+    # hogy a sablon egyszerűen renderelhesse őket (és legyen CSRF tokenjük).
+    forms = {b.id: BookingActionForm() for b in bookings}
+    for b in bookings:
+        forms[b.id].booking_id.data = b.id
+
+    return render_template('admin_bookings.html', bookings=bookings, forms=forms)
+
+
+@admin_bp.route('/booking/<int:booking_id>/action', methods=['POST'])
+@login_required
+@admin_required
+def booking_action(booking_id):
+    form = BookingActionForm()
+    if not form.validate_on_submit():
+        flash('Érvénytelen kérés.', 'danger')
+        return redirect(url_for('admin.admin_bookings'))
+
+    booking = Booking.query.get_or_404(booking_id)
+    action = form.action.data
+    try:
+        if action == 'confirm':
+            booking.confirm()
+            db.session.commit()
+            flash('Foglalás visszaigazolva.', 'success')
+        elif action == 'cancel':
+            booking.cancel()
+            db.session.commit()
+            flash('Foglalás lemondva.', 'info')
+        elif action == 'check_in':
+            booking.check_in_action()
+            db.session.commit()
+            flash('Vendég bejelentkezett.', 'success')
+        elif action == 'check_out':
+            booking.check_out_action()
+            db.session.commit()
+            flash('Vendég kijelentkeztetve.', 'success')
+        else:
+            flash('Ismeretlen művelet.', 'warning')
+    except Exception as e:
+        current_app.logger.exception('Admin booking action failed')
+        flash(f'Hiba a művelet során: {e}', 'danger')
+
+    return redirect(url_for('admin.admin_bookings'))

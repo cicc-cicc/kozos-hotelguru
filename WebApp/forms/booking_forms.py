@@ -38,10 +38,18 @@ class BookingRequestForm(FlaskForm):
     room_id = HiddenField('Room ID', validators=[DataRequired()])
     arrival_date = HiddenField('Arrival Date', validators=[DataRequired()])
     departure_date = HiddenField('Departure Date', validators=[DataRequired()])
+    guests = HiddenField('Guests', validators=[DataRequired()])
     
     submit = SubmitField('Foglalás véglegesítése')
 
 class BookingCancelForm(FlaskForm):
     confirm = BooleanField('Biztosan lemondod a foglalást?', validators=[DataRequired()])
     submit = SubmitField('Foglalás lemondása')
+
+
+class BookingEditForm(FlaskForm):
+    arrival_date = DateField('Érkezés napja', format='%Y-%m-%d', validators=[DataRequired()])
+    departure_date = DateField('Távozás napja', format='%Y-%m-%d', validators=[DataRequired()])
+    guests = IntegerField('Vendégek száma', validators=[DataRequired(), NumberRange(min=1)])
+    submit = SubmitField('Foglalás frissítése')
 

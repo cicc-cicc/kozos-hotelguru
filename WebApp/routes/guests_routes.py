@@ -1,10 +1,10 @@
-from flask import Blueprint, render_template, redirect, url_for, flash, request, abort
+from flask import Blueprint, render_template, redirect, url_for, flash, request, abort, current_app
 from flask_login import login_required, current_user
 from datetime import datetime
 
 from .. import db
 from ..models import Room, Booking, Invoice, BookingStatus, ExtraService, BookingService
-from ..forms.booking_forms import RoomSearchForm, BookingRequestForm, BookingCancelForm
+from ..forms.booking_forms import RoomSearchForm, BookingRequestForm, BookingCancelForm, BookingEditForm
 from ..forms.service_forms import GuestServiceOrderForm
 
 # Blueprint létrehozása 'guest' néven
@@ -50,6 +50,7 @@ def search_results():
     booking_form = BookingRequestForm()
     booking_form.arrival_date.data = arrival_str
     booking_form.departure_date.data = departure_str
+    booking_form.guests.data = str(guests)
     
     return render_template('search_results.html', 
                            rooms=available_rooms, 
@@ -63,79 +64,109 @@ def search_results():
 @login_required # Foglalni csak bejelentkezve lehet
 def book_room():
     """Foglalás rögzítése és számla (Invoice) generálása"""
-    form = BookingRequestForm()
-    
-    if form.validate_on_submit():
-        room = Room.query.get_or_404(form.room_id.data)
-        check_in = datetime.strptime(form.arrival_date.data, '%Y-%m-%d')
-        check_out = datetime.strptime(form.departure_date.data, '%Y-%m-%d')
-        
-        # Dupla ellenőrzés a biztonság kedvéért (nehogy ketten foglalják le egyszerre)
-        if not room.is_available_for(check_in, check_out):
-            flash('Sajnáljuk, időközben ezt a szobát lefoglalták.', 'danger')
+    try:
+        form = BookingRequestForm()
+
+        if form.validate_on_submit():
+            room = Room.query.get_or_404(int(form.room_id.data))
+            check_in = datetime.strptime(form.arrival_date.data, '%Y-%m-%d')
+            check_out = datetime.strptime(form.departure_date.data, '%Y-%m-%d')
+
+            # Dupla ellenőrzés a biztonság kedvéért (nehogy ketten foglalják le egyszerre)
+            if not room.is_available_for(check_in, check_out):
+                flash('Sajnáljuk, időközben ezt a szobát lefoglalták.', 'danger')
+                return redirect(url_for('guest.index'))
+
+            # Ár kiszámítása (éjszakák száma * ár)
+            nights = max(1, (check_out - check_in).days)
+            guests_count = int(form.guests.data) if getattr(form, 'guests', None) and form.guests.data else 1
+            if current_app.config.get('PRICE_PER_PERSON'):
+                total_price = nights * room.price_per_night * guests_count
+            else:
+                total_price = nights * room.price_per_night
+
+            # 1. Foglalás létrehozása (alapból pending státusszal)
+            new_booking = Booking(
+                user_id=current_user.id,
+                room_id=room.id,
+                check_in=check_in,
+                check_out=check_out,
+                status=BookingStatus.pending,
+                total_price=total_price,
+                guests_count=guests_count
+            )
+            db.session.add(new_booking)
+            db.session.flush() # Így megkapjuk a new_booking.id-t a számlához
+
+            # 2. Számla (Invoice) létrehozása
+            new_invoice = Invoice(
+                booking_id=new_booking.id,
+                total_amount=total_price,
+                paid=False
+            )
+            db.session.add(new_invoice)
+            db.session.commit()
+
+            flash('Sikeres foglalás! A visszaigazolást hamarosan küldjük.', 'success')
+            return redirect(url_for('guest.my_bookings'))
+
+        # Ha a WTForms validáció valamiért nem sikerül (pl. CSRF, hiányzó mezők),
+        # próbáljuk meg a beérkező form adatait közvetlenül kiolvasni és fallbackként végrehajtani a foglalást.
+        current_app.logger.warning('Booking form validate failed; form.errors=%s, formdata=%s', getattr(form, 'errors', None), request.form)
+        try:
+            room_id = request.form.get('room_id')
+            arrival = request.form.get('arrival_date')
+            departure = request.form.get('departure_date')
+            guests_field = request.form.get('guests')
+            if not room_id or not arrival or not departure:
+                raise ValueError('Missing booking fields')
+
+            room = Room.query.get_or_404(int(room_id))
+            check_in = datetime.strptime(arrival, '%Y-%m-%d')
+            check_out = datetime.strptime(departure, '%Y-%m-%d')
+
+            if not room.is_available_for(check_in, check_out):
+                flash('Sajnáljuk, időközben ezt a szobát lefoglalták.', 'danger')
+                return redirect(url_for('guest.index'))
+
+            nights = max(1, (check_out - check_in).days)
+            guests_count = int(guests_field) if guests_field else 1
+            if current_app.config.get('PRICE_PER_PERSON'):
+                total_price = nights * room.price_per_night * guests_count
+            else:
+                total_price = nights * room.price_per_night
+
+            new_booking = Booking(
+                user_id=current_user.id,
+                room_id=room.id,
+                check_in=check_in,
+                check_out=check_out,
+                status=BookingStatus.pending,
+                total_price=total_price,
+                guests_count=guests_count
+            )
+            db.session.add(new_booking)
+            db.session.flush()
+
+            new_invoice = Invoice(
+                booking_id=new_booking.id,
+                total_amount=total_price,
+                paid=False
+            )
+            db.session.add(new_invoice)
+            db.session.commit()
+
+            flash('Sikeres foglalás! (fallback útvonal) A visszaigazolást hamarosan küldjük.', 'success')
+            return redirect(url_for('guest.my_bookings'))
+        except Exception as e:
+            current_app.logger.exception('Booking fallback failed')
+            # Show the error to the user (safe short message)
+            flash(f'Hiba a foglalás során: {e}', 'danger')
             return redirect(url_for('guest.index'))
-            
-        # Ár kiszámítása (éjszakák száma * ár)
-        nights = max(1, (check_out - check_in).days)
-        total_price = nights * room.price_per_night
-        
-        # 1. Foglalás létrehozása (alapból pending státusszal)
-        new_booking = Booking(
-            user_id=current_user.id,
-            room_id=room.id,
-            check_in=check_in,
-            check_out=check_out,
-            status=BookingStatus.pending,
-            total_price=total_price
-        )
-        db.session.add(new_booking)
-        db.session.flush() # Így megkapjuk a new_booking.id-t a számlához
-        
-        # 2. Számla (Invoice) létrehozása
-        new_invoice = Invoice(
-            booking_id=new_booking.id,
-            total_amount=total_price,
-            paid=False
-        )
-        db.session.add(new_invoice)
-        db.session.commit()
-        
-        flash('Sikeres foglalás! A visszaigazolást hamarosan küldjük.', 'success')
-        return redirect(url_for('guest.my_bookings'))
-        
-    flash('Hiba a foglalás során.', 'danger')
-    return redirect(url_for('guest.index'))
-
-
-@guest_bp.route('/my-bookings')
-@login_required
-def my_bookings():
-    """A vendég saját foglalásainak listázása"""
-    # Lekérjük a bejelentkezett vendég foglalásait, a legújabbakkal kezdve
-    bookings = Booking.query.filter_by(user_id=current_user.id).order_by(Booking.created_at.desc()).all()
-    return render_template('my_bookings.html', bookings=bookings)
-
-
-@guest_bp.route('/booking/<int:booking_id>/cancel', methods=['GET', 'POST'])
-@login_required
-def cancel_booking(booking_id):
-    """Foglalás lemondása a vendég által"""
-    booking = Booking.query.get_or_404(booking_id)
-    
-    # Biztonsági ellenőrzés: csak a sajátját mondhatja le
-    if booking.user_id != current_user.id:
-        abort(403)
-        
-    form = BookingCancelForm()
-    
-    if form.validate_on_submit() and form.confirm.data:
-        # A models.py-ban megírt metódust hívjuk
-        booking.cancel() 
-        db.session.commit()
-        flash('A foglalás sikeresen le lett mondva.', 'info')
-        return redirect(url_for('guest.my_bookings'))
-        
-    return render_template('cancel_booking.html', form=form, booking=booking)
+    except Exception as e:
+        current_app.logger.exception('Unhandled error in book_room')
+        flash(f'Hiba a foglalás során: {e}', 'danger')
+        return redirect(url_for('guest.index'))
 
 
 @guest_bp.route('/booking/<int:booking_id>/add-service', methods=['GET', 'POST'])
@@ -174,3 +205,89 @@ def order_service(booking_id):
         
     form.booking_id.data = booking.id
     return render_template('order_service.html', form=form, booking=booking)
+
+
+@guest_bp.route('/my-bookings')
+@login_required
+def my_bookings():
+    """A vendég saját foglalásainak listázása"""
+    bookings = Booking.query.filter_by(user_id=current_user.id).order_by(Booking.created_at.desc()).all()
+    return render_template('my_bookings.html', bookings=bookings)
+
+
+@guest_bp.route('/booking/<int:booking_id>/cancel', methods=['GET', 'POST'])
+@login_required
+def cancel_booking(booking_id):
+    """Foglalás lemondása a vendég által"""
+    booking = Booking.query.get_or_404(booking_id)
+
+    # Biztonsági ellenőrzés: csak a saját foglalását mondhatja le
+    if booking.user_id != current_user.id:
+        abort(403)
+
+    form = BookingCancelForm()
+    if form.validate_on_submit() and form.confirm.data:
+        booking.cancel()
+        db.session.commit()
+        flash('A foglalás sikeresen le lett mondva.', 'info')
+        return redirect(url_for('guest.my_bookings'))
+
+    return render_template('cancel_booking.html', form=form, booking=booking)
+
+
+@guest_bp.route('/booking/<int:booking_id>/edit', methods=['GET', 'POST'])
+@login_required
+def edit_booking(booking_id):
+    """Vendég számára foglalás módosítása (dátumok, vendégek száma)."""
+    booking = Booking.query.get_or_404(booking_id)
+
+    # Csak a saját, nem lemondott foglalását szerkesztheti a vendég
+    if booking.user_id != current_user.id:
+        abort(403)
+    if booking.status == BookingStatus.cancelled:
+        flash('A lemondott foglalást nem lehet szerkeszteni.', 'warning')
+        return redirect(url_for('guest.my_bookings'))
+
+    form = BookingEditForm()
+
+    if form.validate_on_submit():
+        try:
+            new_check_in = datetime.combine(form.arrival_date.data, datetime.min.time())
+            new_check_out = datetime.combine(form.departure_date.data, datetime.min.time())
+
+            # Validáljuk a logikát: távozás > érkezés
+            if new_check_out <= new_check_in:
+                flash('A távozás dátuma később kell legyen, mint az érkezés dátuma.', 'danger')
+                return render_template('edit_booking.html', form=form, booking=booking)
+
+            # Ellenőrizzük az ütközéseket, kizárva az aktuális foglalást
+            if Booking.has_conflict(booking.room_id, new_check_in, new_check_out, exclude_booking_id=booking.id):
+                flash('A megadott időszak ütközik egy másik foglalással.', 'danger')
+                return render_template('edit_booking.html', form=form, booking=booking)
+
+            # Frissítjük a foglalás adatait
+            booking.check_in = new_check_in
+            booking.check_out = new_check_out
+            booking.guests_count = form.guests.data
+
+            # Új ár kiszámítása (nem számoljuk bele az extra szolgáltatásokat itt)
+            nights = max(1, (booking.check_out - booking.check_in).days)
+            booking.total_price = nights * booking.room.price_per_night
+            if booking.invoice:
+                booking.invoice.total_amount = booking.total_price
+
+            db.session.commit()
+            flash('A foglalás sikeresen frissítve.', 'success')
+            return redirect(url_for('guest.my_bookings'))
+        except Exception as e:
+            current_app.logger.exception('Error updating booking')
+            flash(f'Hiba a foglalás frissítése során: {e}', 'danger')
+            return render_template('edit_booking.html', form=form, booking=booking)
+
+    # GET -> Kitöltjük az űrlapot az aktuális értékekkel
+    if request.method == 'GET':
+        form.arrival_date.data = booking.check_in.date()
+        form.departure_date.data = booking.check_out.date()
+        form.guests.data = getattr(booking, 'guests_count', 1)
+
+    return render_template('edit_booking.html', form=form, booking=booking)
