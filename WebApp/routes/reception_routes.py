@@ -2,7 +2,7 @@ from flask import Blueprint, render_template, redirect, url_for, flash, request,
 from flask_login import login_required, current_user
 from functools import wraps
 
-from ..models import Booking, Room, ExtraService, BookingService, Role, BookingStatus
+from ..models import Booking, Role, BookingStatus
 from ..forms.reception_forms import BookingActionForm, ServiceOrderForm
 from ..services.reception_service import (
     perform_booking_action,
@@ -94,7 +94,7 @@ def add_extra_service(booking_id):
 
     if form.validate_on_submit():
         try:
-            new_service = add_extra_service_to_booking(
+            add_extra_service_to_booking(
                 booking, form.service_id.data, form.quantity.data
             )
             flash(

@@ -11,6 +11,7 @@ from flask import (
 from flask_login import login_required, current_user
 from datetime import datetime
 
+from .. import db
 from ..models import Room, Booking, BookingStatus, ExtraService, BookingService
 from ..services.booking_service import create_booking
 from ..forms.booking_forms import (

@@ -145,8 +145,10 @@ class Booking(db.Model):
 
     def __repr__(self):
         return (
-            f"<Booking id={self.id} user_id={self.user_id} room_id={self.room_id}"
-            f" check_in={self.check_in} check_out={self.check_out} status={self.status.value}>"
+            "<Booking id="
+            + f"{self.id} user_id={self.user_id} room_id={self.room_id} "
+            + f"check_in={self.check_in} check_out={self.check_out} "
+            + f"status={self.status.value}>"
         )
 
     # --- Foglalás állapotkezelő segédfüggvények a frontendhez ---
@@ -197,7 +199,11 @@ class BookingService(db.Model):
     service = db.relationship("ExtraService", back_populates="booking_services")
 
     def __repr__(self):
-        return f"<BookingService id={self.id} booking_id={self.booking_id} service_id={self.service_id} qty={self.quantity}>"
+        return (
+            "<BookingService id="
+            + f"{self.id} booking_id={self.booking_id} "
+            + f"service_id={self.service_id} qty={self.quantity}>"
+        )
 
 
 class ExtraService(db.Model):
@@ -220,7 +226,11 @@ class ExtraService(db.Model):
     )
 
     def __repr__(self):
-        return f"<ExtraService id={self.id} name={self.name} price={self.price}>"
+        return (
+            "<ExtraService id="
+            + f"{self.id} name={self.name} "
+            + f"price={self.price}>"
+        )
 
 
 class Invoice(db.Model):
@@ -238,4 +248,8 @@ class Invoice(db.Model):
     booking = db.relationship("Booking", back_populates="invoice")
 
     def __repr__(self):
-        return f"<Invoice id={self.id} booking_id={self.booking_id} total={self.total_amount} paid={self.paid}>"
+        return (
+            "<Invoice id="
+            + f"{self.id} booking_id={self.booking_id} "
+            + f"total={self.total_amount} paid={self.paid}>"
+        )

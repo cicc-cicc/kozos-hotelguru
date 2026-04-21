@@ -1,3 +1,4 @@
+# ruff: noqa: E402
 from datetime import datetime, timedelta
 import os
 import sys
@@ -7,7 +8,7 @@ proj_root = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 if proj_root not in sys.path:
     sys.path.insert(0, proj_root)
 
-    from WebApp import create_app, db  # noqa: E402
+from WebApp import create_app, db  # noqa: E402
 from WebApp.models import User, Room
 
 app = create_app()

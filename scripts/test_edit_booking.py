@@ -1,4 +1,5 @@
-from datetime import datetime, timedelta
+# ruff: noqa: E402
+from datetime import timedelta
 import os
 import sys
 

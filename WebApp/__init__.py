@@ -15,7 +15,8 @@ from flask_jwt_extended import JWTManager
 # Globális objektumok
 db = SQLAlchemy()
 migrate = Migrate()
-login_manager = LoginManager()  # 2. LoginManager inicializálása
+login_manager = LoginManager()
+# LoginManager inicializálása
 csrf = CSRFProtect()
 jwt = JWTManager()
 if Swagger is not None:
@@ -41,8 +42,7 @@ def create_app():
         port = params.get("port")
         database = params.get("database")
         app.config["SQLALCHEMY_DATABASE_URI"] = (
-            "mysql+pymysql://"
-            + f"{user}:{password}@{host}:{port}/{database}"
+            "mysql+pymysql://" + f"{user}:{password}@{host}:{port}/" + f"{database}"
         )
     app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = False
     app.config["SECRET_KEY"] = "hotelguru_titok"

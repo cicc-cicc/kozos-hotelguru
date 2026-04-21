@@ -16,10 +16,7 @@ def validate_password_strength(form, field):
         raise ValidationError("A jelszónak tartalmaznia kell legalább egy számot.")
     if not re.search(r'[!@#$%^&*(),.?":{}|<>]', value):
         raise ValidationError(
-            (
-                "A jelszónak tartalmaznia kell legalább "
-                "egy speciális karaktert."
-            )
+            ("A jelszónak tartalmaznia kell legalább " "egy speciális karaktert.")
         )
 
 
@@ -64,7 +61,10 @@ class RegistrationForm(FlaskForm):
             DataRequired(),
             Regexp(
                 r"^\+36\d{9}$",
-                message="Telefonszám formátuma érvénytelen: +36-val kell kezdődnie, majd 9 számjegy.",
+                message=(
+                    "Telefonszám formátuma érvénytelen: +36-val kell "
+                    "kezdődnie, majd 9 számjegy."
+                ),
             ),
         ],
     )
