@@ -95,7 +95,11 @@ def seed_database():
             if svc:
                 services_map[svc.name] = svc
                 continue
-            svc = ExtraService(name=s["name"], description=s.get("description"), price=s.get("price", 0.0))
+            svc = ExtraService(
+                name=s["name"],
+                description=s.get("description"),
+                price=s.get("price", 0.0),
+            )
             db.session.add(svc)
             db.session.flush()
             services_map[svc.name] = svc
@@ -114,7 +118,9 @@ def seed_database():
             if existing:
                 # Frissítjük a meglévő szoba adatait
                 existing.capacity = r.get("capacity", existing.capacity)
-                existing.price_per_night = r.get("price_per_night", existing.price_per_night)
+                existing.price_per_night = r.get(
+                    "price_per_night", existing.price_per_night
+                )
                 existing.description = r.get("description", existing.description)
                 existing.status = status_enum
                 db.session.add(existing)
@@ -151,7 +157,10 @@ def seed_database():
 
             # Ütközés ellenőrzés
             if Booking.has_conflict(room.id, check_in, check_out):
-                print(f"Ütköző foglalás, kihagyva: user={user.username} room={room.room_number} {check_in}->{check_out}")
+                print(
+                    f"Ütköző foglalás, kihagyva: user={user.username} "
+                    f"room={room.room_number} {check_in}->{check_out}"
+                )
                 continue
 
             # státusz
@@ -183,7 +192,9 @@ def seed_database():
                     print(f"Ismeretlen szolgáltatás: {ex.get('service_name')}")
                     continue
                 qty = int(ex.get("quantity", 1))
-                bs = BookingService(booking_id=booking.id, service_id=svc.id, quantity=qty)
+                bs = BookingService(
+                    booking_id=booking.id, service_id=svc.id, quantity=qty
+                )
                 db.session.add(bs)
                 extras_total += (svc.price or 0.0) * qty
 
@@ -195,10 +206,16 @@ def seed_database():
 
             inv_data = b.get("invoice")
             if inv_data:
-                invoice = Invoice(booking_id=booking.id, total_amount=total_price, paid=bool(inv_data.get("paid", False)))
+                invoice = Invoice(
+                    booking_id=booking.id,
+                    total_amount=total_price,
+                    paid=bool(inv_data.get("paid", False)),
+                )
                 db.session.add(invoice)
 
-            print(f"Foglalás létrehozva: user={user.username} room={room.room_number} {check_in}->{check_out}")
+            print(
+                f"Foglalás létrehozva: user={user.username} room={room.room_number} {check_in}->{check_out}"
+            )
 
         # végső mentés
         try:

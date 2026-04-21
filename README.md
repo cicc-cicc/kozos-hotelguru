@@ -209,5 +209,3 @@ Majd újra:
 ```
 git push
 ```
-
-

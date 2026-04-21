@@ -3,7 +3,9 @@ from ..models import Room, Booking, Invoice, BookingStatus
 from .. import db
 
 
-def create_booking(user_id, room_id, check_in, check_out, guests_count=1, price_per_person=False):
+def create_booking(
+    user_id, room_id, check_in, check_out, guests_count=1, price_per_person=False
+):
     """Létrehoz egy foglalást és a hozzá tartozó számlát.
 
     Dob ValueError-t, ha a szoba nem elérhető vagy más üzleti hiba van.
@@ -15,7 +17,13 @@ def create_booking(user_id, room_id, check_in, check_out, guests_count=1, price_
     if not room.is_available_for(check_in, check_out):
         raise ValueError("A kiválasztott szoba nem elérhető a megadott időpontra.")
 
-    total_price = calculate_total_price(room, check_in, check_out, guests_count=guests_count, price_per_person=price_per_person)
+    total_price = calculate_total_price(
+        room,
+        check_in,
+        check_out,
+        guests_count=guests_count,
+        price_per_person=price_per_person,
+    )
 
     booking = Booking(
         user_id=user_id,
@@ -38,7 +46,14 @@ def create_booking(user_id, room_id, check_in, check_out, guests_count=1, price_
     return booking, invoice
 
 
-def calculate_total_price(room: Room, check_in, check_out, guests_count: int = 1, price_per_person: bool = False, extras: float = 0.0):
+def calculate_total_price(
+    room: Room,
+    check_in,
+    check_out,
+    guests_count: int = 1,
+    price_per_person: bool = False,
+    extras: float = 0.0,
+):
     """Központi árkalkulátor: kiszámolja az alapárat (éjszakák * price_per_night),
     és opcionálisan figyelembe veszi a főre jutó árazást és az extra szolgáltatásokat.
     Visszaad egy lebegőpontos értéket.

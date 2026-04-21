@@ -7,20 +7,27 @@ from WebApp.models import User, Room
 
 def test_booking_flow():
     app = create_app()
-    app.config['TESTING'] = True
+    app.config["TESTING"] = True
 
     with app.app_context():
         # ensure test user
-        user = User.query.filter_by(username='test_robot').first()
+        user = User.query.filter_by(username="test_robot").first()
         if not user:
-            user = User(username='test_robot', email='test_robot@example.com', password_hash='x')
+            user = User(
+                username="test_robot", email="test_robot@example.com", password_hash="x"
+            )
             db.session.add(user)
             db.session.commit()
 
         # ensure test room
-        room = Room.query.filter_by(room_number='T100').first()
+        room = Room.query.filter_by(room_number="T100").first()
         if not room:
-            room = Room(room_number='T100', capacity=2, price_per_night=5000.0, description='Test room')
+            room = Room(
+                room_number="T100",
+                capacity=2,
+                price_per_night=5000.0,
+                description="Test room",
+            )
             db.session.add(room)
             db.session.commit()
 
@@ -31,15 +38,15 @@ def test_booking_flow():
 
         # Simulate login by setting session values
         with client.session_transaction() as sess:
-            sess['_user_id'] = str(user.id)
-            sess['_fresh'] = True
+            sess["_user_id"] = str(user.id)
+            sess["_fresh"] = True
 
         params = {
-            'arrival': arrival.strftime('%Y-%m-%d'),
-            'departure': departure.strftime('%Y-%m-%d'),
-            'guests': '2'
+            "arrival": arrival.strftime("%Y-%m-%d"),
+            "departure": departure.strftime("%Y-%m-%d"),
+            "guests": "2",
         }
-        get_resp = client.get('/search-results', query_string=params)
+        get_resp = client.get("/search-results", query_string=params)
         assert get_resp.status_code == 200
         html = get_resp.get_data(as_text=True)
 
@@ -47,14 +54,14 @@ def test_booking_flow():
         csrf = m.group(1) if m else None
 
         data = {
-            'room_id': str(room.id),
-            'arrival_date': arrival.strftime('%Y-%m-%d'),
-            'departure_date': departure.strftime('%Y-%m-%d'),
-            'guests': '2',
-            'csrf_token': csrf,
+            "room_id": str(room.id),
+            "arrival_date": arrival.strftime("%Y-%m-%d"),
+            "departure_date": departure.strftime("%Y-%m-%d"),
+            "guests": "2",
+            "csrf_token": csrf,
         }
 
-        resp = client.post('/book-room', data=data, follow_redirects=True)
+        resp = client.post("/book-room", data=data, follow_redirects=True)
         text = resp.get_data(as_text=True)
         assert resp.status_code == 200
-        assert 'Sikeres foglalás' in text or 'Sikeres foglalás' in text
+        assert "Sikeres foglalás" in text or "Sikeres foglalás" in text

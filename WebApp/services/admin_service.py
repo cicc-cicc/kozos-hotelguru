@@ -5,7 +5,7 @@ from ..models import Room, RoomStatus
 def create_room_from_form(form):
     existing = Room.query.filter_by(room_number=form.room_number.data).first()
     if existing:
-        raise ValueError(f'A {form.room_number.data} szobaszám már foglalt!')
+        raise ValueError(f"A {form.room_number.data} szobaszám már foglalt!")
 
     room = Room(
         room_number=form.room_number.data,
@@ -24,7 +24,7 @@ def update_room_from_form(room, form):
     if form.room_number.data != room.room_number:
         existing = Room.query.filter_by(room_number=form.room_number.data).first()
         if existing:
-            raise ValueError(f'A {form.room_number.data} szobaszám már létezik!')
+            raise ValueError(f"A {form.room_number.data} szobaszám már létezik!")
 
     room.room_number = form.room_number.data
     room.capacity = form.capacity.data
@@ -40,7 +40,9 @@ def update_room_from_form(room, form):
 def delete_room(room):
     # Prevent accidental removal when there are active bookings
     if room.bookings and len(room.bookings) > 0:
-        raise ValueError("A szobához kapcsolódó foglalások vannak. Előbb töröld a foglalásokat.")
+        raise ValueError(
+            "A szobához kapcsolódó foglalások vannak. Előbb töröld a foglalásokat."
+        )
 
     deleted_number = room.room_number
     db.session.delete(room)
