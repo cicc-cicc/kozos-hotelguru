@@ -2,7 +2,7 @@ from datetime import datetime, timedelta
 import re
 
 from WebApp import create_app, db
-from WebApp.models import User, Room
+from WebApp.models import User, Room, Booking
 
 
 def test_booking_flow():
@@ -35,6 +35,12 @@ def test_booking_flow():
         departure = arrival + timedelta(days=1)
 
         client = app.test_client()
+
+        # Ensure no conflicting bookings exist for the test room
+        bookings_to_remove = Booking.query.filter_by(room_id=room.id).all()
+        for b in bookings_to_remove:
+            db.session.delete(b)
+        db.session.commit()
 
         # Simulate login by setting session values
         with client.session_transaction() as sess:
