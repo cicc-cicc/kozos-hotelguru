@@ -4,14 +4,25 @@
 
 {% block content %}
 <h1>Szoba törlése: {{ room.room_number }}</h1>
-<p>Biztosan törölni szeretnéd a(z) <strong>{{ room.room_number }}</strong> szobát? A művelet az összes kapcsolódó foglalást is törli.</p>
+<p>Biztosan törölni szeretnéd a(z) <strong>{{ room.room_number }}</strong> szobát?</p>
 
-<form method="POST">
-    {{ form.hidden_tag() }}
-    <div>
-        {{ form.submit(class='btn btn-danger') }}
-        <a href="{{ url_for('admin.admin_dashboard') }}">Mégse</a>
-    </div>
-</form>
+{% if room.bookings and room.bookings|length > 0 %}
+    <div class="alert alert-warning">A szobához <strong>{{ room.bookings|length }}</strong> foglalás kapcsolódik. Előbb töröld a foglalásokat, vagy törölj minden foglalást kézzel.</div>
+    <form method="POST" action="{{ url_for('admin.delete_room', room_id=room.id) }}">
+        {{ form.hidden_tag() }}
+        <div>
+            <button class="btn btn-danger" disabled>Végleges törlés</button>
+            <a href="{{ url_for('admin.admin_dashboard') }}">Mégse</a>
+        </div>
+    </form>
+{% else %}
+    <form method="POST">
+        {{ form.hidden_tag() }}
+        <div>
+            {{ form.submit(class='btn btn-danger') }}
+            <a href="{{ url_for('admin.admin_dashboard') }}">Mégse</a>
+        </div>
+    </form>
+{% endif %}
 
 {% endblock %}

@@ -4,6 +4,7 @@ from datetime import datetime
 
 from .. import db
 from ..models import Room, Booking, Invoice, BookingStatus, ExtraService, BookingService
+from ..services.booking_service import create_booking
 from ..forms.booking_forms import RoomSearchForm, BookingRequestForm, BookingCancelForm, BookingEditForm
 from ..forms.service_forms import GuestServiceOrderForm
 
@@ -68,50 +69,27 @@ def book_room():
         form = BookingRequestForm()
 
         if form.validate_on_submit():
-            room = Room.query.get_or_404(int(form.room_id.data))
+            # Form-ból jövő adatokat parse-oljuk
             check_in = datetime.strptime(form.arrival_date.data, '%Y-%m-%d')
             check_out = datetime.strptime(form.departure_date.data, '%Y-%m-%d')
+            guests_count = int(form.guests.data) if getattr(form, 'guests', None) and form.guests.data else 1
 
-            # Dupla ellenőrzés a biztonság kedvéért (nehogy ketten foglalják le egyszerre)
-            if not room.is_available_for(check_in, check_out):
-                flash('Sajnáljuk, időközben ezt a szobát lefoglalták.', 'danger')
+            try:
+                create_booking(
+                    user_id=current_user.id,
+                    room_id=int(form.room_id.data),
+                    check_in=check_in,
+                    check_out=check_out,
+                    guests_count=guests_count,
+                    price_per_person=current_app.config.get('PRICE_PER_PERSON', False),
+                )
+                flash('Sikeres foglalás! A visszaigazolást hamarosan küldjük.', 'success')
+                return redirect(url_for('guest.my_bookings'))
+            except ValueError as e:
+                flash(str(e), 'danger')
                 return redirect(url_for('guest.index'))
 
-            # Ár kiszámítása (éjszakák száma * ár)
-            nights = max(1, (check_out - check_in).days)
-            guests_count = int(form.guests.data) if getattr(form, 'guests', None) and form.guests.data else 1
-            if current_app.config.get('PRICE_PER_PERSON'):
-                total_price = nights * room.price_per_night * guests_count
-            else:
-                total_price = nights * room.price_per_night
-
-            # 1. Foglalás létrehozása (alapból pending státusszal)
-            new_booking = Booking(
-                user_id=current_user.id,
-                room_id=room.id,
-                check_in=check_in,
-                check_out=check_out,
-                status=BookingStatus.pending,
-                total_price=total_price,
-                guests_count=guests_count
-            )
-            db.session.add(new_booking)
-            db.session.flush() # Így megkapjuk a new_booking.id-t a számlához
-
-            # 2. Számla (Invoice) létrehozása
-            new_invoice = Invoice(
-                booking_id=new_booking.id,
-                total_amount=total_price,
-                paid=False
-            )
-            db.session.add(new_invoice)
-            db.session.commit()
-
-            flash('Sikeres foglalás! A visszaigazolást hamarosan küldjük.', 'success')
-            return redirect(url_for('guest.my_bookings'))
-
-        # Ha a WTForms validáció valamiért nem sikerül (pl. CSRF, hiányzó mezők),
-        # próbáljuk meg a beérkező form adatait közvetlenül kiolvasni és fallbackként végrehajtani a foglalást.
+        # Fallback útvonal: közvetlen form-adatból
         current_app.logger.warning('Booking form validate failed; form.errors=%s, formdata=%s', getattr(form, 'errors', None), request.form)
         try:
             room_id = request.form.get('room_id')
@@ -121,46 +99,22 @@ def book_room():
             if not room_id or not arrival or not departure:
                 raise ValueError('Missing booking fields')
 
-            room = Room.query.get_or_404(int(room_id))
             check_in = datetime.strptime(arrival, '%Y-%m-%d')
             check_out = datetime.strptime(departure, '%Y-%m-%d')
-
-            if not room.is_available_for(check_in, check_out):
-                flash('Sajnáljuk, időközben ezt a szobát lefoglalták.', 'danger')
-                return redirect(url_for('guest.index'))
-
-            nights = max(1, (check_out - check_in).days)
             guests_count = int(guests_field) if guests_field else 1
-            if current_app.config.get('PRICE_PER_PERSON'):
-                total_price = nights * room.price_per_night * guests_count
-            else:
-                total_price = nights * room.price_per_night
 
-            new_booking = Booking(
+            create_booking(
                 user_id=current_user.id,
-                room_id=room.id,
+                room_id=int(room_id),
                 check_in=check_in,
                 check_out=check_out,
-                status=BookingStatus.pending,
-                total_price=total_price,
-                guests_count=guests_count
+                guests_count=guests_count,
+                price_per_person=current_app.config.get('PRICE_PER_PERSON', False),
             )
-            db.session.add(new_booking)
-            db.session.flush()
-
-            new_invoice = Invoice(
-                booking_id=new_booking.id,
-                total_amount=total_price,
-                paid=False
-            )
-            db.session.add(new_invoice)
-            db.session.commit()
-
             flash('Sikeres foglalás! (fallback útvonal) A visszaigazolást hamarosan küldjük.', 'success')
             return redirect(url_for('guest.my_bookings'))
-        except Exception as e:
+        except ValueError as e:
             current_app.logger.exception('Booking fallback failed')
-            # Show the error to the user (safe short message)
             flash(f'Hiba a foglalás során: {e}', 'danger')
             return redirect(url_for('guest.index'))
     except Exception as e:
@@ -271,8 +225,12 @@ def edit_booking(booking_id):
             booking.guests_count = form.guests.data
 
             # Új ár kiszámítása (nem számoljuk bele az extra szolgáltatásokat itt)
-            nights = max(1, (booking.check_out - booking.check_in).days)
-            booking.total_price = nights * booking.room.price_per_night
+            from ..services.booking_service import calculate_total_price
+
+            booking.total_price = calculate_total_price(
+                booking.room, new_check_in, new_check_out, guests_count=booking.guests_count,
+                price_per_person=current_app.config.get('PRICE_PER_PERSON', False)
+            )
             if booking.invoice:
                 booking.invoice.total_amount = booking.total_price
 

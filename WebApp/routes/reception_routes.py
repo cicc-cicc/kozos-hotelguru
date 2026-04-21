@@ -5,6 +5,7 @@ from functools import wraps
 from .. import db
 from ..models import Booking, Room, ExtraService, BookingService, Role, BookingStatus
 from ..forms.reception_forms import BookingActionForm, ServiceOrderForm
+from ..services.reception_service import perform_booking_action, add_extra_service_to_booking
 
 reception_bp = Blueprint('reception', __name__)
 
@@ -57,29 +58,9 @@ def handle_booking(booking_id):
     if form.validate_on_submit():
         action = form.action.data
         try:
-            if action == 'confirm':
-                booking.confirm() # A modeled ütközés-ellenőrzését is futtatja!
-                flash(f'Foglalás (#{booking.id}) visszaigazolva.', 'success')
-                
-            elif action == 'check_in':
-                booking.check_in_action()
-                flash(f'Vendég bejelentkeztetve: Foglalás #{booking.id}.', 'success')
-                
-            elif action == 'check_out':
-                booking.check_out_action()
-                # Számla lezárása (kifizetve)
-                if booking.invoice:
-                    booking.invoice.paid = True
-                flash(f'Kijelentkezés és számlázás befejezve (Foglalás #{booking.id}).', 'info')
-                
-            elif action == 'cancel':
-                booking.cancel()
-                flash(f'Foglalás (#{booking.id}) lemondva.', 'warning')
-                
-            db.session.commit()
-            
+            perform_booking_action(booking, action)
+            flash('Művelet sikeresen végrehajtva.', 'success')
         except ValueError as e:
-            # Ha pl. a confirm() ütközést talál, elkapjuk a ValueError-t
             flash(str(e), 'danger')
             
     return redirect(url_for('reception.reception_dashboard'))
@@ -100,22 +81,12 @@ def add_extra_service(booking_id):
     form = ServiceOrderForm()
     
     if form.validate_on_submit():
-        service = ExtraService.query.get_or_404(form.service_id.data)
-        quantity = form.quantity.data
-        
-        # Kapcsolótábla bejegyzés
-        new_service = BookingService(booking_id=booking.id, service_id=service.id, quantity=quantity)
-        db.session.add(new_service)
-        
-        # Pénzügyi adatok frissítése
-        extra_cost = service.price * quantity
-        booking.total_price += extra_cost
-        if booking.invoice:
-            booking.invoice.total_amount += extra_cost
-            
-        db.session.commit()
-        flash(f'{quantity}x {service.name} hozzáadva a #{booking.id} számlájához.', 'success')
-        return redirect(url_for('reception.reception_dashboard'))
+        try:
+            new_service = add_extra_service_to_booking(booking, form.service_id.data, form.quantity.data)
+            flash(f'{form.quantity.data}x hozzáadva a #{booking.id} számlájához.', 'success')
+            return redirect(url_for('reception.reception_dashboard'))
+        except ValueError as e:
+            flash(str(e), 'danger')
         
     form.booking_id.data = booking.id
     return render_template('reception_add_service.html', form=form, booking=booking)

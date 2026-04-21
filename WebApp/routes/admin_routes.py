@@ -6,6 +6,7 @@ from .. import db
 from ..models import Room, Role, RoomStatus, Booking, BookingStatus
 from ..forms.admin_forms import RoomForm, RoomDeleteForm
 from ..forms.reception_forms import BookingActionForm
+from ..services.admin_service import create_room_from_form, update_room_from_form, delete_room as service_delete_room
 from flask import current_app
 
 admin_bp = Blueprint('admin', __name__)
@@ -40,27 +41,13 @@ def add_room():
     form = RoomForm()
     
     if form.validate_on_submit():
-        # Ellenőrizzük, hogy létezik-e már ez a szobaszám
-        existing_room = Room.query.filter_by(room_number=form.room_number.data).first()
-        if existing_room:
-            flash(f'A {form.room_number.data} szobaszám már foglalt!', 'danger')
-            return render_template('admin_room_form.html', form=form, title="Új szoba hozzáadása")
-            
-        new_room = Room(
-            room_number=form.room_number.data,
-            capacity=form.capacity.data,
-            price_per_night=form.price_per_night.data,
-            equipment=form.equipment.data,
-            description=form.description.data
-        )
-        # Az enum állapot beállítása a models.py-ban megírt metódussal
-        new_room.set_status(form.status.data)
-        
-        db.session.add(new_room)
-        db.session.commit()
-        flash(f'{new_room.room_number}. szoba sikeresen hozzáadva!', 'success')
-        return redirect(url_for('admin.admin_dashboard'))
-        
+        try:
+            new_room = create_room_from_form(form)
+            flash(f'{new_room.room_number}. szoba sikeresen hozzáadva!', 'success')
+            return redirect(url_for('admin.admin_dashboard'))
+        except ValueError as e:
+            flash(str(e), 'danger')
+
     return render_template('admin_room_form.html', form=form, title="Új szoba hozzáadása")
 
 
@@ -73,25 +60,14 @@ def edit_room(room_id):
     form = RoomForm()
     
     if form.validate_on_submit():
-        # Ellenőrizzük, hogy ha átírja a szobaszámot, az nem ütközik-e másikkal
-        if form.room_number.data != room.room_number:
-            existing = Room.query.filter_by(room_number=form.room_number.data).first()
-            if existing:
-                flash(f'A {form.room_number.data} szobaszám már létezik!', 'danger')
-                return render_template('admin_room_form.html', form=form, room=room, title="Szoba szerkesztése")
-                
-        # Adatok frissítése
-        room.room_number = form.room_number.data
-        room.capacity = form.capacity.data
-        room.price_per_night = form.price_per_night.data
-        room.equipment = form.equipment.data
-        room.description = form.description.data
-        room.set_status(form.status.data)
-        
-        db.session.commit()
-        flash(f'A {room.room_number}. szoba adatai frissültek.', 'success')
-        return redirect(url_for('admin.admin_dashboard'))
-        
+        try:
+            update_room_from_form(room, form)
+            flash(f'A {room.room_number}. szoba adatai frissültek.', 'success')
+            return redirect(url_for('admin.admin_dashboard'))
+        except ValueError as e:
+            flash(str(e), 'danger')
+            return render_template('admin_room_form.html', form=form, room=room, title="Szoba szerkesztése")
+
     elif request.method == 'GET':
         # Form előtöltése a jelenlegi adatokkal
         form.room_number.data = room.room_number
@@ -100,7 +76,7 @@ def edit_room(room_id):
         form.equipment.data = room.equipment
         form.description.data = room.description
         form.status.data = room.status.name # Enum stringgé alakítása a legördülőhöz
-        
+
     return render_template('admin_room_form.html', form=form, room=room, title="Szoba szerkesztése")
 
 
@@ -111,16 +87,19 @@ def delete_room(room_id):
     """Szoba végleges törlése"""
     room = Room.query.get_or_404(room_id)
     form = RoomDeleteForm()
-    
     if form.validate_on_submit():
-        # Figyelem: A models.py "cascade='all, delete-orphan'" beállítása miatt 
-        # a szoba törlése a hozzá tartozó foglalásokat is törli!
-        deleted_number = room.room_number
-        db.session.delete(room)
-        db.session.commit()
-        flash(f'A {deleted_number}. szoba véglegesen törölve lett a rendszerből.', 'warning')
-        return redirect(url_for('admin.admin_dashboard'))
-        
+        try:
+            deleted_number = service_delete_room(room)
+            flash(f'A {deleted_number}. szoba véglegesen törölve lett a rendszerből.', 'warning')
+            return redirect(url_for('admin.admin_dashboard'))
+        except ValueError as e:
+            flash(str(e), 'danger')
+            return redirect(url_for('admin.delete_room', room_id=room.id))
+        except Exception as e:
+            current_app.logger.exception('Error deleting room')
+            flash('Hiba történt a szoba törlése közben. Részletek a naplóban.', 'danger')
+            return redirect(url_for('admin.admin_dashboard'))
+
     return render_template('admin_delete_room.html', form=form, room=room)
 
 

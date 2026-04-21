@@ -1,8 +1,14 @@
 from flask import Flask
+import os
 from flask_sqlalchemy import SQLAlchemy
 from flask_migrate import Migrate
 from flask_login import LoginManager # 1. Új import
 from flask_wtf import CSRFProtect
+try:
+    from flasgger import Swagger
+except Exception:
+    Swagger = None
+from flask_jwt_extended import JWTManager
 
 
 # Globális objektumok
@@ -10,20 +16,38 @@ db = SQLAlchemy()
 migrate = Migrate()
 login_manager = LoginManager() # 2. LoginManager inicializálása
 csrf = CSRFProtect()
+jwt = JWTManager()
+if Swagger is not None:
+    swagger = Swagger()
+else:
+    swagger = None
 
 def create_app():
     app = Flask(__name__)
-
-    from .config import db_config
-    params = db_config()
-    
-    app.config['SQLALCHEMY_DATABASE_URI'] = f"mysql+pymysql://{params['user']}:{params['password']}@{params['host']}:{params['port']}/{params['database']}"
+    # Allow overriding the database via environment variable for CI/tests/local overrides
+    database_url = os.environ.get('DATABASE_URL')
+    if database_url:
+        app.config['SQLALCHEMY_DATABASE_URI'] = database_url
+    else:
+        from .config import db_config
+        params = db_config()
+        app.config['SQLALCHEMY_DATABASE_URI'] = f"mysql+pymysql://{params['user']}:{params['password']}@{params['host']}:{params['port']}/{params['database']}"
     app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
     app.config['SECRET_KEY'] = 'hotelguru_titok'
 
     db.init_app(app)
     migrate.init_app(app, db)
     csrf.init_app(app)
+    # Flasgger (OpenAPI / Swagger) init
+    if swagger is not None:
+        try:
+            swagger.init_app(app)
+        except Exception:
+            # If Flasgger is installed but incompatible, skip initialization
+            pass
+    # JWT init
+    app.config.setdefault('JWT_SECRET_KEY', app.config.get('SECRET_KEY'))
+    jwt.init_app(app)
     
     # 3. Flask-Login beállítása az app-hoz
     login_manager.init_app(app)
@@ -56,4 +80,8 @@ def create_app():
 
         from .routes.admin_routes import admin_bp
         app.register_blueprint(admin_bp, url_prefix='/admin') # Admin útvonalak /admin előtaggal (pl. /admin/dashboard)
+        
+        # API blueprint (JSON endpoints + OpenAPI)
+        from .routes.api import api_bp
+        app.register_blueprint(api_bp, url_prefix='/api')
     return app
