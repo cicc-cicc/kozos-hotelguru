@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html lang="hu">
+<head>
+
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Kezdőlap - HotelGuru</title>
+    <link rel="stylesheet" href="/static/style.css">
+    <style>
+        /* Alapvető menü formázás a style.css kiegészítéseként */
+        nav { background-color: #2c3e50; padding: 1rem; color: white; margin-bottom: 20px; }
+        nav .container { width: 100%; max-width: none; display: flex; justify-content: center; align-items: center; gap: 12px; flex-wrap: wrap; }
+        nav ul { list-group: none; display: flex; margin: 0; padding: 0; }
+        nav ul li { margin-left: 20px; list-style: none; }
+        nav a { color: white; text-decoration: none; font-weight: bold; margin: 0 8px; }
+        .alert { padding: 15px; margin-bottom: 20px; border-radius: 4px; }
+        .alert-success { background-color: #d4edda; color: #155724; border: 1px solid #c3e6cb; }
+        .alert-danger { background-color: #f8d7da; color: #721c24; border: 1px solid #f5c6cb; }
+        .alert-info { background-color: #d1ecf1; color: #0c5460; border: 1px solid #bee5eb; }
+        .form-group { margin-bottom: 15px; }
+        .form-control { width: 100%; padding: 8px; border: 1px solid #ccc; border-radius: 4px; box-sizing: border-box; }
+        .btn { padding: 10px 20px; border: none; border-radius: 4px; cursor: pointer; font-weight: bold; }
+        .btn-primary { background-color: #3498db; color: white; }
+    </style>
+</head>
+<body>
+    <nav>
+        <div class="container">
+            <a href="/">Kezdőlap</a>
+
+            
+                <a href="/auth/profile">Profil</a>
+                <a href="/my-bookings">Foglalásaim</a>
+
+                
+
+                <a href="/auth/logout">Kijelentkezés</a>
+            
+        </div>
+    </nav>
+
+    <div class="container">
+        
+            
+                
+                    <div class="alert alert-danger">A kiválasztott szoba nem elérhető a megadott időpontra.</div>
+                
+            
+        
+
+        
+<div class="hero-section" style="text-align: center; padding: 40px 0;">
+    <h1>Találja meg a tökéletes szobát!</h1>
+    <p>Adja meg az időpontot és a vendégek számát a kereséshez.</p>
+</div>
+
+<div class="search-container" style="background: #ecf0f1; padding: 30px; border-radius: 8px; max-width: 800px; margin: 0 auto;">
+    <form method="POST" action="/">
+        <input id="csrf_token" name="csrf_token" type="hidden" value="IjdhM2M0NmUwZDNmNWE1ZWViOTQ3NDUwMTg3NTFiMWVhOGVjMGJiNTMi.aefQow.Ap7Jl8tA8-_agcyCGwEs6jWZLvs">
+        <div style="display: flex; gap: 20px; flex-wrap: wrap; justify-content: center;">
+            <div class="form-group">
+                <label for="arrival_date">Érkezés napja</label><br>
+                <input class="form-control" id="arrival_date" name="arrival_date" required type="date" value="2026-04-21">
+                
+            </div>
+            <div class="form-group">
+                <label for="departure_date">Távozás napja</label><br>
+                <input class="form-control" id="departure_date" name="departure_date" required type="date" value="">
+                
+            </div>
+            <div class="form-group">
+                <label for="guests">Vendégek száma</label><br>
+                <input class="form-control" id="guests" max="10" min="1" name="guests" required type="number" value="">
+                
+            </div>
+        </div>
+        <div style="text-align: center; margin-top: 20px;">
+            <input class="btn btn-primary" id="submit" name="submit" type="submit" value="Szabad szobák keresése">
+        </div>
+    </form>
+</div>
+
+    </div>
+</body>
+</html>

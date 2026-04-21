@@ -1,19 +1,22 @@
 from . import db
 from datetime import datetime
 from flask_login import UserMixin
-from enum import Enum, auto, unique
+from enum import Enum
+
 
 class Role(Enum):
     guest = "guest"
     receptionist = "receptionist"
     manager = "manager"
     admin = "admin"
-    
+
+
 class RoomStatus(Enum):
     available = "available"
     occupied = "occupied"
     maintenance = "maintenance"
     unavailable = "unavailable"
+
 
 class BookingStatus(Enum):
     pending = "pending"
@@ -22,8 +25,9 @@ class BookingStatus(Enum):
     checked_in = "checked_in"
     checked_out = "checked_out"
 
-class User(db.Model, UserMixin  ):
-    __tablename__ = 'users'
+
+class User(db.Model, UserMixin):
+    __tablename__ = "users"
     id = db.Column(db.Integer, primary_key=True)
     username = db.Column(db.String(80), unique=True, nullable=False)
     email = db.Column(db.String(120), unique=True, nullable=False)
@@ -34,7 +38,9 @@ class User(db.Model, UserMixin  ):
     created_at = db.Column(db.DateTime, nullable=False, default=datetime.utcnow)
 
     # Kapcsolatok
-    bookings = db.relationship("Booking", back_populates="user", cascade="all, delete-orphan")
+    bookings = db.relationship(
+        "Booking", back_populates="user", cascade="all, delete-orphan"
+    )
 
     def __repr__(self):
         return f"<User id={self.id} username={self.username} role={self.role.value}>"
@@ -48,11 +54,17 @@ class Room(db.Model):
     capacity = db.Column(db.Integer, nullable=False)
     price_per_night = db.Column(db.Float, nullable=False)
     description = db.Column(db.Text, nullable=True)
-    equipment = db.Column(db.Text, nullable=True)  # Felszereltség, vesszővel elválasztva
-    status = db.Column(db.Enum(RoomStatus), nullable=False, default=RoomStatus.available)
+    equipment = db.Column(
+        db.Text, nullable=True
+    )  # Felszereltség, vesszővel elválasztva
+    status = db.Column(
+        db.Enum(RoomStatus), nullable=False, default=RoomStatus.available
+    )
 
     # Kapcsolatok
-    bookings = db.relationship("Booking", back_populates="room", cascade="all, delete-orphan")
+    bookings = db.relationship(
+        "Booking", back_populates="room", cascade="all, delete-orphan"
+    )
 
     @property
     def equipment_list(self):
@@ -63,9 +75,13 @@ class Room(db.Model):
     @property
     def is_available(self):
         return self.status == RoomStatus.available
-    
+
     def __repr__(self):
-        return f"<Room id={self.id} number={self.room_number} status={self.status.value}>"
+        return (
+            "<Room id="
+            + f"{self.id} number={self.room_number} "
+            + f"status={self.status.value}>"
+        )
 
     # --- Helper metódusok a frontend gombjaihoz és üzleti logikához ---
     def set_status(self, new_status):
@@ -79,10 +95,7 @@ class Room(db.Model):
                 raise ValueError(f"Ismeretlen RoomStatus: {new_status}")
         self.status = new_status
 
-    @property
-    def is_available(self):
-        """Egyszerű boolean jelzés, hogy a szoba állapota `available`-e."""
-        return self.status == RoomStatus.available
+    # Note: `is_available` property defined above; duplicate definition removed.
 
     def is_available_for(self, check_in, check_out):
         """Ellenőrzi, hogy a szoba szabad-e a megadott időszakra.
@@ -103,7 +116,9 @@ class Booking(db.Model):
     check_in = db.Column(db.DateTime, nullable=False)
     check_out = db.Column(db.DateTime, nullable=False)
     guests_count = db.Column(db.Integer, nullable=False, default=1)
-    status = db.Column(db.Enum(BookingStatus), nullable=False, default=BookingStatus.pending)
+    status = db.Column(
+        db.Enum(BookingStatus), nullable=False, default=BookingStatus.pending
+    )
     created_at = db.Column(db.DateTime, nullable=False, default=datetime.utcnow)
     total_price = db.Column(db.Float, nullable=True)
 
@@ -111,7 +126,9 @@ class Booking(db.Model):
     user = db.relationship("User", back_populates="bookings")
     room = db.relationship("Room", back_populates="bookings")
     # Asszociációs objektumok az extra szolgáltatásokhoz
-    booking_services = db.relationship("BookingService", back_populates="booking", cascade="all, delete-orphan")
+    booking_services = db.relationship(
+        "BookingService", back_populates="booking", cascade="all, delete-orphan"
+    )
 
     # Kényelmi, csak olvasható kapcsolat az ExtraService objektumokhoz az asszociációs táblán keresztül
     extra_services = db.relationship(
@@ -122,18 +139,24 @@ class Booking(db.Model):
     )
 
     # Egy-az-egyhez számla
-    invoice = db.relationship("Invoice", back_populates="booking", uselist=False, cascade="all, delete-orphan")
+    invoice = db.relationship(
+        "Invoice", back_populates="booking", uselist=False, cascade="all, delete-orphan"
+    )
 
     def __repr__(self):
         return (
-            f"<Booking id={self.id} user_id={self.user_id} room_id={self.room_id}"
-            f" check_in={self.check_in} check_out={self.check_out} status={self.status.value}>"
+            "<Booking id="
+            + f"{self.id} user_id={self.user_id} room_id={self.room_id} "
+            + f"check_in={self.check_in} check_out={self.check_out} "
+            + f"status={self.status.value}>"
         )
 
     # --- Foglalás állapotkezelő segédfüggvények a frontendhez ---
     def confirm(self):
         """Foglalás megerősítése; ellenőrzi az ütközést és státuszt állít."""
-        if Booking.has_conflict(self.room_id, self.check_in, self.check_out, exclude_booking_id=self.id):
+        if Booking.has_conflict(
+            self.room_id, self.check_in, self.check_out, exclude_booking_id=self.id
+        ):
             raise ValueError("Ütköző foglalás miatt nem erősíthető meg.")
         self.status = BookingStatus.confirmed
 
@@ -147,7 +170,9 @@ class Booking(db.Model):
         self.status = BookingStatus.checked_out
 
     @classmethod
-    def has_conflict(cls, room_id, new_check_in, new_check_out, exclude_booking_id=None):
+    def has_conflict(
+        cls, room_id, new_check_in, new_check_out, exclude_booking_id=None
+    ):
         query = cls.query.filter(
             cls.room_id == room_id,
             cls.check_in < new_check_out,
@@ -157,7 +182,6 @@ class Booking(db.Model):
         if exclude_booking_id:
             query = query.filter(cls.id != exclude_booking_id)
         return query.first() is not None
-                    
 
 
 class BookingService(db.Model):
@@ -165,7 +189,9 @@ class BookingService(db.Model):
 
     id = db.Column(db.Integer, primary_key=True)
     booking_id = db.Column(db.Integer, db.ForeignKey("bookings.id"), nullable=False)
-    service_id = db.Column(db.Integer, db.ForeignKey("extraservices.id"), nullable=False)
+    service_id = db.Column(
+        db.Integer, db.ForeignKey("extraservices.id"), nullable=False
+    )
     quantity = db.Column(db.Integer, nullable=False, default=1)
 
     # Kapcsolatok
@@ -173,7 +199,12 @@ class BookingService(db.Model):
     service = db.relationship("ExtraService", back_populates="booking_services")
 
     def __repr__(self):
-        return f"<BookingService id={self.id} booking_id={self.booking_id} service_id={self.service_id} qty={self.quantity}>"
+        return (
+            "<BookingService id="
+            + f"{self.id} booking_id={self.booking_id} "
+            + f"service_id={self.service_id} qty={self.quantity}>"
+        )
+
 
 class ExtraService(db.Model):
     __tablename__ = "extraservices"
@@ -184,7 +215,9 @@ class ExtraService(db.Model):
     description = db.Column(db.Text, nullable=True)
 
     # Kapcsolatok
-    booking_services = db.relationship("BookingService", back_populates="service", cascade="all, delete-orphan")
+    booking_services = db.relationship(
+        "BookingService", back_populates="service", cascade="all, delete-orphan"
+    )
     bookings = db.relationship(
         "Booking",
         secondary="booking_services",
@@ -193,13 +226,20 @@ class ExtraService(db.Model):
     )
 
     def __repr__(self):
-        return f"<ExtraService id={self.id} name={self.name} price={self.price}>"
+        return (
+            "<ExtraService id="
+            + f"{self.id} name={self.name} "
+            + f"price={self.price}>"
+        )
+
 
 class Invoice(db.Model):
     __tablename__ = "invoices"
 
     id = db.Column(db.Integer, primary_key=True)
-    booking_id = db.Column(db.Integer, db.ForeignKey("bookings.id"), unique=True, nullable=False)
+    booking_id = db.Column(
+        db.Integer, db.ForeignKey("bookings.id"), unique=True, nullable=False
+    )
     total_amount = db.Column(db.Float, nullable=False)
     created_at = db.Column(db.DateTime, nullable=False, default=datetime.utcnow)
     paid = db.Column(db.Boolean, nullable=False, default=False)
@@ -208,5 +248,8 @@ class Invoice(db.Model):
     booking = db.relationship("Booking", back_populates="invoice")
 
     def __repr__(self):
-        return f"<Invoice id={self.id} booking_id={self.booking_id} total={self.total_amount} paid={self.paid}>"
-
+        return (
+            "<Invoice id="
+            + f"{self.id} booking_id={self.booking_id} "
+            + f"total={self.total_amount} paid={self.paid}>"
+        )

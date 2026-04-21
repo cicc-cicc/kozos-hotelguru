@@ -5,10 +5,10 @@
 {% block content %}
 <div style="max-width: 600px; margin: 0 auto; background: white; padding: 30px; border-radius: 8px; box-shadow: 0 2px 5px rgba(0,0,0,0.1);">
     <h1>{{ title }}</h1>
-    
+
     <form method="POST">
         {{ form.hidden_tag() }}
-        
+
         <div style="display: flex; gap: 15px;">
             <div class="form-group" style="flex: 1;">
                 {{ form.room_number.label(style="font-weight: bold;") }}
@@ -27,7 +27,7 @@
             {{ form.price_per_night(class="form-control") }}
             {% for error in form.price_per_night.errors %}<span style="color:red; font-size:0.9em;">{{ error }}</span>{% endfor %}
         </div>
-        
+
         <div class="form-group">
             {{ form.status.label(style="font-weight: bold;") }}
             {{ form.status(class="form-control") }}
