@@ -1,6 +1,5 @@
 from flask import Blueprint, jsonify, request
 from flask_login import current_user
-from flask import current_app
 from ..models import Room, User
 from .. import db
 from ..services.booking_service import create_booking

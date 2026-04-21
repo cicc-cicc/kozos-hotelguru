@@ -2,7 +2,6 @@ from flask_wtf import FlaskForm
 from wtforms import DateField, SubmitField, HiddenField, IntegerField, BooleanField
 from wtforms.validators import DataRequired, NumberRange
 from datetime import date
-from wtforms import Form, validators
 
 
 class RoomSearchForm(FlaskForm):

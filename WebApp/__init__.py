@@ -34,9 +34,16 @@ def create_app():
         from .config import db_config
 
         params = db_config()
-        app.config[
-            "SQLALCHEMY_DATABASE_URI"
-        ] = f"mysql+pymysql://{params['user']}:{params['password']}@{params['host']}:{params['port']}/{params['database']}"
+        # build the URI in parts to avoid very long single-line strings
+        user = params.get("user")
+        password = params.get("password")
+        host = params.get("host")
+        port = params.get("port")
+        database = params.get("database")
+        app.config["SQLALCHEMY_DATABASE_URI"] = (
+            "mysql+pymysql://"
+            + f"{user}:{password}@{host}:{port}/{database}"
+        )
     app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = False
     app.config["SECRET_KEY"] = "hotelguru_titok"
 

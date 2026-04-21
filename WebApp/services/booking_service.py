@@ -1,4 +1,3 @@
-from datetime import datetime
 from ..models import Room, Booking, Invoice, BookingStatus
 from .. import db
 

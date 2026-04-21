@@ -1,7 +1,7 @@
 from . import db
 from datetime import datetime
 from flask_login import UserMixin
-from enum import Enum, auto, unique
+from enum import Enum
 
 
 class Role(Enum):
@@ -78,7 +78,9 @@ class Room(db.Model):
 
     def __repr__(self):
         return (
-            f"<Room id={self.id} number={self.room_number} status={self.status.value}>"
+            "<Room id="
+            + f"{self.id} number={self.room_number} "
+            + f"status={self.status.value}>"
         )
 
     # --- Helper metódusok a frontend gombjaihoz és üzleti logikához ---
@@ -93,10 +95,7 @@ class Room(db.Model):
                 raise ValueError(f"Ismeretlen RoomStatus: {new_status}")
         self.status = new_status
 
-    @property
-    def is_available(self):
-        """Egyszerű boolean jelzés, hogy a szoba állapota `available`-e."""
-        return self.status == RoomStatus.available
+    # Note: `is_available` property defined above; duplicate definition removed.
 
     def is_available_for(self, check_in, check_out):
         """Ellenőrzi, hogy a szoba szabad-e a megadott időszakra.

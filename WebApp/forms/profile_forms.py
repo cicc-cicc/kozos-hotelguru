@@ -16,7 +16,10 @@ class UserProfileForm(FlaskForm):
             DataRequired(),
             Regexp(
                 r"^\+36\d{9,10}$",
-                message="Telefonszám formátuma érvénytelen: +36-val kell kezdődnie, majd 9-10 számjegy.",
+                message=(
+                    "Telefonszám formátuma érvénytelen: +36-val kell "
+                    "kezdődnie, majd 9-10 számjegy."
+                ),
             ),
         ],
     )

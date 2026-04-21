@@ -1,12 +1,13 @@
 from datetime import datetime, timedelta
-import json, os, sys
+import os
+import sys
 
 # Ensure project root is importable (so 'WebApp' package can be found)
 proj_root = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 if proj_root not in sys.path:
     sys.path.insert(0, proj_root)
 
-from WebApp import create_app, db
+    from WebApp import create_app, db  # noqa: E402
 from WebApp.models import User, Room
 
 app = create_app()

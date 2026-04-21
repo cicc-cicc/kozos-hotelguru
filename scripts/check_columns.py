@@ -1,4 +1,5 @@
-import os, sys
+import os
+import sys
 
 print("CWD:", os.getcwd())
 print("PYTHONPATH first entries:", sys.path[:3])

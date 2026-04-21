@@ -3,7 +3,7 @@ from flask_login import login_required, current_user
 from functools import wraps
 
 from .. import db
-from ..models import Room, Role, RoomStatus, Booking, BookingStatus
+from ..models import Room, Role, Booking
 from ..forms.admin_forms import RoomForm, RoomDeleteForm
 from ..forms.reception_forms import BookingActionForm
 from ..services.admin_service import (
@@ -113,10 +113,11 @@ def delete_room(room_id):
         except ValueError as e:
             flash(str(e), "danger")
             return redirect(url_for("admin.delete_room", room_id=room.id))
-        except Exception as e:
+        except Exception:
             current_app.logger.exception("Error deleting room")
             flash(
-                "Hiba történt a szoba törlése közben. Részletek a naplóban.", "danger"
+                "Hiba történt a szoba törlése közben. Részletek a naplóban.",
+                "danger",
             )
             return redirect(url_for("admin.admin_dashboard"))
 

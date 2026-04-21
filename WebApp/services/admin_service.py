@@ -1,5 +1,5 @@
 from .. import db
-from ..models import Room, RoomStatus
+from ..models import Room
 
 
 def create_room_from_form(form):

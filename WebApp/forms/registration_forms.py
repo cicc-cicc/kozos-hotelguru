@@ -16,7 +16,10 @@ def validate_password_strength(form, field):
         raise ValidationError("A jelszónak tartalmaznia kell legalább egy számot.")
     if not re.search(r'[!@#$%^&*(),.?":{}|<>]', value):
         raise ValidationError(
-            "A jelszónak tartalmaznia kell legalább egy speciális karaktert."
+            (
+                "A jelszónak tartalmaznia kell legalább "
+                "egy speciális karaktert."
+            )
         )
 
 

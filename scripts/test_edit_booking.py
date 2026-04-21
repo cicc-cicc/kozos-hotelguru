@@ -1,11 +1,12 @@
 from datetime import datetime, timedelta
-import json, os, sys
+import os
+import sys
 
 proj_root = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 if proj_root not in sys.path:
     sys.path.insert(0, proj_root)
 
-from WebApp import create_app, db
+from WebApp import create_app  # noqa: E402
 from WebApp.models import User, Booking
 
 app = create_app()

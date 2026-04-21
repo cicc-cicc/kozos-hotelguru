@@ -2,7 +2,6 @@ from flask import Blueprint, render_template, redirect, url_for, flash, request,
 from flask_login import login_required, current_user
 from functools import wraps
 
-from .. import db
 from ..models import Booking, Room, ExtraService, BookingService, Role, BookingStatus
 from ..forms.reception_forms import BookingActionForm, ServiceOrderForm
 from ..services.reception_service import (
