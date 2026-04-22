@@ -43,7 +43,12 @@ def upgrade():
                 sa.Column("booking_id", sa.Integer(), nullable=True),
                 sa.Column("action", sa.String(length=120), nullable=False),
                 sa.Column("details", sa.Text(), nullable=True),
-                sa.Column("created_at", sa.DateTime(), nullable=False, server_default=sa.func.now()),
+                sa.Column(
+                    "created_at",
+                    sa.DateTime(),
+                    nullable=False,
+                    server_default=sa.func.now(),
+                ),
                 mysql_engine="InnoDB",
             ),
         ),

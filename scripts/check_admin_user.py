@@ -21,7 +21,10 @@ def main() -> None:
             print("FOUND:", u.username, u.email, "role=", u.role.name)
             print("password_hash present:", bool(u.password_hash))
             # test provided password
-            print("check admin123:", check_password_hash(u.password_hash or "", "admin123"))
+            print(
+                "check admin123:",
+                check_password_hash(u.password_hash or "", "admin123"),
+            )
             print("raw hash:", u.password_hash)
 
 

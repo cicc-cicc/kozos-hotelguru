@@ -23,6 +23,7 @@ The `ROLE_PERMISSIONS` mapping can be extended to add fine-grained
 permission checks without touching route code.
 """
 
+
 def _role_name(role_or_str):
     # Accept either Enum members (Role.x) or strings
     try:
@@ -98,7 +99,9 @@ def permission_required(permission):
                 from .. import db
 
                 rp = db.session.execute(
-                    db.select(RolePermission).filter_by(role_name=role_name, permission=permission)
+                    db.select(RolePermission).filter_by(
+                        role_name=role_name, permission=permission
+                    )
                 ).scalar_one_or_none()
                 if rp is not None:
                     return f(*args, **kwargs)

@@ -1,5 +1,5 @@
-from WebApp import create_app, db
-from WebApp.models import Booking, BookingStatus
+from WebApp import create_app
+from WebApp.models import Booking
 
 app = create_app()
 

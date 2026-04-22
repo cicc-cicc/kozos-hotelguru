@@ -18,14 +18,21 @@ def test_edit_booking_flow():
         # Create or get test user
         user = User.query.filter_by(username="test_robot").first()
         if not user:
-            user = User(username="test_robot", email="test_robot@example.com", password_hash="x")
+            user = User(
+                username="test_robot", email="test_robot@example.com", password_hash="x"
+            )
             db.session.add(user)
             db.session.commit()
 
         # Ensure there's at least one room
         room = Room.query.filter_by(room_number="T100").first()
         if not room:
-            room = Room(room_number="T100", capacity=2, price_per_night=5000.0, description="Test room")
+            room = Room(
+                room_number="T100",
+                capacity=2,
+                price_per_night=5000.0,
+                description="Test room",
+            )
             db.session.add(room)
             db.session.commit()
 
@@ -38,7 +45,13 @@ def test_edit_booking_flow():
         if not booking:
             arrival = datetime.utcnow().date()
             departure = arrival + timedelta(days=1)
-            booking = Booking(user_id=user.id, room_id=room.id, check_in=datetime.combine(arrival, datetime.min.time()), check_out=datetime.combine(departure, datetime.min.time()), guests=1)
+            booking = Booking(
+                user_id=user.id,
+                room_id=room.id,
+                check_in=datetime.combine(arrival, datetime.min.time()),
+                check_out=datetime.combine(departure, datetime.min.time()),
+                guests=1,
+            )
             db.session.add(booking)
             db.session.commit()
 

@@ -27,7 +27,9 @@ def main() -> None:
                 data = json.load(f)
             json_users = [u["username"] for u in data.get("users", [])]
             missing = [
-                name for name in json_users if not any(u.username == name for u in users)
+                name
+                for name in json_users
+                if not any(u.username == name for u in users)
             ]
             extra = [u.username for u in users if u.username not in json_users]
             print("\nUsers in data.json:", json_users)

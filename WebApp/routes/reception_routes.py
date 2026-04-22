@@ -1,6 +1,6 @@
-from flask import Blueprint, render_template, redirect, url_for, flash, request, abort
-from flask_login import login_required, current_user
-from ..utils.rbac import roles_required, permission_required
+from flask import Blueprint, render_template, redirect, url_for, flash, request
+from flask_login import login_required
+from ..utils.rbac import roles_required
 
 from ..models import Booking, Role, BookingStatus
 from ..forms.reception_forms import BookingActionForm, ServiceOrderForm
@@ -39,7 +39,9 @@ def reception_dashboard():
                 # return empty list when requesting excluded status
                 bookings = []
                 return render_template(
-                    "receptiondashboard.html", bookings=bookings, action_form=BookingActionForm()
+                    "receptiondashboard.html",
+                    bookings=bookings,
+                    action_form=BookingActionForm(),
                 )
             query = query.filter(Booking.status == status_enum)
         except KeyError:
@@ -55,14 +57,23 @@ def reception_dashboard():
 
     # counts for quick overview
     counts = {
-        'all': Booking.query.count(),
-        'pending': Booking.query.filter(Booking.status == BookingStatus.pending).count(),
-        'confirmed': Booking.query.filter(Booking.status == BookingStatus.confirmed).count(),
-        'checked_in': Booking.query.filter(Booking.status == BookingStatus.checked_in).count(),
+        "all": Booking.query.count(),
+        "pending": Booking.query.filter(
+            Booking.status == BookingStatus.pending
+        ).count(),
+        "confirmed": Booking.query.filter(
+            Booking.status == BookingStatus.confirmed
+        ).count(),
+        "checked_in": Booking.query.filter(
+            Booking.status == BookingStatus.checked_in
+        ).count(),
     }
 
     return render_template(
-        "receptiondashboard.html", bookings=bookings, action_form=action_form, counts=counts
+        "receptiondashboard.html",
+        bookings=bookings,
+        action_form=action_form,
+        counts=counts,
     )
 
 
@@ -85,7 +96,9 @@ def handle_booking(booking_id):
                 new_status = booking.status.name
                 if new_status in ("cancelled", "checked_out"):
                     return redirect(url_for("reception.reception_dashboard"))
-                return redirect(url_for("reception.reception_dashboard", status=new_status))
+                return redirect(
+                    url_for("reception.reception_dashboard", status=new_status)
+                )
             except Exception:
                 return redirect(url_for("reception.reception_dashboard"))
         except ValueError as e:

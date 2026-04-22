@@ -65,7 +65,9 @@ class User(db.Model, UserMixin):
         # Fallback: if RolePermission table exists, consult it
         try:
             rp = db.session.execute(
-                db.select(RolePermission).filter_by(role_name=self.role.name, permission=permission_name)
+                db.select(RolePermission).filter_by(
+                    role_name=self.role.name, permission=permission_name
+                )
             ).scalar_one_or_none()
             return rp is not None
         except Exception:

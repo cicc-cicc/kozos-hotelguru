@@ -1,6 +1,10 @@
 import json
 import os
+import sys
+import shutil
+import subprocess
 from datetime import datetime
+from urllib.parse import urlparse
 
 from WebApp import create_app, db
 from WebApp.models import (
@@ -30,6 +34,111 @@ def parse_dt(value):
 
 def seed_database():
     with app.app_context():
+        # Safety guard: avoid accidental destructive operations on production DB.
+        db_uri = app.config.get("SQLALCHEMY_DATABASE_URI", "") or ""
+        is_sqlite = db_uri.startswith("sqlite")
+        allow_seed = os.environ.get("ALLOW_SEED", "0") in ("1", "true", "yes")
+        # Require explicit ALLOW_SEED for non-sqlite DBs and an additional --force flag
+        has_force = "--force" in sys.argv
+        no_backup_flag = "--no-backup" in sys.argv
+        if not is_sqlite and not allow_seed:
+            print(
+                "Refusing to run seed: non-sqlite database detected and ALLOW_SEED not set."
+            )
+            print(
+                "If you really want to seed this database, set environment variable ALLOW_SEED=1 and run again."
+            )
+            return
+        if not is_sqlite and not has_force:
+            print(
+                "Refusing to run seed: non-sqlite database detected and --force flag not provided."
+            )
+            print("To proceed intentionally, run: ALLOW_SEED=1 python seed.py --force")
+            return
+
+        # Create a pre-seed backup for non-sqlite DBs (and copy sqlite DB file if used)
+        backups_dir = os.path.join(os.path.dirname(__file__), "backups")
+        os.makedirs(backups_dir, exist_ok=True)
+        timestamp = datetime.utcnow().strftime("%Y%m%dT%H%M%SZ")
+        try:
+            if is_sqlite:
+                # For sqlite, copy the DB file referenced by the URI
+                # Example sqlite URI: sqlite:///./app.db or sqlite:////absolute/path.db
+                path = db_uri.replace("sqlite:///", "").replace("sqlite://", "")
+                path = path or "./app.db"
+                src = os.path.abspath(path)
+                dst = os.path.join(backups_dir, f"sqlite-backup-{timestamp}.db")
+                if os.path.exists(src):
+                    shutil.copy2(src, dst)
+                    print(f"Pre-seed sqlite DB copied to: {dst}")
+                else:
+                    print(
+                        f"No sqlite DB file found at {src}; skipping sqlite file backup."
+                    )
+            else:
+                # Try to run mysqldump when possible
+                parsed = urlparse(db_uri)
+                scheme = parsed.scheme or ""
+                if "mysql" in scheme:
+                    user = parsed.username or os.environ.get("MYSQL_USER")
+                    password = parsed.password or os.environ.get("MYSQL_PWD")
+                    host = parsed.hostname or "localhost"
+                    port = parsed.port or 3306
+                    dbname = (parsed.path or "").lstrip("/")
+                    out_path = os.path.join(
+                        backups_dir, f"mysqldump-preseed-{timestamp}.sql.gz"
+                    )
+                    if no_backup_flag:
+                        print("--no-backup specified; skipping mysqldump pre-backup.")
+                    else:
+                        mysqldump = shutil.which("mysqldump")
+                        if not mysqldump:
+                            raise RuntimeError(
+                                "mysqldump not found in PATH; cannot create pre-seed dump."
+                            )
+                        env = os.environ.copy()
+                        if password:
+                            env["MYSQL_PWD"] = password
+                        cmd = [
+                            mysqldump,
+                            "-h",
+                            host,
+                            "-P",
+                            str(port),
+                            "-u",
+                            user,
+                            dbname,
+                        ]
+                        print(
+                            f"Running pre-seed mysqldump to {out_path} (this may take a while)..."
+                        )
+                        with subprocess.Popen(
+                            cmd, stdout=subprocess.PIPE, env=env
+                        ) as proc:
+                            with open(out_path, "wb") as f_out:
+                                # Pipe raw SQL into gzip compression
+                                gzip_proc = subprocess.Popen(
+                                    ["gzip"], stdin=proc.stdout, stdout=f_out
+                                )
+                                proc.stdout.close()
+                                gzip_proc.communicate()
+                                ret = proc.wait()
+                                if ret != 0:
+                                    raise RuntimeError(
+                                        f"mysqldump exited with code {ret}"
+                                    )
+                        print(f"Pre-seed mysqldump saved to: {out_path}")
+                else:
+                    print(
+                        "Pre-seed backup: DB scheme not recognized for automated dump; skipping."
+                    )
+        except Exception as e:
+            print(f"Pre-seed backup failed: {e}")
+            if not no_backup_flag:
+                print(
+                    "Aborting seed to avoid data loss. If you understand the risks, re-run with --no-backup --force"
+                )
+                return
         # Fejlesztői fallback: ha nincsenek migrációk lefuttatva, biztosítjuk, hogy a táblák létrejöjjenek.
         # Ez helyben gyorsan segít elkerülni a "Table doesn't exist" hibát. Production környezetben
         # érdemes migrációkat használni és ezt a sort eltávolítani.
@@ -37,6 +146,17 @@ def seed_database():
         print("db.create_all() futtatva — a táblák biztosítva.")
 
         # Foglalások törlése, hogy ne legyenek idegen kulcs hibák
+        # If user explicitly chose to skip backups we require interactive confirmation.
+        if no_backup_flag:
+            print(
+                "WARNING: You requested --no-backup. This will DELETE existing data in these tables:"
+            )
+            print("  Invoice, BookingService, Booking, Room, ExtraService")
+            confirm = input("Type CONFIRM to proceed with destructive seed: ")
+            if confirm.strip() != "CONFIRM":
+                print("Confirmation not received — aborting seed.")
+                return
+
         Invoice.query.delete()
         db.session.commit()
         BookingService.query.delete()

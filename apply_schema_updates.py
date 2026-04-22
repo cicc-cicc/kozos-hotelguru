@@ -17,12 +17,14 @@ with app.app_context():
                 {"db": db_name, "col": col},
             ).scalar()
             if not exists:
-                conn.execute(text(f"ALTER TABLE bookings ADD COLUMN {col} DATETIME NULL;"))
-                print(f'Added column bookings.{col}')
+                conn.execute(
+                    text(f"ALTER TABLE bookings ADD COLUMN {col} DATETIME NULL;")
+                )
+                print(f"Added column bookings.{col}")
             else:
-                print(f'Column bookings.{col} already exists')
+                print(f"Column bookings.{col} already exists")
     except Exception as e:
-        print('Error adding booking columns:', e)
+        print("Error adding booking columns:", e)
 
     # Create audit_logs table if not exists
     try:
@@ -40,9 +42,9 @@ with app.app_context():
                 """
             )
         )
-        print('Ensured audit_logs table')
+        print("Ensured audit_logs table")
     except Exception as e:
-        print('Error creating audit_logs:', e)
+        print("Error creating audit_logs:", e)
 
     # Create permissions and role_permissions tables if not exists
     try:
@@ -68,9 +70,9 @@ with app.app_context():
                 """
             )
         )
-        print('Ensured permissions and role_permissions tables')
+        print("Ensured permissions and role_permissions tables")
     except Exception as e:
-        print('Error creating permission tables:', e)
+        print("Error creating permission tables:", e)
 
     conn.close()
-    print('Schema update complete')
+    print("Schema update complete")

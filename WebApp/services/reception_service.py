@@ -8,7 +8,6 @@ from ..models import (
     BookingStatus,
     BookingService,
     ExtraService,
-    Room,
     RoomStatus,
     AuditLog,
 )

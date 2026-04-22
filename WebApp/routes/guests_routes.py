@@ -214,7 +214,9 @@ def my_bookings():
         form.booking_id.data = b.id
         service_forms[b.id] = form
 
-    return render_template("my_bookings.html", bookings=bookings, service_forms=service_forms)
+    return render_template(
+        "my_bookings.html", bookings=bookings, service_forms=service_forms
+    )
 
 
 @guest_bp.route("/booking/<int:booking_id>/cancel", methods=["GET", "POST"])
