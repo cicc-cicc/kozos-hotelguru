@@ -1,0 +1,52 @@
+{% extends "base.html" %}
+
+{% block title %}Szolgáltatások kezelése{% endblock %}
+
+{% block content %}
+<h1>Szolgáltatások</h1>
+
+<form method="POST">
+    {{ form.hidden_tag() }}
+    <div class="form-group">
+        {{ form.name.label }}
+        {{ form.name(class='form-control') }}
+    </div>
+    <div class="form-group">
+        {{ form.description.label }}
+        {{ form.description(class='form-control') }}
+    </div>
+    <div class="form-group">
+        {{ form.price.label }}
+        {{ form.price(class='form-control') }}
+    </div>
+    {{ form.submit(class='btn btn-primary') }}
+</form>
+
+<hr>
+<h3>Jelenlegi szolgáltatások</h3>
+<table class="table">
+    <thead>
+        <tr><th>Név</th><th>Leírás</th><th>Ár</th><th>Műveletek</th></tr>
+    </thead>
+    <tbody>
+    {% for s in services %}
+        <tr>
+            <td>{{ s.name }}</td>
+            <td>{{ s.description or '' }}</td>
+            <td>{{ '%.0f' % s.price }} Ft</td>
+            <td>
+                <a href="{{ url_for('admin.edit_service', service_id=s.id) }}">Szerkeszt</a>
+                |
+                <form method="POST" action="{{ url_for('admin.delete_service', service_id=s.id) }}" style="display:inline">
+                    {{ delete_form.hidden_tag() }}
+                    <button class="btn btn-link" type="submit">Töröl</button>
+                </form>
+            </td>
+        </tr>
+    {% else %}
+        <tr><td colspan="4">Nincsenek szolgáltatások.</td></tr>
+    {% endfor %}
+    </tbody>
+</table>
+
+{% endblock %}

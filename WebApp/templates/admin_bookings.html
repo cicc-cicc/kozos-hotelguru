@@ -8,7 +8,7 @@
     <div>
         <a href="{{ url_for('admin.admin_bookings') }}" class="btn btn-primary">Frissít</a>
         <a href="{{ url_for('admin.admin_users') }}" class="btn" style="margin-left:8px">Felhasználók</a>
-        <a href="{{ url_for('admin.admin_permissions') }}" class="btn" style="margin-left:8px">Jogosultságok</a>
+        <a href="{{ url_for('admin.admin_services') }}" class="btn" style="margin-left:8px">Szolgáltatások</a>
     </div>
 </div>
 
@@ -41,6 +41,13 @@
                     {{ forms[b.id].hidden_tag() }}
                     {{ forms[b.id].action(class='form-control', style='display:inline-block; width:auto') }}
                     {{ forms[b.id].submit(class='btn btn-primary', style='margin-left:6px') }}
+                </form>
+                <!-- Inline service add form -->
+                <form method="POST" action="{{ url_for('admin.booking_add_service', booking_id=b.id) }}" style="display:inline; margin-left:8px">
+                    {{ service_forms[b.id].hidden_tag() }}
+                    {{ service_forms[b.id].service_id(class='form-control', style='display:inline-block; width:160px') }}
+                    {{ service_forms[b.id].quantity(class='form-control', style='display:inline-block; width:80px; margin-left:6px') }}
+                    {{ service_forms[b.id].submit(class='btn btn-secondary', style='margin-left:6px') }}
                 </form>
             </td>
         </tr>

@@ -35,8 +35,14 @@
             </td>
             <td style="padding: 12px; text-align: center;">
                 {% if booking.status.value == 'pending' or booking.status.value == 'confirmed' %}
-                    <a href="{{ url_for('guest.order_service', booking_id=booking.id) }}" class="btn" style="background: #27ae60; color: white; padding: 5px 10px; text-decoration: none; font-size: 0.9em; margin-right: 5px;">Szolgáltatás</a>
-                    <a href="{{ url_for('guest.cancel_booking', booking_id=booking.id) }}" class="btn" style="background: #e74c3c; color: white; padding: 5px 10px; text-decoration: none; font-size: 0.9em;">Lemondás</a>
+                    <!-- Inline guest service order form -->
+                    <form method="POST" action="{{ url_for('guest.order_service', booking_id=booking.id) }}" style="display:inline-block;">
+                        {{ service_forms[booking.id].hidden_tag() }}
+                        {{ service_forms[booking.id].service_id(class='form-control', style='display:inline-block; width:160px') }}
+                        {{ service_forms[booking.id].quantity(class='form-control', style='display:inline-block; width:80px; margin-left:6px') }}
+                        {{ service_forms[booking.id].submit(class='btn btn-secondary', style='margin-left:6px') }}
+                    </form>
+                    <a href="{{ url_for('guest.cancel_booking', booking_id=booking.id) }}" class="btn" style="background: #e74c3c; color: white; padding: 5px 10px; text-decoration: none; font-size: 0.9em; margin-left:6px">Lemondás</a>
                 {% endif %}
             </td>
         </tr>

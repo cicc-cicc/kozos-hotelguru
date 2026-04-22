@@ -29,6 +29,13 @@
             <td>{{ b.status.value if b.status else '—' }}</td>
             <td>
                 {% if b.status and b.status.value != 'cancelled' %}
+                    <!-- Inline service order for guest -->
+                    <form method="POST" action="{{ url_for('guest.order_service', booking_id=b.id) }}" style="display:inline-block;">
+                        {{ service_forms[b.id].hidden_tag() }}
+                        {{ service_forms[b.id].service_id(class='form-control', style='display:inline-block; width:160px') }}
+                        {{ service_forms[b.id].quantity(class='form-control', style='display:inline-block; width:80px; margin-left:6px') }}
+                        {{ service_forms[b.id].submit(class='btn btn-secondary', style='margin-left:6px') }}
+                    </form>
                     <a href="{{ url_for('guest.edit_booking', booking_id=b.id) }}">Szerkeszt</a> |
                     <a href="{{ url_for('guest.cancel_booking', booking_id=b.id) }}">Lemondás</a>
                 {% else %}

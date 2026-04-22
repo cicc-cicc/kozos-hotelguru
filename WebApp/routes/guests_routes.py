@@ -207,7 +207,14 @@ def my_bookings():
         .order_by(Booking.created_at.desc())
         .all()
     )
-    return render_template("my_bookings.html", bookings=bookings)
+    # Prepare per-booking service order forms so guests can add services inline
+    service_forms = {}
+    for b in bookings:
+        form = GuestServiceOrderForm()
+        form.booking_id.data = b.id
+        service_forms[b.id] = form
+
+    return render_template("my_bookings.html", bookings=bookings, service_forms=service_forms)
 
 
 @guest_bp.route("/booking/<int:booking_id>/cancel", methods=["GET", "POST"])
