@@ -38,7 +38,15 @@ class ServiceDeleteForm(FlaskForm):
 
 
 class UserRoleForm(FlaskForm):
-    role = SelectField("Szerepkör", choices=[('guest','guest'), ('receptionist','receptionist'), ('admin','admin')], validators=[DataRequired()])
+    role = SelectField(
+        "Szerepkör",
+        choices=[
+            ("guest", "guest"),
+            ("receptionist", "receptionist"),
+            ("admin", "admin"),
+        ],
+        validators=[DataRequired()],
+    )
     submit = SubmitField("Mentés")
 
 
@@ -51,8 +59,10 @@ class PermissionForm(FlaskForm):
 class AdminServiceForm(FlaskForm):
     booking_id = SelectField("Foglalás", coerce=int, validators=[DataRequired()])
     service_id = SelectField("Szolgáltatás", coerce=int, validators=[DataRequired()])
-    quantity = IntegerField("Mennyiség", default=1, validators=[DataRequired(), NumberRange(min=1)])
-    submit = SubmitField("Hozzáad");
+    quantity = IntegerField(
+        "Mennyiség", default=1, validators=[DataRequired(), NumberRange(min=1)]
+    )
+    submit = SubmitField("Hozzáad")
 
 
 class AdminCreateServiceForm(FlaskForm):
@@ -65,11 +75,16 @@ class AdminCreateServiceForm(FlaskForm):
 class BookingServiceAddForm(FlaskForm):
     booking_id = HiddenField("Foglalás", validators=[DataRequired()])
     service_id = SelectField("Szolgáltatás", coerce=int, validators=[DataRequired()])
-    quantity = IntegerField("Mennyiség", default=1, validators=[DataRequired(), NumberRange(min=1)])
+    quantity = IntegerField(
+        "Mennyiség", default=1, validators=[DataRequired(), NumberRange(min=1)]
+    )
     submit = SubmitField("Hozzáad")
 
     def __init__(self, *args, **kwargs):
         super(BookingServiceAddForm, self).__init__(*args, **kwargs)
         from ..models import ExtraService
+
         services = ExtraService.query.order_by(ExtraService.name).all()
-        self.service_id.choices = [(s.id, f"{s.name} ({int(s.price)} Ft)") for s in services]
+        self.service_id.choices = [
+            (s.id, f"{s.name} ({int(s.price)} Ft)") for s in services
+        ]
