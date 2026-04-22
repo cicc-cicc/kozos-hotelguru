@@ -45,6 +45,32 @@ class User(db.Model, UserMixin):
     def __repr__(self):
         return f"<User id={self.id} username={self.username} role={self.role.value}>"
 
+    def has_permission(self, permission_name: str) -> bool:
+        """Helper: basic permission check using role enum name or DB-driven RolePermission if present.
+
+        This keeps backward compatibility with enum-based role checks while
+        allowing DB-backed permissions (RolePermission) to be queried if the
+        table exists.
+        """
+        # First, quick enum-based mapping (keeps compatibility with utils/rbac defaults)
+        try:
+            from .utils.rbac import ROLE_PERMISSIONS
+
+            role_perms = ROLE_PERMISSIONS.get(self.role.name, set())
+            if permission_name in role_perms:
+                return True
+        except Exception:
+            pass
+
+        # Fallback: if RolePermission table exists, consult it
+        try:
+            rp = db.session.execute(
+                db.select(RolePermission).filter_by(role_name=self.role.name, permission=permission_name)
+            ).scalar_one_or_none()
+            return rp is not None
+        except Exception:
+            return False
+
 
 class Room(db.Model):
     __tablename__ = "rooms"
@@ -115,6 +141,8 @@ class Booking(db.Model):
     room_id = db.Column(db.Integer, db.ForeignKey("rooms.id"), nullable=False)
     check_in = db.Column(db.DateTime, nullable=False)
     check_out = db.Column(db.DateTime, nullable=False)
+    check_in_time = db.Column(db.DateTime, nullable=True)
+    check_out_time = db.Column(db.DateTime, nullable=True)
     guests_count = db.Column(db.Integer, nullable=False, default=1)
     status = db.Column(
         db.Enum(BookingStatus), nullable=False, default=BookingStatus.pending
@@ -165,9 +193,11 @@ class Booking(db.Model):
 
     def check_in_action(self):
         self.status = BookingStatus.checked_in
+        self.check_in_time = datetime.utcnow()
 
     def check_out_action(self):
         self.status = BookingStatus.checked_out
+        self.check_out_time = datetime.utcnow()
 
     @classmethod
     def has_conflict(
@@ -253,3 +283,39 @@ class Invoice(db.Model):
             + f"{self.id} booking_id={self.booking_id} "
             + f"total={self.total_amount} paid={self.paid}>"
         )
+
+
+class Permission(db.Model):
+    __tablename__ = "permissions"
+
+    id = db.Column(db.Integer, primary_key=True)
+    name = db.Column(db.String(120), unique=True, nullable=False)
+    description = db.Column(db.Text, nullable=True)
+
+    def __repr__(self):
+        return f"<Permission id={self.id} name={self.name}>"
+
+
+class RolePermission(db.Model):
+    __tablename__ = "role_permissions"
+
+    id = db.Column(db.Integer, primary_key=True)
+    role_name = db.Column(db.String(80), nullable=False)
+    permission = db.Column(db.String(120), nullable=False)
+
+    def __repr__(self):
+        return f"<RolePermission id={self.id} role={self.role_name} perm={self.permission}>"
+
+
+class AuditLog(db.Model):
+    __tablename__ = "audit_logs"
+
+    id = db.Column(db.Integer, primary_key=True)
+    user_id = db.Column(db.Integer, nullable=True)
+    booking_id = db.Column(db.Integer, nullable=True)
+    action = db.Column(db.String(120), nullable=False)
+    details = db.Column(db.Text, nullable=True)
+    created_at = db.Column(db.DateTime, nullable=False, default=datetime.utcnow)
+
+    def __repr__(self):
+        return f"<AuditLog id={self.id} user_id={self.user_id} action={self.action} at={self.created_at}>"

@@ -1,18 +1,102 @@
+from datetime import datetime
+
+from flask_login import current_user
+
 from .. import db
-from ..models import Booking, BookingStatus, BookingService, ExtraService
+from ..models import (
+    Booking,
+    BookingStatus,
+    BookingService,
+    ExtraService,
+    Room,
+    RoomStatus,
+    AuditLog,
+)
 
 
 def perform_booking_action(booking: Booking, action: str):
     if action == "confirm":
         booking.confirm()
+        # Audit
+        try:
+            user_id = getattr(current_user, "id", None)
+            db.session.add(
+                AuditLog(
+                    user_id=user_id,
+                    booking_id=booking.id,
+                    action="confirm",
+                    details=f"Confirmed booking {booking.id} by user {user_id}",
+                    created_at=datetime.utcnow(),
+                )
+            )
+        except Exception:
+            pass
     elif action == "check_in":
         booking.check_in_action()
+        # Mark room occupied when guest checks in
+        try:
+            room = booking.room
+            if room:
+                room.status = RoomStatus.occupied
+                db.session.add(room)
+        except Exception:
+            pass
+        # Audit
+        try:
+            user_id = getattr(current_user, "id", None)
+            db.session.add(
+                AuditLog(
+                    user_id=user_id,
+                    booking_id=booking.id,
+                    action="check_in",
+                    details=f"Checked in booking {booking.id} by user {user_id}",
+                    created_at=datetime.utcnow(),
+                )
+            )
+        except Exception:
+            pass
     elif action == "check_out":
         booking.check_out_action()
+        # Mark invoice paid and room available
         if booking.invoice:
             booking.invoice.paid = True
+        try:
+            room = booking.room
+            if room:
+                room.status = RoomStatus.available
+                db.session.add(room)
+        except Exception:
+            pass
+        # Audit
+        try:
+            user_id = getattr(current_user, "id", None)
+            db.session.add(
+                AuditLog(
+                    user_id=user_id,
+                    booking_id=booking.id,
+                    action="check_out",
+                    details=f"Checked out booking {booking.id} by user {user_id}",
+                    created_at=datetime.utcnow(),
+                )
+            )
+        except Exception:
+            pass
     elif action == "cancel":
         booking.cancel()
+        # Audit
+        try:
+            user_id = getattr(current_user, "id", None)
+            db.session.add(
+                AuditLog(
+                    user_id=user_id,
+                    booking_id=booking.id,
+                    action="cancel",
+                    details=f"Cancelled booking {booking.id} by user {user_id}",
+                    created_at=datetime.utcnow(),
+                )
+            )
+        except Exception:
+            pass
     else:
         raise ValueError("Ismeretlen művelet.")
 

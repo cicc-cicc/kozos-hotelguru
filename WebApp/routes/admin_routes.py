@@ -1,9 +1,10 @@
 from flask import Blueprint, render_template, redirect, url_for, flash, request, abort
 from flask_login import login_required, current_user
-from functools import wraps
+from ..utils.rbac import roles_required
 
 from .. import db
-from ..models import Room, Role, Booking
+from ..models import Room, Role, Booking, User, Permission, RolePermission, BookingStatus
+from ..services.reception_service import perform_booking_action
 from ..forms.admin_forms import RoomForm, RoomDeleteForm
 from ..forms.reception_forms import BookingActionForm
 from ..services.admin_service import (
@@ -12,21 +13,12 @@ from ..services.admin_service import (
     delete_room as service_delete_room,
 )
 from flask import current_app
+from ..forms.admin_forms import UserRoleForm, PermissionForm
 
 admin_bp = Blueprint("admin", __name__)
 
 
-# --- BIZTONSÁGI DEKORÁTOR ---
-def admin_required(f):
-    """Kizárólag adminisztrátorok engedélyezése"""
-
-    @wraps(f)
-    def decorated_function(*args, **kwargs):
-        if not current_user.is_authenticated or current_user.role != Role.admin:
-            abort(403)  # 403 Forbidden hiba
-        return f(*args, **kwargs)
-
-    return decorated_function
+# Use centralized `roles_required` decorator for admin-only routes
 
 
 # --- ÚTVONALAK ---
@@ -34,7 +26,7 @@ def admin_required(f):
 
 @admin_bp.route("/dashboard")
 @login_required
-@admin_required
+@roles_required(Role.admin)
 def admin_dashboard():
     """Az összes szoba listázása állapotokkal"""
     # A szobákat szobaszám szerint sorba rendezve kérjük le
@@ -44,7 +36,7 @@ def admin_dashboard():
 
 @admin_bp.route("/room/add", methods=["GET", "POST"])
 @login_required
-@admin_required
+@roles_required(Role.admin)
 def add_room():
     """Új szoba felvétele az adatbázisba"""
     form = RoomForm()
@@ -64,7 +56,7 @@ def add_room():
 
 @admin_bp.route("/room/<int:room_id>/edit", methods=["GET", "POST"])
 @login_required
-@admin_required
+@roles_required(Role.admin)
 def edit_room(room_id):
     """Meglévő szoba adatainak szerkesztése"""
     room = Room.query.get_or_404(room_id)
@@ -97,7 +89,7 @@ def edit_room(room_id):
 
 @admin_bp.route("/room/<int:room_id>/delete", methods=["GET", "POST"])
 @login_required
-@admin_required
+@roles_required(Role.admin)
 def delete_room(room_id):
     """Szoba végleges törlése"""
     room = Room.query.get_or_404(room_id)
@@ -126,10 +118,12 @@ def delete_room(room_id):
 
 @admin_bp.route("/bookings")
 @login_required
-@admin_required
+@roles_required(Role.admin)
 def admin_bookings():
     """Listázza az összes foglalást az admin számára és biztosít művelet végrehajtást."""
-    bookings = Booking.query.order_by(Booking.created_at.desc()).all()
+    # Hide cancelled and checked-out bookings from admin listing as well
+    excluded = [BookingStatus.cancelled, BookingStatus.checked_out]
+    bookings = Booking.query.filter(~Booking.status.in_(excluded)).order_by(Booking.created_at.desc()).all()
 
     # Készítsünk külön BookingActionForm példányt minden foglaláshoz,
     # hogy a sablon egyszerűen renderelhesse őket (és legyen CSRF tokenjük).
@@ -140,9 +134,59 @@ def admin_bookings():
     return render_template("admin_bookings.html", bookings=bookings, forms=forms)
 
 
+@admin_bp.route("/users")
+@login_required
+@roles_required(Role.admin)
+def admin_users():
+    users = User.query.order_by(User.username).all()
+    return render_template("admin_users.html", users=users)
+
+
+@admin_bp.route("/user/<int:user_id>/edit-role", methods=["GET", "POST"])
+@login_required
+@roles_required(Role.admin)
+def edit_user_role(user_id):
+    user = User.query.get_or_404(user_id)
+    form = UserRoleForm()
+    if form.validate_on_submit():
+        try:
+            user.role = Role[form.role.data]
+            db.session.commit()
+            flash("Szerepkör frissítve.", "success")
+            return redirect(url_for("admin.admin_users"))
+        except Exception as e:
+            db.session.rollback()
+            flash(f"Hiba a szerepkör mentésekor: {e}", "danger")
+
+    elif request.method == "GET":
+        form.role.data = user.role.name
+
+    return render_template("admin_edit_user.html", user=user, form=form)
+
+
+@admin_bp.route("/permissions", methods=["GET", "POST"])
+@login_required
+@roles_required(Role.admin)
+def admin_permissions():
+    form = PermissionForm()
+    if form.validate_on_submit():
+        perm = Permission(name=form.name.data, description=form.description.data)
+        db.session.add(perm)
+        try:
+            db.session.commit()
+            flash("Permission hozzáadva.", "success")
+            return redirect(url_for("admin.admin_permissions"))
+        except Exception as e:
+            db.session.rollback()
+            flash(f"Hiba: {e}", "danger")
+
+    perms = Permission.query.order_by(Permission.name).all()
+    return render_template("admin_permissions.html", perms=perms, form=form)
+
+
 @admin_bp.route("/booking/<int:booking_id>/action", methods=["POST"])
 @login_required
-@admin_required
+@roles_required(Role.admin)
 def booking_action(booking_id):
     form = BookingActionForm()
     if not form.validate_on_submit():
@@ -151,25 +195,27 @@ def booking_action(booking_id):
 
     booking = Booking.query.get_or_404(booking_id)
     action = form.action.data
+    # Disallow acting on already-closed bookings
+    from ..models import BookingStatus as _BookingStatus
+
+    if booking.status in (_BookingStatus.cancelled, _BookingStatus.checked_out):
+        flash("Ezen a foglaláson nem végezhető művelet (lezárt vagy lemondott).", "warning")
+        return redirect(url_for("admin.admin_bookings"))
+
     try:
+        # Use same service to ensure consistent side-effects (room status, invoice, audit)
+        perform_booking_action(booking, action)
+        # user feedback
         if action == "confirm":
-            booking.confirm()
-            db.session.commit()
             flash("Foglalás visszaigazolva.", "success")
         elif action == "cancel":
-            booking.cancel()
-            db.session.commit()
             flash("Foglalás lemondva.", "info")
         elif action == "check_in":
-            booking.check_in_action()
-            db.session.commit()
             flash("Vendég bejelentkezett.", "success")
         elif action == "check_out":
-            booking.check_out_action()
-            db.session.commit()
             flash("Vendég kijelentkeztetve.", "success")
         else:
-            flash("Ismeretlen művelet.", "warning")
+            flash("Művelet végrehajtva.", "success")
     except Exception as e:
         current_app.logger.exception("Admin booking action failed")
         flash(f"Hiba a művelet során: {e}", "danger")

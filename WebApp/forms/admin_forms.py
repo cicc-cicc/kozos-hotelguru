@@ -30,3 +30,14 @@ class RoomForm(FlaskForm):
 class RoomDeleteForm(FlaskForm):
     # megerősítést kér a szoba törléséhez
     submit = SubmitField("Végleges törlés")
+
+
+class UserRoleForm(FlaskForm):
+    role = SelectField("Szerepkör", choices=[('guest','guest'), ('receptionist','receptionist'), ('admin','admin')], validators=[DataRequired()])
+    submit = SubmitField("Mentés")
+
+
+class PermissionForm(FlaskForm):
+    name = StringField("Permission név", validators=[DataRequired()])
+    description = TextAreaField("Leírás")
+    submit = SubmitField("Mentés")

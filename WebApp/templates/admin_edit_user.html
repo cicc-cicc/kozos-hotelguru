@@ -1,0 +1,15 @@
+{% extends "base.html" %}
+
+{% block title %}Szerepkör szerkesztése - {{ user.username }}{% endblock %}
+
+{% block content %}
+<h1>Szerepkör szerkesztése: {{ user.username }}</h1>
+<form method="POST">
+    {{ form.hidden_tag() }}
+    <div class="form-group">
+        {{ form.role.label }}
+        {{ form.role(class='form-control') }}
+    </div>
+    {{ form.submit(class='btn btn-primary') }}
+</form>
+{% endblock %}

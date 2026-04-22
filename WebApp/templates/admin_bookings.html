@@ -3,7 +3,14 @@
 {% block title %}Foglalások - Admin{% endblock %}
 
 {% block content %}
-<h1>Foglalások kezelése</h1>
+<div style="display:flex; justify-content:space-between; align-items:center;">
+    <h1>Foglalások kezelése</h1>
+    <div>
+        <a href="{{ url_for('admin.admin_bookings') }}" class="btn btn-primary">Frissít</a>
+        <a href="{{ url_for('admin.admin_users') }}" class="btn" style="margin-left:8px">Felhasználók</a>
+        <a href="{{ url_for('admin.admin_permissions') }}" class="btn" style="margin-left:8px">Jogosultságok</a>
+    </div>
+</div>
 
 {% if bookings %}
 <table style="width:100%; border-collapse:collapse">
@@ -35,7 +42,6 @@
                     {{ forms[b.id].action(class='form-control', style='display:inline-block; width:auto') }}
                     {{ forms[b.id].submit(class='btn btn-primary', style='margin-left:6px') }}
                 </form>
-                <a href="{{ url_for('admin.admin_bookings') }}" style="margin-left:8px">Frissít</a>
             </td>
         </tr>
     {% endfor %}
