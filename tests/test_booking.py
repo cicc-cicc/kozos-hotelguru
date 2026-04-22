@@ -10,6 +10,10 @@ def test_booking_flow():
     app.config["TESTING"] = True
 
     with app.app_context():
+        # Ensure a clean schema for the test run
+        db.drop_all()
+        db.create_all()
+
         # ensure test user
         user = User.query.filter_by(username="test_robot").first()
         if not user:

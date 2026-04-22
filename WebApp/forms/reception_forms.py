@@ -6,7 +6,10 @@ from ..models import ExtraService  # Importáljuk a modellt a dinamikus lekérde
 
 class BookingActionForm(FlaskForm):
     # foglalások kezelése
-    booking_id = HiddenField("Booking ID", validators=[DataRequired()])
+    # booking_id is provided in the URL and via hidden input in the template.
+    # Make it optional for validation to avoid issues when rendering multiple
+    # forms on the same page (each form creates identical field names).
+    booking_id = HiddenField("Booking ID")
 
     # recepciós kiválaszthatja a műveletet
     action = SelectField(

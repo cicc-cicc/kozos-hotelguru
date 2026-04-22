@@ -49,8 +49,20 @@
                         <form method="POST" action="{{ url_for('reception.handle_booking', booking_id=booking.id) }}" style="display: inline-block; margin-right: 5px;">
                             {{ action_form.hidden_tag() }}
                             {{ action_form.booking_id(value=booking.id) }}
-                            {{ action_form.action(style="padding: 5px;") }}
-                            {{ action_form.submit(class="btn", style="background: #2980b9; color: white; padding: 6px 12px;") }}
+                            <select name="action" style="padding:5px;">
+                                {% if booking.status.value == 'pending' %}
+                                    <option value="confirm">Visszaigazolás (Confirm)</option>
+                                    <option value="cancel">Foglalás lemondása</option>
+                                {% elif booking.status.value == 'confirmed' %}
+                                    <option value="check_in">Bejelentkeztetés (Check-in)</option>
+                                    <option value="cancel">Foglalás lemondása</option>
+                                {% elif booking.status.value == 'checked_in' %}
+                                    <option value="check_out">Kijelentkeztetés és Számlázás (Check-out)</option>
+                                {% else %}
+                                    <option value="">-- Művelet --</option>
+                                {% endif %}
+                            </select>
+                            <button type="submit" class="btn" style="background: #2980b9; color: white; padding: 6px 12px;">Végrehajtás</button>
                         </form>
                         <a href="{{ url_for('reception.add_extra_service', booking_id=booking.id) }}" class="btn" style="background: #27ae60; color: white; padding: 6px 12px; text-decoration: none;">+ Szolgáltatás</a>
                     {% else %}

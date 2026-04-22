@@ -40,7 +40,10 @@ jobs:
 
     - name: Run linters (pre-commit)
       run: |
-        pre-commit run --all-files
+        # Use python -m pre_commit to avoid PATH issues on runners
+        python -m pre_commit --version || true
+        which pre-commit || true
+        python -m pre_commit run --all-files
 
     - name: Run tests
       run: |

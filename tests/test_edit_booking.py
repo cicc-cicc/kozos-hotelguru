@@ -2,7 +2,9 @@ from datetime import timedelta
 import re
 
 from WebApp import create_app
-from WebApp.models import User, Booking
+from WebApp import db
+from WebApp.models import User, Booking, Room
+from datetime import datetime
 
 
 def test_edit_booking_flow():
@@ -10,17 +12,48 @@ def test_edit_booking_flow():
     app.config["TESTING"] = True
 
     with app.app_context():
-        user = User.query.filter_by(username="test_robot").first()
-        assert user is not None, "Run test_booking first to create test data"
+        # Ensure tables exist
+        db.create_all()
 
+        # Create or get test user
+        user = User.query.filter_by(username="test_robot").first()
+        if not user:
+            user = User(
+                username="test_robot", email="test_robot@example.com", password_hash="x"
+            )
+            db.session.add(user)
+            db.session.commit()
+
+        # Ensure there's at least one room
+        room = Room.query.filter_by(room_number="T100").first()
+        if not room:
+            room = Room(
+                room_number="T100",
+                capacity=2,
+                price_per_night=5000.0,
+                description="Test room",
+            )
+            db.session.add(room)
+            db.session.commit()
+
+        # Create a booking if none exists for the user
         booking = (
             Booking.query.filter_by(user_id=user.id)
             .order_by(Booking.created_at.desc())
             .first()
         )
-        assert (
-            booking is not None
-        ), "No booking found for test_robot; run tests in order or create booking first"
+        if not booking:
+            arrival = datetime.utcnow().date()
+            departure = arrival + timedelta(days=1)
+            booking = Booking(
+                user_id=user.id,
+                room_id=room.id,
+                check_in=datetime.combine(arrival, datetime.min.time()),
+                check_out=datetime.combine(departure, datetime.min.time()),
+                guests=1,
+            )
+            db.session.add(booking)
+            db.session.commit()
 
         client = app.test_client()
 

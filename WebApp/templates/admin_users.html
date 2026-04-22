@@ -1,0 +1,22 @@
+{% extends "base.html" %}
+
+{% block title %}Felhasználók - Admin{% endblock %}
+
+{% block content %}
+<h1>Felhasználók</h1>
+<table class="table">
+    <thead>
+        <tr><th>Felhasználó</th><th>Email</th><th>Szerepkör</th><th>Műveletek</th></tr>
+    </thead>
+    <tbody>
+    {% for u in users %}
+        <tr>
+            <td>{{ u.username }}</td>
+            <td>{{ u.email }}</td>
+            <td>{{ u.role.name }}</td>
+            <td><a href="{{ url_for('admin.edit_user_role', user_id=u.id) }}">Szerkeszt</a></td>
+        </tr>
+    {% endfor %}
+    </tbody>
+</table>
+{% endblock %}

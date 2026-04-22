@@ -207,7 +207,16 @@ def my_bookings():
         .order_by(Booking.created_at.desc())
         .all()
     )
-    return render_template("my_bookings.html", bookings=bookings)
+    # Prepare per-booking service order forms so guests can add services inline
+    service_forms = {}
+    for b in bookings:
+        form = GuestServiceOrderForm()
+        form.booking_id.data = b.id
+        service_forms[b.id] = form
+
+    return render_template(
+        "my_bookings.html", bookings=bookings, service_forms=service_forms
+    )
 
 
 @guest_bp.route("/booking/<int:booking_id>/cancel", methods=["GET", "POST"])
@@ -222,9 +231,14 @@ def cancel_booking(booking_id):
 
     form = BookingCancelForm()
     if form.validate_on_submit() and form.confirm.data:
-        booking.cancel()
-        db.session.commit()
-        flash("A foglalás sikeresen le lett mondva.", "info")
+        # Delete booking entirely so it disappears from all dashboards
+        try:
+            db.session.delete(booking)
+            db.session.commit()
+            flash("A foglalás sikeresen törölve.", "info")
+        except Exception:
+            db.session.rollback()
+            flash("Hiba történt a foglalás törlése során.", "danger")
         return redirect(url_for("guest.my_bookings"))
 
     return render_template("cancel_booking.html", form=form, booking=booking)
