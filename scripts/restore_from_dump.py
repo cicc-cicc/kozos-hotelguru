@@ -10,14 +10,25 @@ if ROOT not in sys.path:
     sys.path.insert(0, ROOT)
 
 from WebApp import create_app, db
-from WebApp.models import User, Room, Booking, ExtraService, BookingService, Invoice, BookingStatus
+from WebApp.models import (
+    User,
+    Room,
+    Booking,
+    ExtraService,
+    BookingStatus,
+)
 
 app = create_app()
 
-BACKUP_DIR = os.path.join(ROOT, 'backups')
+BACKUP_DIR = os.path.join(ROOT, "backups")
+
 
 def find_latest_dump():
-    dumps = [f for f in os.listdir(BACKUP_DIR) if f.startswith('db-dump-') and f.endswith('.json.gz')]
+    dumps = [
+        f
+        for f in os.listdir(BACKUP_DIR)
+        if f.startswith("db-dump-") and f.endswith(".json.gz")
+    ]
     if not dumps:
         return None
     dumps.sort()
@@ -37,27 +48,27 @@ def parse_dt(s):
 
 
 def upsert_from_dump(path):
-    with gzip.open(path, 'rt', encoding='utf-8') as f:
+    with gzip.open(path, "rt", encoding="utf-8") as f:
         data = json.load(f)
 
     with app.app_context():
         # Users
-        for u in data.get('users', []):
-            existing = User.query.filter_by(username=u.get('username')).first()
+        for u in data.get("users", []):
+            existing = User.query.filter_by(username=u.get("username")).first()
             if existing:
                 continue
             new = User(
-                username=u.get('username'),
-                email=u.get('email') or f"{u.get('username')}@example.local",
+                username=u.get("username"),
+                email=u.get("email") or f"{u.get('username')}@example.local",
                 password_hash=None,
-                phone=u.get('phone'),
-                address=u.get('address'),
+                phone=u.get("phone"),
+                address=u.get("address"),
             )
             # Role handling
             try:
                 from WebApp.models import Role
 
-                new.role = Role[u.get('role')]
+                new.role = Role[u.get("role")]
             except Exception:
                 pass
             db.session.add(new)
@@ -65,28 +76,32 @@ def upsert_from_dump(path):
 
         # Extra services
         svc_map = {}
-        for s in data.get('extraservices', []):
-            existing = ExtraService.query.filter_by(name=s.get('name')).first()
+        for s in data.get("extraservices", []):
+            existing = ExtraService.query.filter_by(name=s.get("name")).first()
             if existing:
                 svc_map[existing.name] = existing
                 continue
-            svc = ExtraService(name=s.get('name'), price=s.get('price') or 0.0, description=s.get('description'))
+            svc = ExtraService(
+                name=s.get("name"),
+                price=s.get("price") or 0.0,
+                description=s.get("description"),
+            )
             db.session.add(svc)
             db.session.flush()
             svc_map[svc.name] = svc
 
         # Rooms
         room_map = {}
-        for r in data.get('rooms', []):
-            existing = Room.query.filter_by(room_number=r.get('room_number')).first()
+        for r in data.get("rooms", []):
+            existing = Room.query.filter_by(room_number=r.get("room_number")).first()
             if existing:
                 room_map[existing.room_number] = existing
                 continue
             room = Room(
-                room_number=r.get('room_number'),
-                capacity=r.get('capacity') or 1,
-                price_per_night=r.get('price_per_night') or 0.0,
-                description=r.get('description'),
+                room_number=r.get("room_number"),
+                capacity=r.get("capacity") or 1,
+                price_per_night=r.get("price_per_night") or 0.0,
+                description=r.get("description"),
             )
             db.session.add(room)
             db.session.flush()
@@ -95,18 +110,20 @@ def upsert_from_dump(path):
         db.session.flush()
 
         # Bookings
-        for b in data.get('bookings', []):
+        for b in data.get("bookings", []):
             # avoid duplicates using a heuristic: user+room+check_in
-            user = User.query.filter_by(username=b.get('username')).first()
-            room = Room.query.filter_by(room_number=b.get('room_number')).first()
+            user = User.query.filter_by(username=b.get("username")).first()
+            room = Room.query.filter_by(room_number=b.get("room_number")).first()
             if not user or not room:
                 continue
-            check_in = parse_dt(b.get('check_in'))
-            check_out = parse_dt(b.get('check_out'))
-            exists = Booking.query.filter_by(user_id=user.id, room_id=room.id, check_in=check_in).first()
+            check_in = parse_dt(b.get("check_in"))
+            check_out = parse_dt(b.get("check_out"))
+            exists = Booking.query.filter_by(
+                user_id=user.id, room_id=room.id, check_in=check_in
+            ).first()
             if exists:
                 continue
-            status = b.get('status')
+            status = b.get("status")
             try:
                 status_enum = BookingStatus[status]
             except Exception:
@@ -117,7 +134,7 @@ def upsert_from_dump(path):
                 check_in=check_in,
                 check_out=check_out,
                 status=status_enum,
-                total_price=b.get('total_price'),
+                total_price=b.get("total_price"),
             )
             db.session.add(booking)
             db.session.flush()
@@ -125,17 +142,17 @@ def upsert_from_dump(path):
             # booking services and invoice handled if present in dump items listings
         try:
             db.session.commit()
-            print('Restore committed successfully')
+            print("Restore committed successfully")
         except Exception as e:
             db.session.rollback()
-            print('Restore failed:', e)
+            print("Restore failed:", e)
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     dump = find_latest_dump()
     if not dump:
-        print('No dump files found in', BACKUP_DIR)
+        print("No dump files found in", BACKUP_DIR)
         sys.exit(1)
-    print('Restoring from', dump)
+    print("Restoring from", dump)
     upsert_from_dump(dump)
-    print('Done')
+    print("Done")

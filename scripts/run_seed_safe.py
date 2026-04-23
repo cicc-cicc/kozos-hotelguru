@@ -12,11 +12,14 @@ sys.argv = ["seed.py", "--force", "--no-backup"]
 
 # Monkeypatch input() so seed's interactive confirmation receives CONFIRM
 import builtins
+
 builtins_input = builtins.input
+
 
 def fake_input(prompt=""):
     print(prompt, end="")
     return "CONFIRM"
+
 
 builtins.input = fake_input
 

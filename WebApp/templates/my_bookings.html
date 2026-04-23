@@ -25,7 +25,11 @@
             <td>{{ b.room.room_number if b.room else b.room_id }}</td>
             <td>{{ b.check_in.strftime('%Y-%m-%d') }}</td>
             <td>{{ b.check_out.strftime('%Y-%m-%d') }}</td>
+            {% if b.total_price is not none %}
             <td>{{ "{:,.0f}".format(b.total_price).replace(',', ' ') }} Ft</td>
+            {% else %}
+            <td>-</td>
+            {% endif %}
             <td>{{ b.status.value if b.status else '—' }}</td>
             <td>
                 {% if b.status and b.status.value != 'cancelled' %}
