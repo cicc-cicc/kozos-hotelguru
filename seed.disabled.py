@@ -7,6 +7,5 @@ instructions in DANGEROUS-SCRIPTS.md. Prefer running seed only on a local
 or test database, and always create a pre-seed backup.
 """
 
-from datetime import datetime
 
 # Original seed content has been archived. See DANGEROUS-SCRIPTS.md

@@ -87,7 +87,9 @@ def upsert_from_json(app, json_path):
             if svc:
                 services_map[svc.name] = svc
                 continue
-            svc = ExtraService(name=name, description=s.get("description"), price=s.get("price", 0.0))
+            svc = ExtraService(
+                name=name, description=s.get("description"), price=s.get("price", 0.0)
+            )
             db.session.add(svc)
             db.session.flush()
             services_map[svc.name] = svc
@@ -107,7 +109,9 @@ def upsert_from_json(app, json_path):
 
             if existing:
                 existing.capacity = r.get("capacity", existing.capacity)
-                existing.price_per_night = r.get("price_per_night", existing.price_per_night)
+                existing.price_per_night = r.get(
+                    "price_per_night", existing.price_per_night
+                )
                 existing.description = r.get("description", existing.description)
                 existing.status = status_enum
                 db.session.add(existing)
@@ -140,7 +144,9 @@ def upsert_from_json(app, json_path):
             if not check_in or not check_out:
                 continue
 
-            exists = Booking.query.filter_by(user_id=user.id, room_id=room.id, check_in=check_in).first()
+            exists = Booking.query.filter_by(
+                user_id=user.id, room_id=room.id, check_in=check_in
+            ).first()
             if exists:
                 continue
 
@@ -166,12 +172,18 @@ def upsert_from_json(app, json_path):
                 if not svc:
                     continue
                 qty = int(ex.get("quantity", 1))
-                bs = BookingService(booking_id=booking.id, service_id=svc.id, quantity=qty)
+                bs = BookingService(
+                    booking_id=booking.id, service_id=svc.id, quantity=qty
+                )
                 db.session.add(bs)
 
             inv_data = b.get("invoice")
             if inv_data:
-                invoice = Invoice(booking_id=booking.id, total_amount=inv_data.get("total_amount") or 0.0, paid=bool(inv_data.get("paid", False)))
+                invoice = Invoice(
+                    booking_id=booking.id,
+                    total_amount=inv_data.get("total_amount") or 0.0,
+                    paid=bool(inv_data.get("paid", False)),
+                )
                 db.session.add(invoice)
 
         try:
