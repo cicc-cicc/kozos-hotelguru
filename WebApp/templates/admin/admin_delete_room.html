@@ -1,0 +1,33 @@
+{% extends "base.html" %}
+
+{% block title %}Szoba törlése - HotelGuru{% endblock %}
+
+{% block content %}
+<div style="max-width: 500px; margin: 0 auto; text-align: center; background: white; padding: 40px; border-radius: 8px; box-shadow: 0 4px 10px rgba(0,0,0,0.1);">
+    <h1 style="color: #c0392b;">Veszélyes művelet!</h1>
+
+    <div class="alert alert-danger" style="margin: 20px 0; text-align: left; background-color: #f8d7da; color: #721c24; padding: 15px; border-radius: 4px; border: 1px solid #f5c6cb;">
+        <p>Biztosan törölni szeretné a(z) <strong>{{ room.room_number }}</strong> számú szobát?</p>
+        
+        {% if room.bookings and room.bookings|length > 0 %}
+            <p style="margin-top: 10px; font-weight: bold;">
+                FIGYELEM: Ehhez a szobához jelenleg <strong>{{ room.bookings|length }}</strong> foglalás kapcsolódik.
+            </p>
+        {% endif %}
+        
+        <p style="margin-top: 10px; font-size: 0.9em;">
+            <strong>FONTOS:</strong> A törlés visszavonhatatlan, és a rendszer automatikusan törölni fog minden kapcsolódó foglalást és számlát is!
+        </p>
+    </div>
+
+    <form method="POST">
+        {{ form.hidden_tag() }}
+        <div style="display: flex; justify-content: center; gap: 15px; margin-top: 30px;">
+            <a href="{{ url_for('admin.admin_dashboard') }}" class="btn" style="background: #95a5a6; color: white; text-decoration: none; padding: 10px 30px; border-radius: 4px;">Mégse, Vissza</a>
+            <button type="submit" class="btn" style="background: #c0392b; color: white; padding: 10px 30px; border: none; border-radius: 4px; cursor: pointer; font-weight: bold;">
+                Végleges törlés
+            </button>
+        </div>
+    </form>
+</div>
+{% endblock %}

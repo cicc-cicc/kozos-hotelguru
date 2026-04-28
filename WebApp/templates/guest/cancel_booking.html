@@ -1,0 +1,36 @@
+{% extends "base.html" %}
+
+{% block title %}Foglalás lemondása - HotelGuru{% endblock %}
+
+{% block content %}
+<div style="max-width: 500px; margin: 0 auto; text-align: center; background: white; padding: 40px; border-radius: 8px; box-shadow: 0 4px 10px rgba(0,0,0,0.1);">
+    <h1 style="color: #c0392b;">Foglalás lemondása</h1>
+    
+    <div class="alert alert-danger" style="margin: 20px 0; text-align: left; background-color: #f8d7da; color: #721c24; padding: 15px; border-radius: 4px; border: 1px solid #f5c6cb;">
+        <p>Biztosan le szeretné mondani a <strong>#{{ booking.id }}</strong> számú foglalását?</p>
+        <ul style="margin-top: 10px; padding-left: 20px; font-size: 0.95em;">
+            <li><strong>Szoba:</strong> {{ booking.room.room_number if booking.room else booking.room_id }}</li>
+            <li><strong>Érkezés:</strong> {{ booking.check_in.strftime('%Y-%m-%d') }}</li>
+            <li><strong>Távozás:</strong> {{ booking.check_out.strftime('%Y-%m-%d') }}</li>
+        </ul>
+    </div>
+
+    <form method="POST">
+        {{ form.hidden_tag() }}
+        
+        <div class="form-group" style="margin: 20px 0;">
+            <label style="cursor: pointer;">
+                {{ form.confirm() }} {{ form.confirm.label }}
+            </label>
+            {% for error in form.confirm.errors %}
+                <br><span style="color:red; font-size: 0.85em;">{{ error }}</span>
+            {% endfor %}
+        </div>
+
+        <div style="display: flex; justify-content: center; gap: 15px;">
+            {{ form.submit(class="btn", style="background: #c0392b; color: white; padding: 10px 30px; border: none; border-radius: 4px; cursor: pointer; font-weight: bold;") }}
+            <a href="{{ url_for('guest.my_bookings') }}" class="btn" style="background: #95a5a6; color: white; text-decoration: none; padding: 10px 30px; border-radius: 4px; display: inline-block;">Mégse</a>
+        </div>
+    </form>
+</div>
+{% endblock %}

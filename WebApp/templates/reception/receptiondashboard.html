@@ -3,6 +3,12 @@
 {% block title %}Recepciós Pult - HotelGuru{% endblock %}
 
 {% block content %}
+<style>
+    .text-paid { color: #27ae60; font-weight: bold; }
+    .text-unpaid { color: #e74c3c; font-weight: bold; }
+</style>
+
+
 <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
     <h1>Recepciós Pult - Foglalások kezelése</h1>
     <div>
@@ -37,9 +43,9 @@
                 <td style="padding: 12px;">
                     {% if booking.invoice %}
                         {{ "{:,.0f}".format(booking.invoice.total_amount) }} Ft<br>
-                        <span style="color: {{ 'green' if booking.invoice.paid else 'red' }}; font-weight: bold; font-size: 0.85em;">
-                            {{ "FIZETVE" if booking.invoice.paid else "NINCS FIZETVE" }}
-                        </span>
+                    <span class="{% if booking.invoice.paid %}text-paid{% else %}text-unpaid{% endif %}" style="font-size: 0.85em;">
+                        {% if booking.invoice.paid %}FIZETVE{% else %}NINCS FIZETVE{% endif %}
+                    </span>
                     {% else %}
                         -
                     {% endif %}

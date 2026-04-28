@@ -34,7 +34,8 @@ def register():
         flash("Sikeres regisztráció! Most már bejelentkezhet.", "success")
         return redirect(url_for("auth.login"))  # Ez jó volt eddig is
 
-    return render_template("register.html", form=form)
+    # (JAVÍTVA)
+    return render_template("auth/register.html", form=form)
 
 
 @auth_bp.route("/login", methods=["GET", "POST"])
@@ -63,7 +64,8 @@ def login():
                 "danger",
             )
 
-    return render_template("login.html", form=form)
+    # (JAVÍTVA)
+    return render_template("auth/login.html", form=form)
 
 
 @auth_bp.route("/logout")
@@ -94,4 +96,5 @@ def profile():
         form.phone.data = current_user.phone
         form.address.data = current_user.address
 
-    return render_template("profile.html", form=form)
+    # (JAVÍTVA)
+    return render_template("auth/profile.html", form=form)

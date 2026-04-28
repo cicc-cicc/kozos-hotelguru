@@ -1,0 +1,39 @@
+{% extends "base.html" %}
+
+{% block title %}Szolgáltatás rendelése - HotelGuru{% endblock %}
+
+{% block content %}
+<div style="max-width: 500px; margin: 0 auto; background: white; padding: 30px; border-radius: 8px; box-shadow: 0 2px 5px rgba(0,0,0,0.1);">
+    <h1>Extra szolgáltatás rendelése</h1>
+    
+    <div style="background: #f1f2f6; padding: 15px; margin-bottom: 20px; border-radius: 5px;">
+        <p style="margin: 0 0 5px 0;"><strong>Foglalás azonosító:</strong> #{{ booking.id }}</p>
+        <p style="margin: 0;"><strong>Szoba:</strong> {{ booking.room.room_number if booking.room else booking.room_id }}</p>
+    </div>
+
+    <form method="POST">
+        {{ form.hidden_tag() }}
+        
+        {% if form.booking_id %}
+            {{ form.booking_id(value=booking.id) }}
+        {% endif %}
+
+        <div class="form-group">
+            {{ form.service_id.label(style="font-weight: bold;") }}<br>
+            {{ form.service_id(class="form-control", style="width: 100%; padding: 8px; border-radius: 4px; border: 1px solid #ccc;") }}
+            {% for error in form.service_id.errors %}<span style="color:red; font-size: 0.9em;">{{ error }}</span>{% endfor %}
+        </div>
+
+        <div class="form-group" style="margin-top: 15px;">
+            {{ form.quantity.label(style="font-weight: bold;") }}<br>
+            {{ form.quantity(class="form-control", min="1", style="width: 100%; padding: 8px; border-radius: 4px; border: 1px solid #ccc;") }}
+            {% for error in form.quantity.errors %}<span style="color:red; font-size: 0.9em;">{{ error }}</span>{% endfor %}
+        </div>
+
+        <div style="margin-top: 25px; display: flex; gap: 10px;">
+            {{ form.submit(class="btn btn-primary", style="flex: 1; padding: 10px; font-weight: bold; border-radius: 4px; cursor: pointer;") }}
+            <a href="{{ url_for('guest.my_bookings') }}" class="btn" style="background: #95a5a6; color: white; text-decoration: none; padding: 10px 20px; border-radius: 4px; text-align: center;">Vissza</a>
+        </div>
+    </form>
+</div>
+{% endblock %}

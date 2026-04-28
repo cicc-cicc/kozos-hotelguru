@@ -1,4 +1,8 @@
-from flask import Blueprint, render_template, redirect, url_for, flash, request
+from flask import (
+    Blueprint, render_template,
+    redirect, url_for,
+    flash, request, abort, current_app,
+)
 from flask_login import login_required
 from ..utils.rbac import roles_required
 
@@ -23,17 +27,12 @@ from ..services.admin_service import (
     update_room_from_form,
     delete_room as service_delete_room,
 )
-from flask import current_app
 from ..forms.admin_forms import UserRoleForm
 from ..forms.admin_forms import AdminCreateServiceForm, ServiceDeleteForm
 
 admin_bp = Blueprint("admin", __name__)
 
 
-# Use centralized `roles_required` decorator for admin-only routes
-
-
-# --- ÚTVONALAK ---
 
 
 @admin_bp.route("/dashboard")
@@ -41,9 +40,9 @@ admin_bp = Blueprint("admin", __name__)
 @roles_required(Role.admin)
 def admin_dashboard():
     """Az összes szoba listázása állapotokkal"""
-    # A szobákat szobaszám szerint sorba rendezve kérjük le
     rooms = Room.query.order_by(Room.room_number).all()
-    return render_template("admin_dashboard.html", rooms=rooms)
+
+    return render_template("admin/admin_dashboard.html", rooms=rooms)
 
 
 @admin_bp.route("/room/add", methods=["GET", "POST"])
@@ -62,7 +61,7 @@ def add_room():
             flash(str(e), "danger")
 
     return render_template(
-        "admin_room_form.html", form=form, title="Új szoba hozzáadása"
+        "admin/admin_room_form.html", form=form, title="Új szoba hozzáadása"
     )
 
 
@@ -81,21 +80,22 @@ def edit_room(room_id):
             return redirect(url_for("admin.admin_dashboard"))
         except ValueError as e:
             flash(str(e), "danger")
+
             return render_template(
-                "admin_room_form.html", form=form, room=room, title="Szoba szerkesztése"
+                "admin/admin_room_form.html", form=form, room=room, title="Szoba szerkesztése"
             )
 
     elif request.method == "GET":
-        # Form előtöltése a jelenlegi adatokkal
         form.room_number.data = room.room_number
         form.capacity.data = room.capacity
         form.price_per_night.data = room.price_per_night
         form.equipment.data = room.equipment
         form.description.data = room.description
-        form.status.data = room.status.name  # Enum stringgé alakítása a legördülőhöz
+        form.status.data = room.status.name
+
 
     return render_template(
-        "admin_room_form.html", form=form, room=room, title="Szoba szerkesztése"
+        "admin/admin_room_form.html", form=form, room=room, title="Szoba szerkesztése"
     )
 
 
@@ -125,15 +125,15 @@ def delete_room(room_id):
             )
             return redirect(url_for("admin.admin_dashboard"))
 
-    return render_template("admin_delete_room.html", form=form, room=room)
+
+    return render_template("admin/admin_delete_room.html", form=form, room=room)
 
 
 @admin_bp.route("/bookings")
 @login_required
 @roles_required(Role.admin)
 def admin_bookings():
-    """Listázza az összes foglalást az admin számára és biztosít művelet végrehajtást."""
-    # Hide cancelled and checked-out bookings from admin listing as well
+    """Listázza az összes foglalást az admin számára"""
     excluded = [BookingStatus.cancelled, BookingStatus.checked_out]
     bookings = (
         Booking.query.filter(~Booking.status.in_(excluded))
@@ -141,8 +141,6 @@ def admin_bookings():
         .all()
     )
 
-    # Készítsünk külön BookingActionForm és BookingServiceAddForm példányt minden foglaláshoz,
-    # hogy a sablon egyszerűen renderelhesse őket (és legyen CSRF tokenjük).
     forms = {b.id: BookingActionForm() for b in bookings}
     service_forms = {}
     for b in bookings:
@@ -151,8 +149,9 @@ def admin_bookings():
         sf.booking_id.data = b.id
         service_forms[b.id] = sf
 
+
     return render_template(
-        "admin_bookings.html",
+        "admin/admin_bookings.html",
         bookings=bookings,
         forms=forms,
         service_forms=service_forms,
@@ -164,7 +163,8 @@ def admin_bookings():
 @roles_required(Role.admin)
 def admin_users():
     users = User.query.order_by(User.username).all()
-    return render_template("admin_users.html", users=users)
+
+    return render_template("admin/admin_users.html", users=users)
 
 
 @admin_bp.route("/user/<int:user_id>/edit-role", methods=["GET", "POST"])
@@ -186,19 +186,18 @@ def edit_user_role(user_id):
     elif request.method == "GET":
         form.role.data = user.role.name
 
-    return render_template("admin_edit_user.html", user=user, form=form)
+
+    return render_template("admin/admin_edit_user.html", user=user, form=form)
 
 
 @admin_bp.route("/permissions", methods=["GET", "POST"])
 @login_required
 @roles_required(Role.admin)
 def admin_permissions():
-    # Replace Permissions UI with Admin Service-order UI
     from ..forms.admin_forms import AdminServiceForm
 
     form = AdminServiceForm()
 
-    # populate choices dynamically
     bookings = (
         Booking.query.filter(
             ~Booking.status.in_([BookingStatus.cancelled, BookingStatus.checked_out])
@@ -232,7 +231,7 @@ def admin_permissions():
             flash(f"Hiba hozzáadáskor: {e}", "danger")
 
     return render_template(
-        "admin_permissions.html", form=form, bookings=bookings, services=services
+        "admin/admin_permissions.html", form=form, bookings=bookings, services=services
     )
 
 
@@ -263,7 +262,7 @@ def admin_services():
             flash(f"Hiba: {e}", "danger")
 
     return render_template(
-        "admin_services.html", services=services, form=form, delete_form=delete_form
+        "admin/admin_services.html", services=services, form=form, delete_form=delete_form
     )
 
 
@@ -285,7 +284,7 @@ def edit_service(service_id):
         form.description.data = s.description
         form.price.data = s.price
 
-    return render_template("admin_service_form.html", form=form, service=s)
+    return render_template("admin/admin_service_form.html", form=form, service=s)
 
 
 @admin_bp.route("/service/<int:service_id>/delete", methods=["POST"])
@@ -301,65 +300,3 @@ def delete_service(service_id):
         db.session.rollback()
         flash(f"Hiba törléskor: {e}", "danger")
     return redirect(url_for("admin.admin_services"))
-
-
-@admin_bp.route("/booking/<int:booking_id>/action", methods=["POST"])
-@login_required
-@roles_required(Role.admin)
-def booking_action(booking_id):
-    form = BookingActionForm()
-    if not form.validate_on_submit():
-        flash("Érvénytelen kérés.", "danger")
-        return redirect(url_for("admin.admin_bookings"))
-
-    booking = Booking.query.get_or_404(booking_id)
-    action = form.action.data
-    # Disallow acting on already-closed bookings
-    from ..models import BookingStatus as _BookingStatus
-
-    if booking.status in (_BookingStatus.cancelled, _BookingStatus.checked_out):
-        flash(
-            "Ezen a foglaláson nem végezhető művelet (lezárt vagy lemondott).",
-            "warning",
-        )
-        return redirect(url_for("admin.admin_bookings"))
-
-    try:
-        # Use same service to ensure consistent side-effects (room status, invoice, audit)
-        perform_booking_action(booking, action)
-        # user feedback
-        if action == "confirm":
-            flash("Foglalás visszaigazolva.", "success")
-        elif action == "cancel":
-            flash("Foglalás lemondva.", "info")
-        elif action == "check_in":
-            flash("Vendég bejelentkezett.", "success")
-        elif action == "check_out":
-            flash("Vendég kijelentkeztetve.", "success")
-        else:
-            flash("Művelet végrehajtva.", "success")
-    except Exception as e:
-        current_app.logger.exception("Admin booking action failed")
-        flash(f"Hiba a művelet során: {e}", "danger")
-
-    return redirect(url_for("admin.admin_bookings"))
-
-
-@admin_bp.route("/booking/<int:booking_id>/add_service", methods=["POST"])
-@login_required
-@roles_required(Role.admin)
-def booking_add_service(booking_id):
-    form = BookingServiceAddForm()
-    if not form.validate_on_submit():
-        flash("Érvénytelen szolgáltatás kérés.", "danger")
-        return redirect(url_for("admin.admin_bookings"))
-
-    booking = Booking.query.get_or_404(booking_id)
-    try:
-        add_extra_service_to_booking(booking, form.service_id.data, form.quantity.data)
-        flash("Szolgáltatás hozzáadva a foglaláshoz.", "success")
-    except Exception as e:
-        db.session.rollback()
-        flash(f"Hiba hozzáadáskor: {e}", "danger")
-
-    return redirect(url_for("admin.admin_bookings"))
