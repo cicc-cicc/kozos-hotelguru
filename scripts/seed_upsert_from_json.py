@@ -2,23 +2,6 @@ import os
 import sys
 import json
 from datetime import datetime
-
-ROOT = os.path.dirname(os.path.dirname(__file__))
-if ROOT not in sys.path:
-    sys.path.insert(0, ROOT)
-
-from WebApp import create_app, db
-from WebApp.models import (
-    User,
-    Room,
-    Booking,
-    ExtraService,
-    BookingService,
-    Invoice,
-    Role,
-    RoomStatus,
-    BookingStatus,
-)
 from werkzeug.security import generate_password_hash
 
 
@@ -35,6 +18,20 @@ def parse_dt(value):
 
 
 def upsert_from_json(app, json_path):
+    # Import app-related modules here to avoid module-level side-effects
+    from WebApp import db
+    from WebApp.models import (
+        User,
+        Room,
+        Booking,
+        ExtraService,
+        BookingService,
+        Invoice,
+        Role,
+        RoomStatus,
+        BookingStatus,
+    )
+
     with open(json_path, "r", encoding="utf-8") as f:
         data = json.load(f)
 
@@ -87,7 +84,9 @@ def upsert_from_json(app, json_path):
             if svc:
                 services_map[svc.name] = svc
                 continue
-            svc = ExtraService(name=name, description=s.get("description"), price=s.get("price", 0.0))
+            svc = ExtraService(
+                name=name, description=s.get("description"), price=s.get("price", 0.0)
+            )
             db.session.add(svc)
             db.session.flush()
             services_map[svc.name] = svc
@@ -107,7 +106,9 @@ def upsert_from_json(app, json_path):
 
             if existing:
                 existing.capacity = r.get("capacity", existing.capacity)
-                existing.price_per_night = r.get("price_per_night", existing.price_per_night)
+                existing.price_per_night = r.get(
+                    "price_per_night", existing.price_per_night
+                )
                 existing.description = r.get("description", existing.description)
                 existing.status = status_enum
                 db.session.add(existing)
@@ -140,7 +141,9 @@ def upsert_from_json(app, json_path):
             if not check_in or not check_out:
                 continue
 
-            exists = Booking.query.filter_by(user_id=user.id, room_id=room.id, check_in=check_in).first()
+            exists = Booking.query.filter_by(
+                user_id=user.id, room_id=room.id, check_in=check_in
+            ).first()
             if exists:
                 continue
 
@@ -166,12 +169,18 @@ def upsert_from_json(app, json_path):
                 if not svc:
                     continue
                 qty = int(ex.get("quantity", 1))
-                bs = BookingService(booking_id=booking.id, service_id=svc.id, quantity=qty)
+                bs = BookingService(
+                    booking_id=booking.id, service_id=svc.id, quantity=qty
+                )
                 db.session.add(bs)
 
             inv_data = b.get("invoice")
             if inv_data:
-                invoice = Invoice(booking_id=booking.id, total_amount=inv_data.get("total_amount") or 0.0, paid=bool(inv_data.get("paid", False)))
+                invoice = Invoice(
+                    booking_id=booking.id,
+                    total_amount=inv_data.get("total_amount") or 0.0,
+                    paid=bool(inv_data.get("paid", False)),
+                )
                 db.session.add(invoice)
 
         try:
@@ -182,10 +191,20 @@ def upsert_from_json(app, json_path):
             print("Error during upsert:", e)
 
 
-if __name__ == "__main__":
+def main():
+    ROOT = os.path.dirname(os.path.dirname(__file__))
+    if ROOT not in sys.path:
+        sys.path.insert(0, ROOT)
+
+    from WebApp import create_app
+
     app = create_app()
     json_path = os.path.join(os.path.dirname(os.path.dirname(__file__)), "data.json")
     if not os.path.exists(json_path):
         print("data.json not found at", json_path)
         sys.exit(1)
     upsert_from_json(app, json_path)
+
+
+if __name__ == "__main__":
+    main()
