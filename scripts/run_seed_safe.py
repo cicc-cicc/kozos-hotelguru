@@ -1,6 +1,8 @@
 import os
 import sys
 import runpy
+import builtins
+
 
 # Ensure we're in project root
 ROOT = os.path.dirname(os.path.dirname(__file__))
@@ -11,12 +13,13 @@ os.environ["ALLOW_SEED"] = "1"
 sys.argv = ["seed.py", "--force", "--no-backup"]
 
 # Monkeypatch input() so seed's interactive confirmation receives CONFIRM
-import builtins
 builtins_input = builtins.input
+
 
 def fake_input(prompt=""):
     print(prompt, end="")
     return "CONFIRM"
+
 
 builtins.input = fake_input
 
