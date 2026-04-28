@@ -300,3 +300,62 @@ def delete_service(service_id):
         db.session.rollback()
         flash(f"Hiba törléskor: {e}", "danger")
     return redirect(url_for("admin.admin_services"))
+
+
+@admin_bp.route("/booking/<int:booking_id>/action", methods=["POST"])
+@login_required
+@roles_required(Role.admin)
+def booking_action(booking_id):
+    form = BookingActionForm()
+    if not form.validate_on_submit():
+        flash("Érvénytelen kérés.", "danger")
+        return redirect(url_for("admin.admin_bookings"))
+
+    booking = Booking.query.get_or_404(booking_id)
+    action = form.action.data
+    
+    # Nem engedünk műveletet már lezárt vagy lemondott foglaláson
+    if booking.status in (BookingStatus.cancelled, BookingStatus.checked_out):
+        flash("Ezen a foglaláson nem végezhető művelet (lezárt vagy lemondott).", "warning")
+        return redirect(url_for("admin.admin_bookings"))
+
+    try:
+        # A recepciós szervizt használjuk a művelet végrehajtásához
+        perform_booking_action(booking, action)
+        
+        if action == "confirm":
+            flash("Foglalás visszaigazolva.", "success")
+        elif action == "cancel":
+            flash("Foglalás lemondva.", "info")
+        elif action == "check_in":
+            flash("Vendég bejelentkezett.", "success")
+        elif action == "check_out":
+            flash("Vendég kijelentkeztetve.", "success")
+        else:
+            flash("Művelet végrehajtva.", "success")
+            
+    except Exception as e:
+        current_app.logger.exception("Admin booking action failed")
+        flash(f"Hiba a művelet során: {e}", "danger")
+
+    return redirect(url_for("admin.admin_bookings"))
+
+
+@admin_bp.route("/booking/<int:booking_id>/add_service", methods=["POST"])
+@login_required
+@roles_required(Role.admin)
+def booking_add_service(booking_id):
+    form = BookingServiceAddForm()
+    if not form.validate_on_submit():
+        flash("Érvénytelen szolgáltatás kérés.", "danger")
+        return redirect(url_for("admin.admin_bookings"))
+
+    booking = Booking.query.get_or_404(booking_id)
+    try:
+        add_extra_service_to_booking(booking, form.service_id.data, form.quantity.data)
+        flash("Szolgáltatás hozzáadva a foglaláshoz.", "success")
+    except Exception as e:
+        db.session.rollback()
+        flash(f"Hiba hozzáadáskor: {e}", "danger")
+
+    return redirect(url_for("admin.admin_bookings"))
