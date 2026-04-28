@@ -1,0 +1,77 @@
+{% extends "base.html" %}
+
+{% block title %}Foglalásaim - HotelGuru{% endblock %}
+
+{% block content %}
+<style>
+    .text-paid { color: #27ae60; font-weight: bold; }
+    .text-unpaid { color: #e74c3c; font-weight: bold; }
+</style>
+
+<h1>Saját foglalásaim</h1>
+
+{% if bookings %}
+<table class="table" style="width: 100%; border-collapse: collapse; margin-top: 20px; background: white; box-shadow: 0 1px 3px rgba(0,0,0,0.1);">
+    <thead>
+        <tr style="background: #3498db; color: white;">
+            <th style="padding: 12px; text-align: left;">Szoba</th>
+            <th style="padding: 12px; text-align: left;">Időszak</th>
+            <th style="padding: 12px; text-align: left;">Státusz</th>
+            <th style="padding: 12px; text-align: left;">Összeg (Számla)</th>
+            <th style="padding: 12px; text-align: center;">Műveletek</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for b in bookings %}
+        <tr style="border-bottom: 1px solid #ddd;">
+            <td style="padding: 12px; font-weight: bold;">{{ b.room.room_number if b.room else b.room_id }}</td>
+            <td style="padding: 12px;">{{ b.check_in.strftime('%Y-%m-%d') }} <br>—<br> {{ b.check_out.strftime('%Y-%m-%d') }}</td>
+            <td style="padding: 12px;">
+                {% if b.status.value == 'pending' %}
+                    <span style="color: #f39c12; font-weight: bold;">Függőben</span>
+                {% elif b.status.value == 'confirmed' %}
+                    <span style="color: #27ae60; font-weight: bold;">Visszaigazolva</span>
+                {% elif b.status.value == 'cancelled' %}
+                    <span style="color: #c0392b; font-weight: bold;">Lemondva</span>
+                {% else %}
+                    <span style="font-weight: bold;">{{ b.status.value }}</span>
+                {% endif %}
+            </td>
+            <td style="padding: 12px;">
+                {% if b.invoice %}
+                    <strong>{{ "{:,.0f}".format(b.invoice.total_amount).replace(',', ' ') }} Ft</strong>
+                    <br>
+                    <small class="{% if b.invoice.paid %}text-paid{% else %}text-unpaid{% endif %}">
+                    ({{ "Fizetve" if b.invoice.paid else "Fizetésre vár" }})
+                    </small>
+                {% else %}
+                    <strong>{{ "{:,.0f}".format(b.total_price).replace(',', ' ') if b.total_price else '0' }} Ft</strong>
+                {% endif %}
+            </td>
+            <td style="padding: 12px; text-align: center;">
+                {% if b.status and b.status.value != 'cancelled' %}
+                    <form method="POST" action="{{ url_for('guest.order_service', booking_id=b.id) }}" style="display:inline-block; margin-bottom: 10px;">
+                        {{ service_forms[b.id].hidden_tag() }}
+                        {{ service_forms[b.id].service_id(class='form-control', style='display:inline-block; width:150px; padding: 5px; border-radius: 4px;') }}
+                        {{ service_forms[b.id].quantity(class='form-control', style='display:inline-block; width:60px; margin-left:6px; padding: 5px; border-radius: 4px;') }}
+                        {{ service_forms[b.id].submit(class='btn btn-secondary', value='Rendel', style='margin-left:6px; padding: 5px 10px; cursor: pointer; border-radius: 4px;') }}
+                    </form>
+                    <br>
+                    <a href="{{ url_for('guest.edit_booking', booking_id=b.id) }}" class="btn" style="background: #f39c12; color: white; padding: 5px 15px; text-decoration: none; border-radius: 4px; font-size: 0.9em; margin-right: 5px;">Szerkesztés</a>
+                    <a href="{{ url_for('guest.cancel_booking', booking_id=b.id) }}" class="btn" style="background: #c0392b; color: white; padding: 5px 15px; text-decoration: none; border-radius: 4px; font-size: 0.9em;">Lemondás</a>
+                {% else %}
+                    <span style="color: #95a5a6; font-style: italic;">Nincs elérhető művelet</span>
+                {% endif %}
+            </td>
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
+{% else %}
+<div style="text-align: center; padding: 40px; background: #ecf0f1; border-radius: 8px; margin-top: 20px;">
+    <h2>Nincsenek foglalásaid</h2>
+    <p>Még nem foglaltál szobát nálunk. Keresd meg a számodra megfelelőt a főoldalon!</p>
+    <a href="{{ url_for('guest.index') }}" class="btn btn-primary" style="margin-top: 10px; text-decoration: none; padding: 10px 20px;">Szobák keresése</a>
+</div>
+{% endif %}
+{% endblock %}

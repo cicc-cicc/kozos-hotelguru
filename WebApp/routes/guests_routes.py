@@ -42,8 +42,8 @@ def index():
             )
         )
 
-    # Alapértelmezett kezdőképernyő a keresővel
-    return render_template("index.html", form=form)
+    # Alapértelmezett kezdőképernyő a keresővel (JAVÍTVA)
+    return render_template("guest/index.html", form=form)
 
 
 @guest_bp.route("/search-results")
@@ -74,8 +74,9 @@ def search_results():
     booking_form.departure_date.data = departure_str
     booking_form.guests.data = str(guests)
 
+    # (JAVÍTVA)
     return render_template(
-        "search_results.html",
+        "guest/search_results.html",
         rooms=available_rooms,
         check_in=check_in,
         check_out=check_out,
@@ -195,7 +196,8 @@ def order_service(booking_id):
         return redirect(url_for("guest.my_bookings"))
 
     form.booking_id.data = booking.id
-    return render_template("order_service.html", form=form, booking=booking)
+    # (JAVÍTVA)
+    return render_template("guest/order_service.html", form=form, booking=booking)
 
 
 @guest_bp.route("/my-bookings")
@@ -214,8 +216,9 @@ def my_bookings():
         form.booking_id.data = b.id
         service_forms[b.id] = form
 
+    # (JAVÍTVA)
     return render_template(
-        "my_bookings.html", bookings=bookings, service_forms=service_forms
+        "guest/my_bookings.html", bookings=bookings, service_forms=service_forms
     )
 
 
@@ -241,7 +244,8 @@ def cancel_booking(booking_id):
             flash("Hiba történt a foglalás törlése során.", "danger")
         return redirect(url_for("guest.my_bookings"))
 
-    return render_template("cancel_booking.html", form=form, booking=booking)
+    # (JAVÍTVA)
+    return render_template("guest/cancel_booking.html", form=form, booking=booking)
 
 
 @guest_bp.route("/booking/<int:booking_id>/edit", methods=["GET", "POST"])
@@ -272,7 +276,8 @@ def edit_booking(booking_id):
                     "A távozás dátuma később kell legyen, mint az érkezés dátuma.",
                     "danger",
                 )
-                return render_template("edit_booking.html", form=form, booking=booking)
+                # (JAVÍTVA)
+                return render_template("guest/edit_booking.html", form=form, booking=booking)
 
             # Ellenőrizzük az ütközéseket, kizárva az aktuális foglalást
             if Booking.has_conflict(
@@ -282,7 +287,8 @@ def edit_booking(booking_id):
                 exclude_booking_id=booking.id,
             ):
                 flash("A megadott időszak ütközik egy másik foglalással.", "danger")
-                return render_template("edit_booking.html", form=form, booking=booking)
+                # (JAVÍTVA)
+                return render_template("guest/edit_booking.html", form=form, booking=booking)
 
             # Frissítjük a foglalás adatait
             booking.check_in = new_check_in
@@ -308,7 +314,8 @@ def edit_booking(booking_id):
         except Exception as e:
             current_app.logger.exception("Error updating booking")
             flash(f"Hiba a foglalás frissítése során: {e}", "danger")
-            return render_template("edit_booking.html", form=form, booking=booking)
+            # (JAVÍTVA)
+            return render_template("guest/edit_booking.html", form=form, booking=booking)
 
     # GET -> Kitöltjük az űrlapot az aktuális értékekkel
     if request.method == "GET":
@@ -316,4 +323,5 @@ def edit_booking(booking_id):
         form.departure_date.data = booking.check_out.date()
         form.guests.data = getattr(booking, "guests_count", 1)
 
-    return render_template("edit_booking.html", form=form, booking=booking)
+    # (JAVÍTVA)
+    return render_template("guest/edit_booking.html", form=form, booking=booking)
