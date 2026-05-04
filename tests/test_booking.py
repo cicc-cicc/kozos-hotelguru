@@ -18,6 +18,9 @@ def test_booking_script_flow():
     app = create_app()
 
     with app.app_context():
+        # ÚJ SOR: Létrehozzuk a táblákat az üres teszt-adatbázisban
+        db.create_all()
+
         # Create test user if missing
         user = User.query.filter_by(username="test_robot").first()
         if not user:

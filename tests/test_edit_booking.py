@@ -8,7 +8,8 @@ proj_root = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 if proj_root not in sys.path:
     sys.path.insert(0, proj_root)
 
-from WebApp import create_app  # noqa: E402
+# JAVÍTÁS: beimportáljuk a db-t is!
+from WebApp import create_app, db  # noqa: E402
 from WebApp.models import User, Booking
 
 
@@ -16,6 +17,9 @@ def test_edit_booking_script_flow():
     app = create_app()
 
     with app.app_context():
+        # ÚJ SOR: Létrehozzuk a táblákat
+        db.create_all()
+        
         user = User.query.filter_by(username="test_robot").first()
         # sys.exit(1) helyett assert-et használunk, hogy ne lője ki az egész pytest futást
         assert user is not None, "No test user found; run scripts/test_booking.py first"

@@ -1,5 +1,6 @@
-from WebApp import create_app
-from WebApp.models import Booking
+from WebApp import create_app, db
+from WebApp.models import Booking, User, Role
+from werkzeug.security import generate_password_hash
 
 
 def test_reception_booking_action_flow():
@@ -10,6 +11,20 @@ def test_reception_booking_action_flow():
     app.config["WTF_CSRF_ENABLED"] = False
 
     with app.app_context():
+        # ÚJ SOR: Létrehozzuk a táblákat
+        db.create_all()
+        
+        # ÚJ BLOKK: Létrehozzuk a recepciós felhasználót a tiszta GitHub Actions db-ben
+        if not User.query.filter_by(username="recepcios_kati").first():
+            kati = User(
+                username="recepcios_kati",
+                email="kati@hotel.hu",
+                password_hash=generate_password_hash("rec123"),
+                role=Role.receptionist
+            )
+            db.session.add(kati)
+            db.session.commit()
+
         # Use test client to login and perform action
         client = app.test_client()
 
