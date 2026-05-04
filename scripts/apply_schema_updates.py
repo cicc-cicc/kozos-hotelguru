@@ -1,9 +1,29 @@
+import os
+import sys
+
+# Hozzáadjuk a projekt gyökerét a Python útvonalhoz, hogy megtalálja a WebApp-ot
+proj_root = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+if proj_root not in sys.path:
+    sys.path.insert(0, proj_root)
+
 from WebApp import create_app, db
 from sqlalchemy import text
 
 app = create_app()
 with app.app_context():
     conn = db.engine.connect()
+
+    # --- A MI ÚJ JAVÍTÁSUNK AZ ENUMHOZ ---
+    try:
+        conn.execute(
+            text(
+                "ALTER TABLE rooms MODIFY COLUMN status ENUM('available', 'occupied', 'maintenance', 'unavailable') NOT NULL DEFAULT 'available';"
+            )
+        )
+        print("Updated rooms.status ENUM definition")
+    except Exception as e:
+        print("Error updating rooms.status:", e)
+    # -------------------------------------
 
     # Add columns to bookings if they don't exist
     try:
