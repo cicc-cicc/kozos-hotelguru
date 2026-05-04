@@ -12,6 +12,7 @@ if proj_root not in sys.path:
 from WebApp import create_app, db  # noqa: E402
 from WebApp.models import User, Room
 
+
 # Beleraktuk az egészet egy tesztfüggvénybe!
 def test_booking_script_flow():
     app = create_app()
@@ -71,10 +72,10 @@ def test_booking_script_flow():
             }
 
             resp = client.post("/book-room", data=data, follow_redirects=True)
-            
+
             # Beletettünk egy minimális ellenőrzést, hogy a Pytest boldog legyen
             assert resp.status_code in [200, 302], "Hiba történt a foglalás során"
-            
+
             print("STATUS:", resp.status_code)
             print("LENGTH:", len(resp.data))
             # Print a snippet of response to inspect flashed messages

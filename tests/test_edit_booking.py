@@ -11,6 +11,7 @@ if proj_root not in sys.path:
 from WebApp import create_app  # noqa: E402
 from WebApp.models import User, Booking
 
+
 def test_edit_booking_script_flow():
     app = create_app()
 
@@ -24,7 +25,9 @@ def test_edit_booking_script_flow():
             .order_by(Booking.created_at.desc())
             .first()
         )
-        assert booking is not None, "No booking found for test_robot; run scripts/test_booking.py first"
+        assert (
+            booking is not None
+        ), "No booking found for test_robot; run scripts/test_booking.py first"
 
         with app.test_client() as client:
             with client.session_transaction() as sess:
@@ -38,7 +41,9 @@ def test_edit_booking_script_flow():
             m = re.search(r'name="csrf_token"\s+type="hidden"\s+value="([^"]+)"', html)
             csrf = m.group(1) if m else None
 
-            new_arrival = (booking.check_in.date() + timedelta(days=1)).strftime("%Y-%m-%d")
+            new_arrival = (booking.check_in.date() + timedelta(days=1)).strftime(
+                "%Y-%m-%d"
+            )
             new_departure = (booking.check_out.date() + timedelta(days=2)).strftime(
                 "%Y-%m-%d"
             )
@@ -54,10 +59,13 @@ def test_edit_booking_script_flow():
             resp = client.post(
                 f"/booking/{booking.id}/edit", data=data, follow_redirects=True
             )
-            
+
             # Ellenőrzés a pytest számára
-            assert resp.status_code in [200, 302], "Hiba történt a foglalás szerkesztésekor"
-            
+            assert resp.status_code in [
+                200,
+                302,
+            ], "Hiba történt a foglalás szerkesztésekor"
+
             print("STATUS:", resp.status_code)
             print("LENGTH:", len(resp.data))
             print("SNIPPET:\n", resp.get_data(as_text=True)[:1200])

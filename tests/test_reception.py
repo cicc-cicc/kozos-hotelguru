@@ -1,12 +1,13 @@
 from WebApp import create_app
 from WebApp.models import Booking
 
+
 def test_reception_booking_action_flow():
     app = create_app()
-    
+
     # Kifejezetten teszt módba rakjuk az appot, ami kikapcsolja a CSRF védelmet a POST kéréseknél
-    app.config['TESTING'] = True
-    app.config['WTF_CSRF_ENABLED'] = False
+    app.config["TESTING"] = True
+    app.config["WTF_CSRF_ENABLED"] = False
 
     with app.app_context():
         # Use test client to login and perform action
@@ -24,9 +25,9 @@ def test_reception_booking_action_flow():
         # Find a booking to act on
         booking = Booking.query.order_by(Booking.id.asc()).first()
         assert booking is not None, "No booking found to test."
-        
+
         print("Testing booking id:", booking.id, "status before:", booking.status)
-        
+
         # Mivel a CSRF ki lett kapcsolva, ez az akció is simán le fog futni
         action_resp = client.post(
             f"/reception/booking/{booking.id}/action",
