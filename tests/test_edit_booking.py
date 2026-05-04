@@ -1,75 +1,82 @@
-# ruff: noqa: E402
-from datetime import timedelta
-import os
-import sys
 import re
+from datetime import datetime, timedelta
 
-proj_root = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-if proj_root not in sys.path:
-    sys.path.insert(0, proj_root)
-
-# JAVÍTÁS: beimportáljuk a db-t is!
-from WebApp import create_app, db  # noqa: E402
-from WebApp.models import User, Booking
+from WebApp import db
+from WebApp.models import Booking, User, Room
 
 
-def test_edit_booking_script_flow():
-    app = create_app()
-
+def test_edit_booking_script_flow(app, client):
     with app.app_context():
-        # ÚJ SOR: Létrehozzuk a táblákat
-        db.create_all()
-
+        # Létrehozzuk a teszt felhasználót, ha még nincs
         user = User.query.filter_by(username="test_robot").first()
-        # sys.exit(1) helyett assert-et használunk, hogy ne lője ki az egész pytest futást
-        assert user is not None, "No test user found; run scripts/test_booking.py first"
+        if not user:
+            user = User(
+                username="test_robot", email="test_robot@example.com", password_hash="x"
+            )
+            db.session.add(user)
+            db.session.commit()
 
+        # Megkeressük a legutóbbi foglalást
         booking = (
             Booking.query.filter_by(user_id=user.id)
             .order_by(Booking.created_at.desc())
             .first()
         )
+
+        # Ha a teszt teljesen üres adatbázisból indul (pl. GitHub), csinálunk neki egy foglalást gyorsan
+        if not booking:
+            room = Room(room_number="T200", capacity=1, price_per_night=2000.0)
+            db.session.add(room)
+            db.session.commit()
+
+            arrival = datetime.utcnow()
+            booking = Booking(
+                user_id=user.id,
+                room_id=room.id,
+                check_in=arrival,
+                check_out=arrival + timedelta(days=2),
+                guests_count=1,
+            )
+            db.session.add(booking)
+            db.session.commit()
+
         assert (
             booking is not None
-        ), "No booking found for test_robot; run scripts/test_booking.py first"
+        ), "Nem sikerült foglalást találni vagy létrehozni a teszthez!"
 
-        with app.test_client() as client:
-            with client.session_transaction() as sess:
-                sess["_user_id"] = str(user.id)
-                sess["_fresh"] = True
+        # Bejelentkezés
+        with client.session_transaction() as sess:
+            sess["_user_id"] = str(user.id)
+            sess["_fresh"] = True
 
-            # GET the edit page to fetch CSRF
-            get_resp = client.get(f"/booking/{booking.id}/edit")
-            html = get_resp.get_data(as_text=True)
+        # Lekérjük a szerkesztő oldalt
+        get_resp = client.get(f"/booking/{booking.id}/edit")
+        html = get_resp.get_data(as_text=True)
 
-            m = re.search(r'name="csrf_token"\s+type="hidden"\s+value="([^"]+)"', html)
-            csrf = m.group(1) if m else None
+        # Kinyerjük a CSRF tokent
+        m = re.search(r'name="csrf_token"\s+type="hidden"\s+value="([^"]+)"', html)
+        csrf = m.group(1) if m else None
 
-            new_arrival = (booking.check_in.date() + timedelta(days=1)).strftime(
-                "%Y-%m-%d"
-            )
-            new_departure = (booking.check_out.date() + timedelta(days=2)).strftime(
-                "%Y-%m-%d"
-            )
+        # Új dátumok beállítása (+1, +2 nap)
+        new_arrival = (booking.check_in.date() + timedelta(days=1)).strftime("%Y-%m-%d")
+        new_departure = (booking.check_out.date() + timedelta(days=2)).strftime(
+            "%Y-%m-%d"
+        )
 
-            data = {
-                "arrival_date": new_arrival,
-                "departure_date": new_departure,
-                "guests": "1",
-                "csrf_token": csrf,
-                "submit": "Foglalás frissítése",
-            }
+        data = {
+            "arrival_date": new_arrival,
+            "departure_date": new_departure,
+            "guests": "1",
+            "csrf_token": csrf,
+            "submit": "Foglalás frissítése",
+        }
 
-            resp = client.post(
-                f"/booking/{booking.id}/edit", data=data, follow_redirects=True
-            )
+        # Űrlap elküldése
+        resp = client.post(
+            f"/booking/{booking.id}/edit", data=data, follow_redirects=True
+        )
 
-            # Ellenőrzés a pytest számára
-            assert resp.status_code in [
-                200,
-                302,
-            ], "Hiba történt a foglalás szerkesztésekor"
+        assert resp.status_code in [200, 302], "Hiba történt a foglalás szerkesztésekor"
 
-            print("STATUS:", resp.status_code)
-            print("LENGTH:", len(resp.data))
-            print("SNIPPET:\n", resp.get_data(as_text=True)[:1200])
+        print("STATUS:", resp.status_code)
+        print("LENGTH:", len(resp.data))
