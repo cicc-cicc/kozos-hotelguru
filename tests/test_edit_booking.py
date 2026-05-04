@@ -19,7 +19,7 @@ def test_edit_booking_script_flow():
     with app.app_context():
         # ÚJ SOR: Létrehozzuk a táblákat
         db.create_all()
-        
+
         user = User.query.filter_by(username="test_robot").first()
         # sys.exit(1) helyett assert-et használunk, hogy ne lője ki az egész pytest futást
         assert user is not None, "No test user found; run scripts/test_booking.py first"

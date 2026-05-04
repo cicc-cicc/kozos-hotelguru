@@ -13,14 +13,14 @@ def test_reception_booking_action_flow():
     with app.app_context():
         # ÚJ SOR: Létrehozzuk a táblákat
         db.create_all()
-        
+
         # ÚJ BLOKK: Létrehozzuk a recepciós felhasználót a tiszta GitHub Actions db-ben
         if not User.query.filter_by(username="recepcios_kati").first():
             kati = User(
                 username="recepcios_kati",
                 email="kati@hotel.hu",
                 password_hash=generate_password_hash("rec123"),
-                role=Role.receptionist
+                role=Role.receptionist,
             )
             db.session.add(kati)
             db.session.commit()
