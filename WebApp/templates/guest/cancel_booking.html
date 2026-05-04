@@ -5,7 +5,7 @@
 {% block content %}
 <div style="max-width: 500px; margin: 0 auto; text-align: center; background: white; padding: 40px; border-radius: 8px; box-shadow: 0 4px 10px rgba(0,0,0,0.1);">
     <h1 style="color: #c0392b;">Foglalás lemondása</h1>
-    
+
     <div class="alert alert-danger" style="margin: 20px 0; text-align: left; background-color: #f8d7da; color: #721c24; padding: 15px; border-radius: 4px; border: 1px solid #f5c6cb;">
         <p>Biztosan le szeretné mondani a <strong>#{{ booking.id }}</strong> számú foglalását?</p>
         <ul style="margin-top: 10px; padding-left: 20px; font-size: 0.95em;">
@@ -17,7 +17,7 @@
 
     <form method="POST">
         {{ form.hidden_tag() }}
-        
+
         <div class="form-group" style="margin: 20px 0;">
             <label style="cursor: pointer;">
                 {{ form.confirm() }} {{ form.confirm.label }}

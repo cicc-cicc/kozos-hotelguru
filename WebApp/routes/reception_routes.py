@@ -14,6 +14,7 @@ reception_bp = Blueprint("reception", __name__)
 
 # --- ÚTVONALAK ---
 
+
 @reception_bp.route("/dashboard")
 @login_required
 @roles_required(Role.receptionist, Role.admin)
@@ -47,9 +48,15 @@ def reception_dashboard():
 
     counts = {
         "all": Booking.query.count(),
-        "pending": Booking.query.filter(Booking.status == BookingStatus.pending).count(),
-        "confirmed": Booking.query.filter(Booking.status == BookingStatus.confirmed).count(),
-        "checked_in": Booking.query.filter(Booking.status == BookingStatus.checked_in).count(),
+        "pending": Booking.query.filter(
+            Booking.status == BookingStatus.pending
+        ).count(),
+        "confirmed": Booking.query.filter(
+            Booking.status == BookingStatus.confirmed
+        ).count(),
+        "checked_in": Booking.query.filter(
+            Booking.status == BookingStatus.checked_in
+        ).count(),
     }
 
     # (JAVÍTVA: mappa előtag és fájlnév)
@@ -118,4 +125,6 @@ def add_extra_service(booking_id):
 
     form.booking_id.data = booking.id
     # (JAVÍTVA: mappa előtag és fájlnév)
-    return render_template("reception/reception_add_service.html", form=form, booking=booking)
+    return render_template(
+        "reception/reception_add_service.html", form=form, booking=booking
+    )

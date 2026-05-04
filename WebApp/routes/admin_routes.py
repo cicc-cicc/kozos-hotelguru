@@ -1,7 +1,11 @@
 from flask import (
-    Blueprint, render_template,
-    redirect, url_for,
-    flash, request, abort, current_app,
+    Blueprint,
+    render_template,
+    redirect,
+    url_for,
+    flash,
+    request,
+    current_app,
 )
 from flask_login import login_required
 from ..utils.rbac import roles_required
@@ -31,8 +35,6 @@ from ..forms.admin_forms import UserRoleForm
 from ..forms.admin_forms import AdminCreateServiceForm, ServiceDeleteForm
 
 admin_bp = Blueprint("admin", __name__)
-
-
 
 
 @admin_bp.route("/dashboard")
@@ -82,7 +84,10 @@ def edit_room(room_id):
             flash(str(e), "danger")
 
             return render_template(
-                "admin/admin_room_form.html", form=form, room=room, title="Szoba szerkesztése"
+                "admin/admin_room_form.html",
+                form=form,
+                room=room,
+                title="Szoba szerkesztése",
             )
 
     elif request.method == "GET":
@@ -92,7 +97,6 @@ def edit_room(room_id):
         form.equipment.data = room.equipment
         form.description.data = room.description
         form.status.data = room.status.name
-
 
     return render_template(
         "admin/admin_room_form.html", form=form, room=room, title="Szoba szerkesztése"
@@ -125,7 +129,6 @@ def delete_room(room_id):
             )
             return redirect(url_for("admin.admin_dashboard"))
 
-
     return render_template("admin/admin_delete_room.html", form=form, room=room)
 
 
@@ -148,7 +151,6 @@ def admin_bookings():
         sf = BookingServiceAddForm()
         sf.booking_id.data = b.id
         service_forms[b.id] = sf
-
 
     return render_template(
         "admin/admin_bookings.html",
@@ -185,7 +187,6 @@ def edit_user_role(user_id):
 
     elif request.method == "GET":
         form.role.data = user.role.name
-
 
     return render_template("admin/admin_edit_user.html", user=user, form=form)
 
@@ -262,7 +263,10 @@ def admin_services():
             flash(f"Hiba: {e}", "danger")
 
     return render_template(
-        "admin/admin_services.html", services=services, form=form, delete_form=delete_form
+        "admin/admin_services.html",
+        services=services,
+        form=form,
+        delete_form=delete_form,
     )
 
 
@@ -313,16 +317,19 @@ def booking_action(booking_id):
 
     booking = Booking.query.get_or_404(booking_id)
     action = form.action.data
-    
+
     # Nem engedünk műveletet már lezárt vagy lemondott foglaláson
     if booking.status in (BookingStatus.cancelled, BookingStatus.checked_out):
-        flash("Ezen a foglaláson nem végezhető művelet (lezárt vagy lemondott).", "warning")
+        flash(
+            "Ezen a foglaláson nem végezhető művelet (lezárt vagy lemondott).",
+            "warning",
+        )
         return redirect(url_for("admin.admin_bookings"))
 
     try:
         # A recepciós szervizt használjuk a művelet végrehajtásához
         perform_booking_action(booking, action)
-        
+
         if action == "confirm":
             flash("Foglalás visszaigazolva.", "success")
         elif action == "cancel":
@@ -333,7 +340,7 @@ def booking_action(booking_id):
             flash("Vendég kijelentkeztetve.", "success")
         else:
             flash("Művelet végrehajtva.", "success")
-            
+
     except Exception as e:
         current_app.logger.exception("Admin booking action failed")
         flash(f"Hiba a művelet során: {e}", "danger")

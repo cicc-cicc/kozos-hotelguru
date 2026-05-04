@@ -5,7 +5,7 @@
 {% block content %}
 <div style="max-width: 500px; margin: 0 auto; background: white; padding: 30px; border-radius: 8px; box-shadow: 0 2px 5px rgba(0,0,0,0.1);">
     <h1>Extra szolgáltatás rendelése</h1>
-    
+
     <div style="background: #f1f2f6; padding: 15px; margin-bottom: 20px; border-radius: 5px;">
         <p style="margin: 0 0 5px 0;"><strong>Foglalás azonosító:</strong> #{{ booking.id }}</p>
         <p style="margin: 0;"><strong>Szoba:</strong> {{ booking.room.room_number if booking.room else booking.room_id }}</p>
@@ -13,7 +13,7 @@
 
     <form method="POST">
         {{ form.hidden_tag() }}
-        
+
         {% if form.booking_id %}
             {{ form.booking_id(value=booking.id) }}
         {% endif %}

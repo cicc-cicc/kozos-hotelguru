@@ -277,7 +277,9 @@ def edit_booking(booking_id):
                     "danger",
                 )
                 # (JAVÍTVA)
-                return render_template("guest/edit_booking.html", form=form, booking=booking)
+                return render_template(
+                    "guest/edit_booking.html", form=form, booking=booking
+                )
 
             # Ellenőrizzük az ütközéseket, kizárva az aktuális foglalást
             if Booking.has_conflict(
@@ -288,7 +290,9 @@ def edit_booking(booking_id):
             ):
                 flash("A megadott időszak ütközik egy másik foglalással.", "danger")
                 # (JAVÍTVA)
-                return render_template("guest/edit_booking.html", form=form, booking=booking)
+                return render_template(
+                    "guest/edit_booking.html", form=form, booking=booking
+                )
 
             # Frissítjük a foglalás adatait
             booking.check_in = new_check_in
@@ -315,7 +319,9 @@ def edit_booking(booking_id):
             current_app.logger.exception("Error updating booking")
             flash(f"Hiba a foglalás frissítése során: {e}", "danger")
             # (JAVÍTVA)
-            return render_template("guest/edit_booking.html", form=form, booking=booking)
+            return render_template(
+                "guest/edit_booking.html", form=form, booking=booking
+            )
 
     # GET -> Kitöltjük az űrlapot az aktuális értékekkel
     if request.method == "GET":

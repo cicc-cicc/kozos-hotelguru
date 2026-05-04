@@ -8,13 +8,13 @@
 
     <div class="alert alert-danger" style="margin: 20px 0; text-align: left; background-color: #f8d7da; color: #721c24; padding: 15px; border-radius: 4px; border: 1px solid #f5c6cb;">
         <p>Biztosan törölni szeretné a(z) <strong>{{ room.room_number }}</strong> számú szobát?</p>
-        
+
         {% if room.bookings and room.bookings|length > 0 %}
             <p style="margin-top: 10px; font-weight: bold;">
                 FIGYELEM: Ehhez a szobához jelenleg <strong>{{ room.bookings|length }}</strong> foglalás kapcsolódik.
             </p>
         {% endif %}
-        
+
         <p style="margin-top: 10px; font-size: 0.9em;">
             <strong>FONTOS:</strong> A törlés visszavonhatatlan, és a rendszer automatikusan törölni fog minden kapcsolódó foglalást és számlát is!
         </p>
