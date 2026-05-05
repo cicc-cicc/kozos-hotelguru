@@ -3,20 +3,61 @@
 {% block title %}Felhasználók - Admin{% endblock %}
 
 {% block content %}
-<h1>Felhasználók</h1>
-<table class="table">
-    <thead>
-        <tr><th>Felhasználó</th><th>Email</th><th>Szerepkör</th><th>Műveletek</th></tr>
-    </thead>
-    <tbody>
-    {% for u in users %}
-        <tr>
-            <td>{{ u.username }}</td>
-            <td>{{ u.email }}</td>
-            <td>{{ u.role.name }}</td>
-            <td><a href="{{ url_for('admin.edit_user_role', user_id=u.id) }}">Szerkeszt</a></td>
-        </tr>
-    {% endfor %}
-    </tbody>
-</table>
+<div class="container main-wrap">
+    
+    <!-- Page Header -->
+    <div class="hero" style="padding: 30px 0 20px; background: transparent; border: none;">
+        <h1 style="display: flex; justify-content: center; align-items: center; gap: 10px;">
+            Felhasználók <span class="emoji-icon">🌸</span>
+        </h1>
+        <p style="text-align: center; color: var(--muted); margin-top: 5px;">
+            Kezeld a regisztrált tagokat és szerepköreiket
+        </p>
+    </div>
+
+    <!-- User Table Container -->
+    <div class="card" style="overflow-x: auto; padding: 0;">
+        <table class="table-clean" style="margin-top: 0;">
+            <thead>
+                <tr>
+                    <th><span class="emoji-icon">👑</span> Felhasználó</th>
+                    <th><span class="emoji-icon">✉️</span> Email</th>
+                    <th><span class="emoji-icon">🛡️</span> Szerepkör</th>
+                    <th style="text-align: center;"><span class="emoji-icon">⚙️</span> Műveletek</th>
+                </tr>
+            </thead>
+            <tbody>
+            {% for u in users %}
+                <tr>
+                    <!-- Emphasize the username slightly -->
+                    <td style="font-weight: 600; color: #701a75;">{{ u.username }}</td>
+                    
+                    <!-- Soften the email so it doesn't fight for attention -->
+                    <td class="muted">{{ u.email }}</td>
+                    
+                    <!-- Use a badge for quick visual scanning of roles -->
+                    <td>
+                        <span class="badge">{{ u.role.name }}</span>
+                    </td>
+                    
+                    <!-- Clean, ghost-style action button -->
+                    <td style="text-align: center;">
+                        <a href="{{ url_for('admin.edit_user_role', user_id=u.id) }}" class="btn btn-ghost" style="padding: 6px 14px; font-size: 0.85rem;">
+                            ✏️ Szerkeszt
+                        </a>
+                    </td>
+                </tr>
+            {% else %}
+                <!-- Friendly empty state if there are no users -->
+                <tr>
+                    <td colspan="4" style="text-align: center; padding: 40px; color: var(--muted);">
+                        Még nincsenek felhasználók a rendszerben. 🎀
+                    </td>
+                </tr>
+            {% endfor %}
+            </tbody>
+        </table>
+    </div>
+
+</div>
 {% endblock %}

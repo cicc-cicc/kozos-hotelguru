@@ -1,31 +1,42 @@
 {% extends "base.html" %}
 
-{% block title %}Szoba törlése - HotelGuru{% endblock %}
+{% block title %}Szoba törlése 🥀 - HotelGuru{% endblock %}
 
 {% block content %}
-<div style="max-width: 500px; margin: 0 auto; text-align: center; background: white; padding: 40px; border-radius: 8px; box-shadow: 0 4px 10px rgba(0,0,0,0.1);">
-    <h1 style="color: #c0392b;">Veszélyes művelet!</h1>
+<div style="max-width: 550px; margin: 40px auto; text-align: center; background: white; padding: 40px; border-radius: 30px; box-shadow: 0 10px 30px rgba(240, 98, 146, 0.15); border: 1px solid #fce4ec;">
+    
+    <!-- Emotional/Themed Header -->
+    <div style="font-size: 3rem; margin-bottom: 10px;">🥀</div>
+    <h1 style="color: #ad1457; font-family: 'Dancing Script', cursive; font-size: 2.5rem; margin-top: 0;">Biztosan búcsút veszünk?</h1>
 
-    <div class="alert alert-danger" style="margin: 20px 0; text-align: left; background-color: #f8d7da; color: #721c24; padding: 15px; border-radius: 4px; border: 1px solid #f5c6cb;">
-        <p>Biztosan törölni szeretné a(z) <strong>{{ room.room_number }}</strong> számú szobát?</p>
+    <!-- Softened Alert Box -->
+    <div class="alert alert-danger" style="margin: 25px 0; text-align: left; background-color: #fff5f8; color: #880e4f; padding: 25px; border-radius: 20px; border: 1px dashed #f8bbd0;">
+        <p style="font-size: 1.1rem; margin-top: 0;">Biztosan törölni szeretnéd a(z) <strong style="color: #d81b60;">{{ room.room_number }}</strong> számú szobát? 🥺</p>
 
         {% if room.bookings and room.bookings|length > 0 %}
-            <p style="margin-top: 10px; font-weight: bold;">
-                FIGYELEM: Ehhez a szobához jelenleg <strong>{{ room.bookings|length }}</strong> foglalás kapcsolódik.
-            </p>
+            <div style="margin-top: 15px; padding: 10px; background: #fce4ec; border-radius: 12px;">
+                <p style="margin: 0; font-weight: bold; font-size: 0.95rem;">
+                    ✨ FIGYELEM: Ehhez a szobához jelenleg <strong style="color: #c62828;">{{ room.bookings|length }}</strong> foglalás kapcsolódik!
+                </p>
+            </div>
         {% endif %}
 
-        <p style="margin-top: 10px; font-size: 0.9em;">
-            <strong>FONTOS:</strong> A törlés visszavonhatatlan, és a rendszer automatikusan törölni fog minden kapcsolódó foglalást és számlát is!
+        <p style="margin-top: 20px; margin-bottom: 0; font-size: 0.9em; line-height: 1.6;">
+            <strong>🎀 FONTOS:</strong> A törlés visszavonhatatlan, és a rendszer automatikusan törölni fog minden kapcsolódó foglalást és számlát is. Kérlek, gondold át alaposan!
         </p>
     </div>
 
     <form method="POST">
         {{ form.hidden_tag() }}
-        <div style="display: flex; justify-content: center; gap: 15px; margin-top: 30px;">
-            <a href="{{ url_for('admin.admin_dashboard') }}" class="btn" style="background: #95a5a6; color: white; text-decoration: none; padding: 10px 30px; border-radius: 4px;">Mégse, Vissza</a>
-            <button type="submit" class="btn" style="background: #c0392b; color: white; padding: 10px 30px; border: none; border-radius: 4px; cursor: pointer; font-weight: bold;">
-                Végleges törlés
+        <div style="display: flex; justify-content: center; flex-wrap: wrap; gap: 15px; margin-top: 30px;">
+            <!-- Gentle Cancel Button -->
+            <a href="{{ url_for('admin.admin_dashboard') }}" class="btn" style="background: #fce4ec; color: #ad1457; text-decoration: none; padding: 12px 30px; border-radius: 50px; font-weight: bold; border: 1px solid #f8bbd0; flex: 1; min-width: 150px;">
+                🌸 Mégse, visszalépek
+            </a>
+            
+            <!-- Girly Destructive Button -->
+            <button type="submit" class="btn" style="background: linear-gradient(90deg, #d81b60, #ad1457); color: white; padding: 12px 30px; border: none; border-radius: 50px; cursor: pointer; font-weight: bold; box-shadow: 0 4px 10px rgba(173, 20, 87, 0.2); flex: 1; min-width: 150px;">
+                Végleges törlés 🗑️
             </button>
         </div>
     </form>

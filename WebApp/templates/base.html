@@ -1,56 +1,127 @@
 <!DOCTYPE html>
 <html lang="hu">
 <head>
-
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>{% block title %}HotelGuru{% endblock %}</title>
     <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+    <!-- Import an elegant font -->
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;700&family=Dancing+Script:wght@600&display=swap" rel="stylesheet">
+    
     <style>
-        /* Alapvető menü formázás a style.css kiegészítéseként */
-        nav { background-color: #2c3e50; padding: 1rem; color: white; margin-bottom: 20px; }
-        nav .container { width: 100%; max-width: none; display: flex; justify-content: center; align-items: center; gap: 12px; flex-wrap: wrap; }
-        nav ul { list-group: none; display: flex; margin: 0; padding: 0; }
-        nav ul li { margin-left: 20px; list-style: none; }
-        nav a { color: white; text-decoration: none; font-weight: bold; margin: 0 8px; }
-        .alert { padding: 15px; margin-bottom: 20px; border-radius: 4px; }
-        .alert-success { background-color: #d4edda; color: #155724; border: 1px solid #c3e6cb; }
-        .alert-danger { background-color: #f8d7da; color: #721c24; border: 1px solid #f5c6cb; }
-        .alert-info { background-color: #d1ecf1; color: #0c5460; border: 1px solid #bee5eb; }
-        .form-group { margin-bottom: 15px; }
-        .form-control { width: 100%; padding: 8px; border: 1px solid #ccc; border-radius: 4px; box-sizing: border-box; }
-        .btn { padding: 10px 20px; border: none; border-radius: 4px; cursor: pointer; font-weight: bold; }
-        .btn-primary { background-color: #3498db; color: white; }
+        /* Updated aesthetic for a "girly" and pretty feel */
+        body { 
+            background: linear-gradient(135deg, #fff5f8 0%, #fce4ec 100%); 
+            font-family: 'Montserrat', sans-serif;
+            color: #4a148c; 
+        }
+
+        /* Navigation: Soft Pink/Lavender instead of Dark Navy */
+        nav { 
+            background: linear-gradient(90deg, #ff80ab, #f06292); 
+            padding: 1.2rem; 
+            box-shadow: 0 4px 15px rgba(236, 64, 122, 0.2);
+            margin-bottom: 30px; 
+        }
+        
+        nav .container { 
+            width: 100%; 
+            max-width: none; 
+            display: flex; 
+            justify-content: center; 
+            align-items: center; 
+            gap: 15px; 
+            flex-wrap: wrap; 
+        }
+
+        /* Pretty Links with Emojis */
+        nav a { 
+            color: white; 
+            text-decoration: none; 
+            font-weight: bold; 
+            margin: 0 10px; 
+            font-size: 1.05rem;
+            transition: all 0.3s ease;
+        }
+
+        nav a:hover { 
+            transform: scale(1.1); 
+            text-shadow: 0 0 8px rgba(255, 255, 255, 0.6); 
+        }
+
+        /* Rounded and Soft Alerts */
+        .alert { padding: 15px; margin-bottom: 20px; border-radius: 15px; border: none; font-weight: 500; }
+        .alert-success { background-color: #f1f8e9; color: #388e3c; }
+        .alert-danger { background-color: #ffebee; color: #c62828; }
+        .alert-info { background-color: #f3e5f5; color: #7b1fa2; }
+
+        /* Girly Buttons */
+        .btn { 
+            padding: 12px 25px; 
+            border: none; 
+            border-radius: 50px; /* Pill shape */
+            cursor: pointer; 
+            font-weight: bold; 
+            transition: 0.3s;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+        }
+
+        .btn-primary { 
+            background: linear-gradient(90deg, #ec407a, #d81b60); 
+            color: white; 
+        }
+
+        .btn-primary:hover {
+            box-shadow: 0 6px 15px rgba(216, 27, 96, 0.3);
+            transform: translateY(-2px);
+        }
+
+        .form-control { 
+            width: 100%; 
+            padding: 12px; 
+            border: 2px solid #f8bbd0; 
+            border-radius: 12px; 
+            box-sizing: border-box; 
+        }
+
+        .form-control:focus {
+            border-color: #f06292;
+            outline: none;
+            box-shadow: 0 0 8px rgba(240, 98, 146, 0.2);
+        }
     </style>
 </head>
 <body>
     <nav>
         <div class="container">
-            <a href="{{ url_for('guest.index') }}">Kezdőlap</a>
+            <a href="{{ url_for('guest.index') }}">🌸 Kezdőlap</a>
 
             {% if current_user.is_authenticated %}
-                <a href="{{ url_for('auth.profile') }}">Profil</a>
-                <a href="{{ url_for('guest.my_bookings') }}">Foglalásaim</a>
+                <a href="{{ url_for('auth.profile') }}">✨ Profil</a>
+                <a href="{{ url_for('guest.my_bookings') }}">🛌 Foglalásaim</a>
 
                 {% if current_user.role.value == 'receptionist' %}
-                    <a href="{{ url_for('reception.reception_dashboard') }}">Recepció</a>
+                    <a href="{{ url_for('reception.reception_dashboard') }}">🛎️ Recepció</a>
                 {% elif current_user.role.value == 'admin' %}
-                    <a href="{{ url_for('admin.admin_dashboard') }}">Admin</a>
+                    <a href="{{ url_for('admin.admin_dashboard') }}">👑 Admin</a>
                 {% endif %}
 
-                <a href="{{ url_for('auth.logout') }}">Kijelentkezés</a>
+                <a href="{{ url_for('auth.logout') }}">🚪 Kijelentkezés</a>
             {% else %}
-                <a href="{{ url_for('auth.login') }}">Bejelentkezés</a>
-                <a href="{{ url_for('auth.register') }}">Regisztráció</a>
+                <a href="{{ url_for('auth.login') }}">💖 Bejelentkezés</a>
+                <a href="{{ url_for('auth.register') }}">🎀 Regisztráció</a>
             {% endif %}
         </div>
     </nav>
 
     <div class="container">
+        <!-- Optional: Floating Sparkle or Flower image placeholder -->
+        <img src="/static/flower-icon.png" style="position: absolute; top: 10px; right: 10px; width: 50px; opacity: 0.5;"> -->
+
         {% with messages = get_flashed_messages(with_categories=true) %}
             {% if messages %}
                 {% for category, message in messages %}
-                    <div class="alert alert-{{ category }}">{{ message }}</div>
+                    <div class="alert alert-{{ category }}">✨ {{ message }}</div>
                 {% endfor %}
             {% endif %}
         {% endwith %}

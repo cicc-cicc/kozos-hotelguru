@@ -3,53 +3,114 @@
 {% block title %}{{ title }} - HotelGuru{% endblock %}
 
 {% block content %}
-<div style="max-width: 600px; margin: 0 auto; background: white; padding: 30px; border-radius: 8px; box-shadow: 0 2px 5px rgba(0,0,0,0.1);">
-    <h1>{{ title }}</h1>
+<div class="container main-wrap">
 
-    <form method="POST">
-        {{ form.hidden_tag() }}
+    <!-- Cute Page Header -->
+    <div class="hero" style="padding: 20px 0 30px; background: transparent; border: none; margin-bottom: 0;">
+        <h1 style="display: flex; justify-content: center; align-items: center; gap: 10px;">
+            {{ title }} <span class="emoji-icon">🛏️</span>
+        </h1>
+        <p style="text-align: center; color: var(--muted); margin-top: 5px;">
+            Állítsd be a szoba részleteit és kényelmi funkcióit
+        </p>
+    </div>
 
-        <div style="display: flex; gap: 15px;">
-            <div class="form-group" style="flex: 1;">
-                {{ form.room_number.label(style="font-weight: bold;") }}<br>
-                {{ form.room_number(class="form-control") }}
-                {% for error in form.room_number.errors %}<span style="color:red; font-size:0.9em;">{{ error }}</span>{% endfor %}
+    <!-- Centered Form Card -->
+    <div class="card" style="max-width: 650px; margin: 0 auto 40px; padding: 30px;">
+        <form method="POST" class="stack" style="gap: 20px;">
+            {{ form.hidden_tag() }}
+
+            <!-- Side-by-side row for Room Number & Capacity -->
+            <div style="display: flex; gap: 15px; flex-wrap: wrap;">
+                
+                <!-- Room Number -->
+                <div class="form-group stack" style="flex: 1; min-width: 200px; gap: 8px;">
+                    <div style="display: flex; align-items: center; gap: 5px; font-weight: 600; color: #701a75; font-size: 0.95rem;">
+                        <span class="emoji-icon">🚪</span>
+                        {{ form.room_number.label(style="margin: 0; cursor: pointer;") }}
+                    </div>
+                    {{ form.room_number(class="form-control", placeholder="Pl. 101, 205A...") }}
+                    {% for error in form.room_number.errors %}
+                        <span style="color: #e11d48; font-size: 0.85rem; font-weight: 600;">{{ error }}</span>
+                    {% endfor %}
+                </div>
+                
+                <!-- Capacity -->
+                <div class="form-group stack" style="flex: 1; min-width: 200px; gap: 8px;">
+                    <div style="display: flex; align-items: center; gap: 5px; font-weight: 600; color: #701a75; font-size: 0.95rem;">
+                        <span class="emoji-icon">👥</span>
+                        {{ form.capacity.label(style="margin: 0; cursor: pointer;") }}
+                    </div>
+                    {{ form.capacity(class="form-control", min="1") }}
+                    {% for error in form.capacity.errors %}
+                        <span style="color: #e11d48; font-size: 0.85rem; font-weight: 600;">{{ error }}</span>
+                    {% endfor %}
+                </div>
             </div>
-            <div class="form-group" style="flex: 1;">
-                {{ form.capacity.label(style="font-weight: bold;") }}<br>
-                {{ form.capacity(class="form-control", min="1") }}
-                {% for error in form.capacity.errors %}<span style="color:red; font-size:0.9em;">{{ error }}</span>{% endfor %}
+
+            <!-- Price -->
+            <div class="form-group stack" style="gap: 8px;">
+                <div style="display: flex; align-items: center; gap: 5px; font-weight: 600; color: #701a75; font-size: 0.95rem;">
+                    <span class="emoji-icon">💳</span>
+                    {{ form.price_per_night.label(style="margin: 0; cursor: pointer;") }}
+                </div>
+                <div style="position: relative; display: flex; align-items: center;">
+                    {{ form.price_per_night(class="form-control", style="padding-right: 40px;") }}
+                    <span style="position: absolute; right: 16px; color: var(--muted); font-weight: 700;">Ft</span>
+                </div>
+                {% for error in form.price_per_night.errors %}
+                    <span style="color: #e11d48; font-size: 0.85rem; font-weight: 600;">{{ error }}</span>
+                {% endfor %}
             </div>
-        </div>
 
-        <div class="form-group" style="margin-top: 15px;">
-            {{ form.price_per_night.label(style="font-weight: bold;") }}<br>
-            {{ form.price_per_night(class="form-control") }}
-            {% for error in form.price_per_night.errors %}<span style="color:red; font-size:0.9em;">{{ error }}</span>{% endfor %}
-        </div>
+            <!-- Status -->
+            <div class="form-group stack" style="gap: 8px;">
+                <div style="display: flex; align-items: center; gap: 5px; font-weight: 600; color: #701a75; font-size: 0.95rem;">
+                    <span class="emoji-icon">📋</span>
+                    {{ form.status.label(style="margin: 0; cursor: pointer;") }}
+                </div>
+                {{ form.status(class="form-control") }}
+                {% for error in form.status.errors %}
+                    <span style="color: #e11d48; font-size: 0.85rem; font-weight: 600;">{{ error }}</span>
+                {% endfor %}
+            </div>
 
-        <div class="form-group" style="margin-top: 15px;">
-            {{ form.status.label(style="font-weight: bold;") }}<br>
-            {{ form.status(class="form-control") }}
-            {% for error in form.status.errors %}<span style="color:red; font-size:0.9em;">{{ error }}</span>{% endfor %}
-        </div>
+            <!-- Equipment -->
+            <div class="form-group stack" style="gap: 8px;">
+                <div style="display: flex; align-items: center; gap: 5px; font-weight: 600; color: #701a75; font-size: 0.95rem;">
+                    <span class="emoji-icon">📺</span>
+                    {{ form.equipment.label(style="margin: 0; cursor: pointer;") }}
+                </div>
+                {{ form.equipment(class="form-control", rows="2", placeholder="Pl. Légkondi, TV, Minibár, Jacuzzi...") }}
+                {% for error in form.equipment.errors %}
+                    <span style="color: #e11d48; font-size: 0.85rem; font-weight: 600;">{{ error }}</span>
+                {% endfor %}
+            </div>
 
-        <div class="form-group" style="margin-top: 15px;">
-            {{ form.equipment.label(style="font-weight: bold;") }}<br>
-            {{ form.equipment(class="form-control", rows="2", placeholder="pl. Légkondi, TV, Minibár") }}
-            {% for error in form.equipment.errors %}<span style="color:red; font-size:0.9em;">{{ error }}</span>{% endfor %}
-        </div>
+            <!-- Description -->
+            <div class="form-group stack" style="gap: 8px;">
+                <div style="display: flex; align-items: center; gap: 5px; font-weight: 600; color: #701a75; font-size: 0.95rem;">
+                    <span class="emoji-icon">📝</span>
+                    {{ form.description.label(style="margin: 0; cursor: pointer;") }}
+                </div>
+                {{ form.description(class="form-control", rows="3", placeholder="Részletes leírás a szobáról, kilátásról...") }}
+                {% for error in form.description.errors %}
+                    <span style="color: #e11d48; font-size: 0.85rem; font-weight: 600;">{{ error }}</span>
+                {% endfor %}
+            </div>
 
-        <div class="form-group" style="margin-top: 15px;">
-            {{ form.description.label(style="font-weight: bold;") }}<br>
-            {{ form.description(class="form-control", rows="3") }}
-            {% for error in form.description.errors %}<span style="color:red; font-size:0.9em;">{{ error }}</span>{% endfor %}
-        </div>
+            <!-- Action Buttons -->
+            <div style="display: flex; gap: 15px; margin-top: 15px;">
+                <!-- Save Button -->
+                {{ form.submit(class="btn btn-primary btn-cta", style="flex: 1; font-size: 1rem;", value="Mentés ✨") }}
+                
+                <!-- Back Button -->
+                <a href="{{ url_for('admin.admin_dashboard') }}" class="btn btn-ghost" style="flex: 1; display: flex; justify-content: center;">
+                    Vissza
+                </a>
+            </div>
+        </form>
+    </div>
 
-        <div style="margin-top: 25px; display: flex; gap: 10px;">
-            {{ form.submit(class="btn btn-primary", style="flex: 1; padding: 10px; font-weight: bold;") }}
-            <a href="{{ url_for('admin.admin_dashboard') }}" class="btn" style="background: #95a5a6; color: white; text-decoration: none; padding: 10px 20px; border-radius: 4px; text-align: center;">Vissza</a>
-        </div>
-    </form>
 </div>
 {% endblock %}

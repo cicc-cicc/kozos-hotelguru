@@ -1,35 +1,61 @@
 {% extends "base.html" %}
 
-{% block title %}Szolgáltatás hozzáadása - HotelGuru{% endblock %}
+{% block title %}Szolgáltatás hozzáadása 🎀 - HotelGuru{% endblock %}
 
 {% block content %}
-<div style="max-width: 500px; margin: 0 auto; background: white; padding: 30px; border-radius: 8px; box-shadow: 0 2px 5px rgba(0,0,0,0.1);">
-    <h1>Tétel hozzáadása a számlához</h1>
-    <div style="background: #f1f2f6; padding: 15px; margin-bottom: 20px; border-radius: 5px;">
-        <p style="margin: 0 0 5px 0;"><strong>Foglalás:</strong> #{{ booking.id }}</p>
-        <p style="margin: 0 0 5px 0;"><strong>Vendég:</strong> {{ booking.user.username }}</p>
-        <p style="margin: 0;"><strong>Szoba:</strong> {{ booking.room.room_number }}</p>
+<div style="max-width: 500px; margin: 40px auto; background: white; padding: 40px; border-radius: 30px; box-shadow: 0 15px 35px rgba(240, 98, 146, 0.1); border: 1px solid #fce4ec;">
+    
+    <div style="text-align: center; margin-bottom: 30px;">
+        <span style="font-size: 3rem;">🛍️</span>
+        <h1 style="color: #ad1457; font-family: 'Dancing Script', cursive; margin-top: 10px;">Extra Tétel Hozzáadása</h1>
+        <p style="color: #880e4f; font-size: 0.95rem;">Teljesítsd a vendég kívánságát! ✨</p>
+    </div>
+
+    <!-- Cute Boutique Info Box -->
+    <div style="background: #fff5f8; padding: 20px; margin-bottom: 30px; border-radius: 20px; border: 1px dashed #f8bbd0; color: #ad1457;">
+        <p style="margin: 0 0 10px 0; display: flex; align-items: center; gap: 8px;">
+            <strong>🔖 Foglalás:</strong> #{{ booking.id }}
+        </p>
+        <p style="margin: 0 0 10px 0; display: flex; align-items: center; gap: 8px;">
+            <strong>👑 Vendég:</strong> {{ booking.user.username }}
+        </p>
+        <p style="margin: 0; display: flex; align-items: center; gap: 8px;">
+            <strong>🛌 Szoba:</strong> {{ booking.room.room_number }}
+        </p>
     </div>
 
     <form method="POST">
         {{ form.hidden_tag() }}
         {{ form.booking_id(value=booking.id) }}
 
-        <div class="form-group">
-            {{ form.service_id.label(style="font-weight: bold;") }}<br>
-            {{ form.service_id(class="form-control") }}
-            {% for error in form.service_id.errors %}<span style="color:red; font-size: 0.9em;">{{ error }}</span>{% endfor %}
+        <div class="form-group" style="margin-bottom: 20px;">
+            <label style="color: #ad1457; font-weight: bold; display: flex; align-items: center; gap: 8px;">
+                ✨ {{ form.service_id.label }}
+            </label>
+            {{ form.service_id(class="form-control", style="margin-top: 8px; border: 2px solid #f8bbd0; border-radius: 15px; padding: 12px; width: 100%; box-sizing: border-box; outline: none;") }}
+            {% for error in form.service_id.errors %}
+                <span style="color:#d81b60; font-size: 0.85em;">✨ {{ error }}</span>
+            {% endfor %}
         </div>
 
-        <div class="form-group">
-            {{ form.quantity.label(style="font-weight: bold;") }}<br>
-            {{ form.quantity(class="form-control", min="1") }}
-            {% for error in form.quantity.errors %}<span style="color:red; font-size: 0.9em;">{{ error }}</span>{% endfor %}
+        <div class="form-group" style="margin-bottom: 30px;">
+            <label style="color: #ad1457; font-weight: bold; display: flex; align-items: center; gap: 8px;">
+                🔢 {{ form.quantity.label }}
+            </label>
+            {{ form.quantity(class="form-control", min="1", style="margin-top: 8px; border: 2px solid #f8bbd0; border-radius: 15px; padding: 12px; width: 100%; box-sizing: border-box; outline: none;") }}
+            {% for error in form.quantity.errors %}
+                <span style="color:#d81b60; font-size: 0.85em;">✨ {{ error }}</span>
+            {% endfor %}
         </div>
 
-        <div style="margin-top: 20px; display: flex; gap: 10px;">
-            {{ form.submit(class="btn btn-primary", style="flex: 1;") }}
-            <a href="{{ url_for('reception.reception_dashboard') }}" class="btn" style="background: #95a5a6; color: white; text-decoration: none; padding: 10px 20px;">Mégse</a>
+        <div style="display: flex; flex-direction: column; gap: 15px;">
+            <!-- Girly Primary Button -->
+            {{ form.submit(class="btn btn-primary", style="width: 100%; padding: 15px; font-size: 1.1rem; border-radius: 50px; background: linear-gradient(90deg, #d81b60, #ad1457); color: white; border: none; box-shadow: 0 4px 10px rgba(173, 20, 87, 0.2); cursor: pointer;") }}
+            
+            <!-- Soft Cancel Link -->
+            <a href="{{ url_for('reception.reception_dashboard') }}" style="text-align: center; color: #ad1457; text-decoration: none; font-weight: 500; font-size: 0.9rem;">
+                🌸 Mégse, visszalépek
+            </a>
         </div>
     </form>
 </div>

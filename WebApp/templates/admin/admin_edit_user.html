@@ -3,13 +3,43 @@
 {% block title %}Szerepkör szerkesztése - {{ user.username }}{% endblock %}
 
 {% block content %}
-<h1>Szerepkör szerkesztése: {{ user.username }}</h1>
-<form method="POST">
-    {{ form.hidden_tag() }}
-    <div class="form-group">
-        {{ form.role.label }}
-        {{ form.role(class='form-control') }}
+<div class="container main-wrap">
+
+    <!-- Cute Page Header -->
+    <div class="hero" style="padding: 20px 0 30px; background: transparent; border: none; margin-bottom: 0;">
+        <h1 style="display: flex; justify-content: center; align-items: center; gap: 10px; text-align: center;">
+            Jogosultság Kezelése <span class="emoji-icon">🪄</span>
+        </h1>
+        <p style="text-align: center; color: var(--muted); margin-top: 5px;">
+            Módosítsd <strong>{{ user.username }}</strong> felhasználó szerepkörét
+        </p>
     </div>
-    {{ form.submit(class='btn btn-primary') }}
-</form>
+
+    <!-- Centered Edit Form Card -->
+    <div class="card" style="max-width: 500px; margin: 0 auto 40px; padding: 30px;">
+        <form method="POST" class="stack" style="gap: 20px;">
+            {{ form.hidden_tag() }}
+            
+            <!-- Role Selection Field -->
+            <div class="form-group stack" style="gap: 8px;">
+                <label style="font-weight: 600; color: #701a75; font-size: 0.95rem;">
+                    <span class="emoji-icon">🛡️</span> {{ form.role.label.text }}
+                </label>
+                {{ form.role(class='form-control') }}
+            </div>
+            
+            <!-- Action Buttons -->
+            <div style="display: flex; gap: 15px; margin-top: 15px;">
+                <!-- Main Save Button -->
+                {{ form.submit(class='btn btn-primary btn-cta', style='flex: 1; font-size: 1rem;', value='Mentés ✨') }}
+                
+                <!-- Cancel / Back Button -->
+                <a href="{{ url_for('admin.manage_users') }}" class="btn btn-ghost" style="flex: 1; display: flex; justify-content: center;">
+                    Mégsem
+                </a>
+            </div>
+        </form>
+    </div>
+
+</div>
 {% endblock %}

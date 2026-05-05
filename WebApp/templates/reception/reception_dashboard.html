@@ -1,84 +1,148 @@
 {% extends "base.html" %}
 
-{% block title %}Recepciós Pult - HotelGuru{% endblock %}
+{% block title %}Recepciós Pult 🛎️ - HotelGuru{% endblock %}
 
 {% block content %}
 <style>
-    .text-paid { color: #27ae60; font-weight: bold; }
-    .text-unpaid { color: #e74c3c; font-weight: bold; }
+    /* Status Badges for Reception */
+    .status-pill {
+        padding: 6px 14px;
+        border-radius: 50px;
+        font-size: 0.85rem;
+        font-weight: bold;
+        display: inline-block;
+    }
+    .status-pending { background-color: #fff3e0; color: #ef6c00; }
+    .status-confirmed { background-color: #e1f5fe; color: #0288d1; }
+    .status-checked_in { background-color: #e8f5e9; color: #2e7d32; }
+    
+    .text-paid { color: #2e7d32; font-weight: bold; }
+    .text-unpaid { color: #c62828; font-weight: bold; }
+
+    /* Elegant Filter Buttons */
+    .filter-btn {
+        padding: 8px 18px;
+        border-radius: 50px;
+        text-decoration: none;
+        font-weight: bold;
+        font-size: 0.9rem;
+        transition: 0.3s;
+        border: 1px solid transparent;
+    }
+    .filter-btn:hover { transform: translateY(-2px); opacity: 0.9; }
+
+    /* Table Refresh */
+    .reception-table {
+        width: 100%;
+        border-collapse: separate;
+        border-spacing: 0 8px;
+    }
+    .reception-table thead tr {
+        background: linear-gradient(90deg, #ad1457, #d81b60);
+        color: white;
+    }
+    .reception-table th {
+        padding: 15px;
+        text-transform: uppercase;
+        font-size: 0.8rem;
+        letter-spacing: 1px;
+    }
+    .reception-table th:first-child { border-radius: 15px 0 0 15px; }
+    .reception-table th:last-child { border-radius: 0 15px 15px 0; }
+
+    .reception-row { background: white; box-shadow: 0 4px 10px rgba(216, 27, 96, 0.05); }
+    .reception-row td { padding: 15px; border-top: 1px solid #fce4ec; border-bottom: 1px solid #fce4ec; }
+    .reception-row td:first-child { border-left: 1px solid #fce4ec; border-radius: 15px 0 0 15px; }
+    .reception-row td:last-child { border-right: 1px solid #fce4ec; border-radius: 0 15px 15px 0; }
 </style>
 
-
-<div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
-    <h1>Recepciós Pult - Foglalások kezelése</h1>
+<div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 30px; flex-wrap: wrap; gap: 20px;">
     <div>
-        <a href="{{ url_for('reception.reception_dashboard') }}" class="btn" style="background: #7f8c8d; color: white; text-decoration: none; padding: 5px 10px;">Összes</a>
-        <a href="{{ url_for('reception.reception_dashboard', status='pending') }}" class="btn" style="background: #f39c12; color: white; text-decoration: none; padding: 5px 10px;">Függőben</a>
-        <a href="{{ url_for('reception.reception_dashboard', status='confirmed') }}" class="btn" style="background: #3498db; color: white; text-decoration: none; padding: 5px 10px;">Visszaigazolt</a>
-        <a href="{{ url_for('reception.reception_dashboard', status='checked_in') }}" class="btn" style="background: #27ae60; color: white; text-decoration: none; padding: 5px 10px;">Becsekkolt</a>
+        <h1 style="font-family: 'Dancing Script', cursive; color: #ad1457; font-size: 2.8rem; margin: 0;">🛎️ Recepciós Vezérlő</h1>
+        <p style="color: #880e4f; margin: 5px 0 0 0;">Üdvözlünk! Kezeld a vendégek érkezését mosollyal. ✨</p>
+    </div>
+    
+    <div style="display: flex; gap: 8px; flex-wrap: wrap;">
+        <a href="{{ url_for('reception.reception_dashboard') }}" class="filter-btn" style="background: #fce4ec; color: #ad1457; border: 1px solid #f8bbd0;">Összes</a>
+        <a href="{{ url_for('reception.reception_dashboard', status='pending') }}" class="filter-btn" style="background: #ffd54f; color: #827717;">⏳ Függő</a>
+        <a href="{{ url_for('reception.reception_dashboard', status='confirmed') }}" class="filter-btn" style="background: #81d4fa; color: #01579b;">💖 Igazolt</a>
+        <a href="{{ url_for('reception.reception_dashboard', status='checked_in') }}" class="filter-btn" style="background: #a5d6a7; color: #1b5e20;">🔑 Bent lakik</a>
     </div>
 </div>
 
 <div style="overflow-x: auto;">
-    <table class="table" style="width: 100%; border-collapse: collapse; background: white; box-shadow: 0 1px 3px rgba(0,0,0,0.1);">
+    <table class="reception-table">
         <thead>
-            <tr style="background: #34495e; color: white;">
-                <th style="padding: 12px; text-align: left;">#ID</th>
-                <th style="padding: 12px; text-align: left;">Vendég</th>
-                <th style="padding: 12px; text-align: left;">Szoba</th>
-                <th style="padding: 12px; text-align: left;">Érkezés - Távozás</th>
-                <th style="padding: 12px; text-align: left;">Státusz</th>
-                <th style="padding: 12px; text-align: left;">Számla</th>
-                <th style="padding: 12px; text-align: center;">Műveletek</th>
+            <tr>
+                <th>Azonosító</th>
+                <th>Vendég</th>
+                <th>Szoba</th>
+                <th>Időszak</th>
+                <th>Státusz</th>
+                <th>Pénzügyek</th>
+                <th style="text-align: center;">Műveletek</th>
             </tr>
         </thead>
         <tbody>
             {% for booking in bookings %}
-            <tr style="border-bottom: 1px solid #ddd;">
-                <td style="padding: 12px;"><strong>#{{ booking.id }}</strong></td>
-                <td style="padding: 12px;">{{ booking.user.username }}<br><small>{{ booking.user.phone }}</small></td>
-                <td style="padding: 12px;">{{ booking.room.room_number }}</td>
-                <td style="padding: 12px;">{{ booking.check_in.strftime('%m.%d') }} &rarr; {{ booking.check_out.strftime('%m.%d') }}</td>
-                <td style="padding: 12px;"><strong>{{ booking.status.value }}</strong></td>
-                <td style="padding: 12px;">
-                    {% if booking.invoice %}
-                        {{ "{:,.0f}".format(booking.invoice.total_amount) }} Ft<br>
-                    <span class="{% if booking.invoice.paid %}text-paid{% else %}text-unpaid{% endif %}" style="font-size: 0.85em;">
-                        {% if booking.invoice.paid %}FIZETVE{% else %}NINCS FIZETVE{% endif %}
-                    </span>
+            <tr class="reception-row">
+                <td style="color: #ad1457;"><strong>#{{ booking.id }}</strong></td>
+                <td>
+                    <span style="font-weight: bold; color: #4a148c;">{{ booking.user.username }}</span><br>
+                    <small style="color: #880e4f;">📞 {{ booking.user.phone }}</small>
+                </td>
+                <td><span style="background: #f3e5f5; padding: 4px 10px; border-radius: 10px; font-weight: bold;">🛌 {{ booking.room.room_number }}</span></td>
+                <td style="font-size: 0.9rem; color: #4a148c;">
+                    {{ booking.check_in.strftime('%m.%d') }} <span style="color: #f06292;">&rarr;</span> {{ booking.check_out.strftime('%m.%d') }}
+                </td>
+                <td>
+                    {% if booking.status.value == 'pending' %}
+                        <span class="status-pill status-pending">Függőben</span>
+                    {% elif booking.status.value == 'confirmed' %}
+                        <span class="status-pill status-confirmed">Igazolva</span>
+                    {% elif booking.status.value == 'checked_in' %}
+                        <span class="status-pill status-checked_in">Bent van</span>
                     {% else %}
-                        -
+                        <span class="status-pill" style="background:#eee; color:#666;">{{ booking.status.value }}</span>
                     {% endif %}
                 </td>
-                <td style="padding: 12px; text-align: center; white-space: nowrap;">
+                <td>
+                    {% if booking.invoice %}
+                        <span style="font-weight: bold;">{{ "{:,.0f}".format(booking.invoice.total_amount) }} Ft</span><br>
+                    <span class="{% if booking.invoice.paid %}text-paid{% else %}text-unpaid{% endif %}" style="font-size: 0.75rem;">
+                        {% if booking.invoice.paid %}✅ FIZETVE{% else %}👛 TARTOZIK{% endif %}
+                    </span>
+                    {% else %}
+                        <small style="color: #999;">Nincs számla</small>
+                    {% endif %}
+                </td>
+                <td style="text-align: center; white-space: nowrap;">
                     {% if booking.status.value not in ['cancelled', 'checked_out'] %}
-                        <form method="POST" action="{{ url_for('reception.handle_booking', booking_id=booking.id) }}" style="display: inline-block; margin-right: 5px;">
+                        <form method="POST" action="{{ url_for('reception.handle_booking', booking_id=booking.id) }}" style="display: inline-block;">
                             {{ action_form.hidden_tag() }}
                             {{ action_form.booking_id(value=booking.id) }}
-                            <select name="action" style="padding:5px;">
+                            <select name="action" style="padding: 6px; border-radius: 10px; border: 1px solid #f8bbd0; outline: none; background: #fff;">
                                 {% if booking.status.value == 'pending' %}
-                                    <option value="confirm">Visszaigazolás (Confirm)</option>
-                                    <option value="cancel">Foglalás lemondása</option>
+                                    <option value="confirm">Visszaigazolás</option>
+                                    <option value="cancel">Lemondás</option>
                                 {% elif booking.status.value == 'confirmed' %}
-                                    <option value="check_in">Bejelentkeztetés (Check-in)</option>
-                                    <option value="cancel">Foglalás lemondása</option>
+                                    <option value="check_in">Bejelentkeztetés</option>
+                                    <option value="cancel">Lemondás</option>
                                 {% elif booking.status.value == 'checked_in' %}
-                                    <option value="check_out">Kijelentkeztetés és Számlázás (Check-out)</option>
-                                {% else %}
-                                    <option value="">-- Művelet --</option>
+                                    <option value="check_out">Kijelentkeztetés</option>
                                 {% endif %}
                             </select>
-                            <button type="submit" class="btn" style="background: #2980b9; color: white; padding: 6px 12px;">Végrehajtás</button>
+                            <button type="submit" class="btn" style="background: #ad1457; color: white; padding: 6px 12px; border-radius: 10px; font-size: 0.8rem;">GO</button>
                         </form>
-                        <a href="{{ url_for('reception.add_extra_service', booking_id=booking.id) }}" class="btn" style="background: #27ae60; color: white; padding: 6px 12px; text-decoration: none;">+ Szolgáltatás</a>
+                        <a href="{{ url_for('reception.add_extra_service', booking_id=booking.id) }}" title="Szolgáltatás hozzáadása" style="text-decoration: none; font-size: 1.2rem; margin-left: 5px;">➕</a>
                     {% else %}
-                        <span style="color: #7f8c8d; font-style: italic;">Lezárva</span>
+                        <span style="color: #95a5a6; font-size: 0.85rem; font-style: italic;">Lezárva</span>
                     {% endif %}
                 </td>
             </tr>
             {% else %}
             <tr>
-                <td colspan="7" style="padding: 20px; text-align: center;">Nincs megjeleníthető foglalás.</td>
+                <td colspan="7" style="padding: 40px; text-align: center; color: #ad1457; font-style: italic;">✨ Jelenleg nincs egyetlen foglalás sem a listában.</td>
             </tr>
             {% endfor %}
         </tbody>

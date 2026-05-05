@@ -3,27 +3,72 @@
 {% block title %}Bejelentkezés - HotelGuru{% endblock %}
 
 {% block content %}
-<div style="max-width: 400px; margin: 0 auto;">
-    <h1>Bejelentkezés</h1>
-    <form method="POST" action="">
-        {{ form.hidden_tag() }}
-        <div class="form-group">
-            {{ form.username.label }}
-            {{ form.username(class="form-control") }}
-            {% for error in form.username.errors %}<span style="color:red">{{ error }}</span>{% endfor %}
+<div class="container main-wrap">
+
+    <!-- Cute Page Header -->
+    <div class="hero" style="padding: 20px 0 30px; background: transparent; border: none; margin-bottom: 0;">
+        <h1 style="display: flex; justify-content: center; align-items: center; gap: 10px; text-align: center;">
+            Üdvözlünk Újra! <span class="emoji-icon">💖</span>
+        </h1>
+        <p style="text-align: center; color: var(--muted); margin-top: 5px;">
+            Jelentkezz be a fiókodba a folytatáshoz
+        </p>
+    </div>
+
+    <!-- Centered Login Card -->
+    <div class="card" style="max-width: 450px; margin: 0 auto 40px; padding: 35px 30px;">
+        <form method="POST" action="" class="stack" style="gap: 20px;">
+            {{ form.hidden_tag() }}
+            
+            <!-- Username Field -->
+            <div class="form-group stack" style="gap: 8px;">
+                <label style="font-weight: 600; color: #701a75; font-size: 0.95rem;">
+                    <span class="emoji-icon">👤</span> {{ form.username.label.text }}
+                </label>
+                {{ form.username(class="form-control", placeholder="Add meg a felhasználóneved...") }}
+                
+                {% for error in form.username.errors %}
+                    <span style="color: #e11d48; font-size: 0.85rem; font-weight: 600;">{{ error }}</span>
+                {% endfor %}
+            </div>
+            
+            <!-- Password Field -->
+            <div class="form-group stack" style="gap: 8px;">
+                <label style="font-weight: 600; color: #701a75; font-size: 0.95rem;">
+                    <span class="emoji-icon">🗝️</span> {{ form.password.label.text }}
+                </label>
+                {{ form.password(class="form-control", placeholder="Add meg a jelszavad...") }}
+                
+                {% for error in form.password.errors %}
+                    <span style="color: #e11d48; font-size: 0.85rem; font-weight: 600;">{{ error }}</span>
+                {% endfor %}
+            </div>
+            
+            <!-- Remember Me Checkbox -->
+            <div class="form-group" style="display: flex; align-items: center; gap: 10px; margin-top: -5px;">
+                <!-- Custom accent color makes the checkbox pink when checked -->
+                {{ form.remember(style="accent-color: var(--primary); width: 18px; height: 18px; cursor: pointer;") }}
+                <label for="{{ form.remember.id }}" style="color: var(--muted); font-size: 0.95rem; cursor: pointer; margin: 0;">
+                    {{ form.remember.label.text }}
+                </label>
+            </div>
+            
+            <!-- Submit Button -->
+            <div style="margin-top: 10px;">
+                {{ form.submit(class="btn btn-primary btn-cta", style="width: 100%; font-size: 1.05rem;", value="Bejelentkezés ✨") }}
+            </div>
+        </form>
+
+        <!-- Registration Link Area -->
+        <div style="text-align: center; margin-top: 25px; border-top: 2px dashed var(--border); padding-top: 20px;">
+            <p style="color: var(--muted); font-size: 0.95rem; margin: 0;">
+                Még nincs fiókod? <br>
+                <a href="{{ url_for('auth.register') }}" style="color: var(--primary); font-weight: 700; text-decoration: none; display: inline-block; margin-top: 5px; transition: opacity 0.2s ease;">
+                    Regisztrálj itt! 🎀
+                </a>
+            </p>
         </div>
-        <div class="form-group">
-            {{ form.password.label }}
-            {{ form.password(class="form-control") }}
-            {% for error in form.password.errors %}<span style="color:red">{{ error }}</span>{% endfor %}
-        </div>
-        <div class="form-group">
-            {{ form.remember() }} {{ form.remember.label }}
-        </div>
-        {{ form.submit(class="btn btn-primary") }}
-    </form>
-    <p style="margin-top: 20px;">
-        Még nincs fiókja? <a href="{{ url_for('auth.register') }}">Regisztráljon itt!</a>
-    </p>
+    </div>
+
 </div>
 {% endblock %}

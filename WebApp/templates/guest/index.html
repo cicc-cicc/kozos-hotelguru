@@ -1,36 +1,52 @@
 {% extends "base.html" %}
 
-{% block title %}Kezdőlap - HotelGuru{% endblock %}
+{% block title %}Kezdőlap 🌸 - HotelGuru{% endblock %}
 
 {% block content %}
-<div class="hero-section" style="text-align: center; padding: 40px 0;">
-    <h1>Találja meg a tökéletes szobát!</h1>
-    <p>Adja meg az időpontot és a vendégek számát a kereséshez.</p>
+<!-- Hero Section with a Magical Touch -->
+<div class="hero-section" style="text-align: center; padding: 60px 0; background: rgba(255, 255, 255, 0.3); border-radius: 30px; margin-bottom: 40px; border: 1px solid rgba(248, 187, 208, 0.5);">
+    <span style="font-size: 3.5rem;">✨</span>
+    <h1 style="font-family: 'Dancing Script', cursive; color: #ad1457; font-size: 3.5rem; margin: 10px 0;">Találja meg a tökéletes szobát!</h1>
+    <p style="color: #880e4f; font-size: 1.2rem; font-weight: 500;">Egy csipetnyi luxus, csak Önnek. 🎀</p>
 </div>
 
-<div class="search-container" style="background: #ecf0f1; padding: 30px; border-radius: 8px; max-width: 800px; margin: 0 auto;">
+<!-- Pretty Search Container -->
+<div class="search-container" style="background: white; padding: 40px; border-radius: 30px; max-width: 850px; margin: 0 auto; box-shadow: 0 15px 40px rgba(214, 51, 132, 0.1); border: 2px solid #fce4ec;">
     <form method="POST" action="{{ url_for('guest.index') }}">
         {{ form.hidden_tag() }}
-        <div style="display: flex; gap: 20px; flex-wrap: wrap; justify-content: center;">
-            <div class="form-group">
-                {{ form.arrival_date.label }}<br>
-                {{ form.arrival_date(class="form-control", type="date") }}
-                {% for error in form.arrival_date.errors %}<span style="color:red">{{ error }}</span>{% endfor %}
+        
+        <div style="display: flex; gap: 25px; flex-wrap: wrap; justify-content: center;">
+            <!-- Arrival Date -->
+            <div class="form-group" style="flex: 1; min-width: 200px;">
+                <label style="color: #ad1457; font-weight: bold; margin-bottom: 8px; display: block;">📅 {{ form.arrival_date.label }}</label>
+                {{ form.arrival_date(class="form-control", type="date", style="border: 2px solid #f8bbd0; border-radius: 15px; padding: 12px;") }}
+                {% for error in form.arrival_date.errors %}<span style="color:#d81b60; font-size: 0.85em;">✨ {{ error }}</span>{% endfor %}
             </div>
-            <div class="form-group">
-                {{ form.departure_date.label }}<br>
-                {{ form.departure_date(class="form-control", type="date") }}
-                {% for error in form.departure_date.errors %}<span style="color:red">{{ error }}</span>{% endfor %}
+
+            <!-- Departure Date -->
+            <div class="form-group" style="flex: 1; min-width: 200px;">
+                <label style="color: #ad1457; font-weight: bold; margin-bottom: 8px; display: block;">🌙 {{ form.departure_date.label }}</label>
+                {{ form.departure_date(class="form-control", type="date", style="border: 2px solid #f8bbd0; border-radius: 15px; padding: 12px;") }}
+                {% for error in form.departure_date.errors %}<span style="color:#d81b60; font-size: 0.85em;">✨ {{ error }}</span>{% endfor %}
             </div>
-            <div class="form-group">
-                {{ form.guests.label }}<br>
-                {{ form.guests(class="form-control", min="1", max="10") }}
-                {% for error in form.guests.errors %}<span style="color:red">{{ error }}</span>{% endfor %}
+
+            <!-- Guests -->
+            <div class="form-group" style="flex: 1; min-width: 200px;">
+                <label style="color: #ad1457; font-weight: bold; margin-bottom: 8px; display: block;">👥 {{ form.guests.label }}</label>
+                {{ form.guests(class="form-control", min="1", max="10", style="border: 2px solid #f8bbd0; border-radius: 15px; padding: 12px;") }}
+                {% for error in form.guests.errors %}<span style="color:#d81b60; font-size: 0.85em;">✨ {{ error }}</span>{% endfor %}
             </div>
         </div>
-        <div style="text-align: center; margin-top: 20px;">
-            {{ form.submit(class="btn btn-primary") }}
+
+        <div style="text-align: center; margin-top: 35px;">
+            <!-- Large Shiny Button -->
+            {{ form.submit(class="btn btn-primary", style="width: 100%; max-width: 400px; font-size: 1.2rem; padding: 18px; letter-spacing: 1px; text-transform: uppercase;") }}
         </div>
     </form>
+</div>
+
+<!-- Decorative Sparkles Section -->
+<div style="text-align: center; margin-top: 50px; opacity: 0.6; color: #f06292; font-size: 1.5rem;">
+    🌸 ✨ 🎀 ✨ 🌸
 </div>
 {% endblock %}

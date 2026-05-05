@@ -1,52 +1,119 @@
 {% extends "base.html" %}
 
-{% block title %}Szolgáltatások kezelése{% endblock %}
+{% block title %}Szolgáltatások Kezelése{% endblock %}
 
 {% block content %}
-<h1>Szolgáltatások</h1>
+<div class="container main-wrap">
 
-<form method="POST">
-    {{ form.hidden_tag() }}
-    <div class="form-group">
-        {{ form.name.label }}
-        {{ form.name(class='form-control') }}
+    <!-- Page Header -->
+    <div class="hero" style="padding: 20px 0 30px; background: transparent; border: none; margin-bottom: 0;">
+        <h1 style="display: flex; justify-content: center; align-items: center; gap: 10px;">
+            Szolgáltatások <span class="emoji-icon">✨</span>
+        </h1>
+        <p style="text-align: center; color: var(--muted); margin-top: 5px;">
+            Új szolgáltatások hozzáadása és a meglévők kezelése
+        </p>
     </div>
-    <div class="form-group">
-        {{ form.description.label }}
-        {{ form.description(class='form-control') }}
-    </div>
-    <div class="form-group">
-        {{ form.price.label }}
-        {{ form.price(class='form-control') }}
-    </div>
-    {{ form.submit(class='btn btn-primary') }}
-</form>
 
-<hr>
-<h3>Jelenlegi szolgáltatások</h3>
-<table class="table">
-    <thead>
-        <tr><th>Név</th><th>Leírás</th><th>Ár</th><th>Műveletek</th></tr>
-    </thead>
-    <tbody>
-    {% for s in services %}
-        <tr>
-            <td>{{ s.name }}</td>
-            <td>{{ s.description or '' }}</td>
-            <td>{{ '%.0f' % s.price }} Ft</td>
-            <td>
-                <a href="{{ url_for('admin.edit_service', service_id=s.id) }}">Szerkeszt</a>
-                |
-                <form method="POST" action="{{ url_for('admin.delete_service', service_id=s.id) }}" style="display:inline">
-                    {{ delete_form.hidden_tag() }}
-                    <button class="btn btn-link" type="submit">Töröl</button>
-                </form>
-            </td>
-        </tr>
-    {% else %}
-        <tr><td colspan="4">Nincsenek szolgáltatások.</td></tr>
-    {% endfor %}
-    </tbody>
-</table>
+    <!-- Add New Service Form Card -->
+    <div class="card" style="max-width: 600px; margin: 0 auto 40px; padding: 25px 30px;">
+        <h2 style="font-size: 1.4rem; text-align: center; margin-bottom: 20px;">
+            <span class="emoji-icon">🎀</span> Új Szolgáltatás
+        </h2>
+        
+        <form method="POST" class="stack" style="gap: 18px;">
+            {{ form.hidden_tag() }}
+            
+            <div class="form-group stack" style="gap: 6px;">
+                <label style="font-weight: 600; color: #701a75; font-size: 0.95rem;">
+                    {{ form.name.label.text }}
+                </label>
+                {{ form.name(class='form-control', placeholder='Pl. Svédmasszázs, Reggeli...') }}
+            </div>
+            
+            <div class="form-group stack" style="gap: 6px;">
+                <label style="font-weight: 600; color: #701a75; font-size: 0.95rem;">
+                    {{ form.description.label.text }}
+                </label>
+                {{ form.description(class='form-control', placeholder='Rövid, hívogató leírás a szolgáltatásról...') }}
+            </div>
+            
+            <div class="form-group stack" style="gap: 6px;">
+                <label style="font-weight: 600; color: #701a75; font-size: 0.95rem;">
+                    {{ form.price.label.text }}
+                </label>
+                <div style="position: relative; display: flex; align-items: center;">
+                    {{ form.price(class='form-control', style='padding-right: 40px;') }}
+                    <span style="position: absolute; right: 16px; color: var(--muted); font-weight: 700;">Ft</span>
+                </div>
+            </div>
+            
+            <div style="text-align: center; margin-top: 10px;">
+                {{ form.submit(class='btn btn-primary btn-cta', style='width: 100%; font-size: 1rem;') }}
+            </div>
+        </form>
+    </div>
 
+    <hr style="border: 0; border-top: 2px dashed var(--border); margin: 30px auto; max-width: 800px;">
+
+    <!-- Existing Services Table -->
+    <h3 style="text-align: center; color: var(--primary); margin-bottom: 20px; font-family: 'Georgia', serif; font-size: 1.6rem;">
+        <span class="emoji-icon">📋</span> Jelenlegi Szolgáltatások
+    </h3>
+    
+    <div class="card" style="overflow-x: auto; padding: 0;">
+        <table class="table-clean" style="margin-top: 0;">
+            <thead>
+                <tr>
+                    <th><span class="emoji-icon">🏷️</span> Név</th>
+                    <th><span class="emoji-icon">📝</span> Leírás</th>
+                    <th><span class="emoji-icon">💳</span> Ár</th>
+                    <th style="text-align: center;"><span class="emoji-icon">⚙️</span> Műveletek</th>
+                </tr>
+            </thead>
+            <tbody>
+            {% for s in services %}
+                <tr>
+                    <td style="font-weight: 600; color: #701a75;">{{ s.name }}</td>
+                    
+                    <td class="muted">
+                        {% if s.description %}
+                            {{ s.description }}
+                        {% else %}
+                            <span style="font-style: italic; color: #d8b4fe;">Nincs megadva</span>
+                        {% endif %}
+                    </td>
+                    
+                    <!-- Formatted with the .price class from your CSS -->
+                    <td class="price">{{ '%.0f' % s.price }} Ft</td>
+                    
+                    <!-- Action Buttons -->
+                    <td style="text-align: center;">
+                        <div style="display: flex; justify-content: center; gap: 8px;">
+                            <a href="{{ url_for('admin.edit_service', service_id=s.id) }}" class="btn btn-ghost" style="padding: 6px 14px; font-size: 0.85rem;">
+                                ✏️ Szerkeszt
+                            </a>
+                            
+                            <form method="POST" action="{{ url_for('admin.delete_service', service_id=s.id) }}" style="display:inline; margin: 0;">
+                                {{ delete_form.hidden_tag() }}
+                                <!-- Red tinted delete button -->
+                                <button type="submit" class="btn btn-ghost" style="padding: 6px 14px; font-size: 0.85rem; border-color: #fecaca; color: #e11d48; background: #fff1f2;" onclick="return confirm('Biztosan törölni szeretnéd ezt a szolgáltatást? 🥺')">
+                                    🗑️ Töröl
+                                </button>
+                            </form>
+                        </div>
+                    </td>
+                </tr>
+            {% else %}
+                <tr>
+                    <td colspan="4" style="text-align: center; padding: 40px; color: var(--muted);">
+                        Még nincsenek szolgáltatások a rendszerben. 🫧
+                    </td>
+                </tr>
+            {% endfor %}
+            </tbody>
+        </table>
+    </div>
+
+</div>
 {% endblock %}
