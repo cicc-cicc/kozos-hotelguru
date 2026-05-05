@@ -1,4 +1,4 @@
-from flask import Flask
+from flask import Flask, app
 import os
 from flask_sqlalchemy import SQLAlchemy
 from flask_migrate import Migrate
@@ -105,5 +105,10 @@ def create_app():
         # API blueprint (JSON endpoints + OpenAPI)
         from .routes.api import api_bp
 
-        app.register_blueprint(api_bp, url_prefix="/api")
+        # ÍGY MÓDOSÍTSD EZT A SORT:
+        app.register_blueprint(api_bp, url_prefix="/api/v1")
+
+        from .routes.error_routes import error_bp
+        app.register_blueprint(error_bp)
+
     return app

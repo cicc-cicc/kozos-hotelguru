@@ -1,0 +1,12 @@
+{% extends "base.html" %}
+
+{% block title %}Szerver hiba (500) - HotelGuru{% endblock %}
+
+{% block content %}
+<div style="text-align: center; padding: 50px; background: white; border-radius: 8px; box-shadow: 0 4px 10px rgba(0,0,0,0.1); max-width: 600px; margin: 40px auto;">
+    <h1 style="color: #e74c3c; font-size: 48px; margin-bottom: 10px;">500</h1>
+    <h2>Belső szerver hiba</h2>
+    <p style="color: #7f8c8d; margin-bottom: 30px;">Váratlan hiba történt a szerverünkön. A technikai csapatunkat értesítettük, kérjük, próbálja újra később.</p>
+    <a href="{{ url_for('guest.index') }}" class="btn btn-primary">Vissza a kezdőlapra</a>
+</div>
+{% endblock %}
