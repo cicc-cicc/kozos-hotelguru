@@ -331,3 +331,33 @@ def edit_booking(booking_id):
 
     # (JAVÍTVA)
     return render_template("guest/edit_booking.html", form=form, booking=booking)
+
+
+@guest_bp.route("/booking/<int:booking_id>/invoice/download")
+@login_required
+def download_invoice(booking_id):
+    """Számla PDF generálása és letöltése a vendég számára"""
+    booking = Booking.query.get_or_404(booking_id)
+    
+    # Biztonság: csak a saját foglalását töltheti le
+    if booking.user_id != current_user.id:
+        abort(403)
+        
+    if not booking.invoice:
+        flash("Ehhez a foglaláshoz még nem generálódott számla.", "warning")
+        return redirect(url_for("guest.my_bookings"))
+
+    # HTML generálása a Jinja sablonból
+    html_content = render_template(
+        "invoice_pdf.html",
+        booking=booking,
+        invoice=booking.invoice,
+        user=booking.user,
+        room=booking.room
+    )
+    
+    # PDF generálása a segédfüggvénnyel
+    from ..utils.pdf_generator import render_pdf_from_html
+    filename = f"szamla_INV-{booking.check_in.year}-{booking.invoice.id:04}.pdf"
+    
+    return render_pdf_from_html(html_content, filename=filename)
