@@ -1,20 +1,54 @@
 {% extends "base.html" %}
 
-{% block title %}Szabad szobák - HotelGuru{% endblock %}
+{% block title %}Szabad szobák ✨ - HotelGuru{% endblock %}
 
 {% block content %}
-<h1>Szabad szobák</h1>
-<p>{{ check_in.strftime('%Y-%m-%d') }} — {{ check_out.strftime('%Y-%m-%d') }} időszakra, {{ guests }} fő részére.</p>
+<div style="text-align: center; margin-bottom: 40px;">
+    <h1 style="font-family: 'Dancing Script', cursive; color: #ad1457; font-size: 3.5rem; margin-bottom: 10px;">Válassza ki álmai szobáját!</h1>
+    <div style="display: inline-block; background: white; padding: 10px 25px; border-radius: 50px; border: 1px solid #fce4ec; color: #880e4f; box-shadow: 0 4px 10px rgba(240, 98, 146, 0.1);">
+        📅 <strong>{{ check_in.strftime('%Y. %m. %d.') }}</strong> — <strong>{{ check_out.strftime('%Y. %m. %d.') }}</strong> 
+        <span style="margin-left: 10px; color: #f06292;">|</span> 
+        <span style="margin-left: 10px;">👥 {{ guests }} fő részére</span>
+    </div>
+</div>
 
-<div class="rooms-grid" style="display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 20px; margin-top: 30px;">
+<div class="rooms-grid" style="display: grid; grid-template-columns: repeat(auto-fill, minmax(320px, 1fr)); gap: 30px; margin-top: 30px;">
     {% for room in rooms %}
-    <div class="room-card" style="border: 1px solid #ddd; border-radius: 8px; padding: 20px; background: white; box-shadow: 0 2px 4px rgba(0,0,0,0.1);">
-        <h3>{{ room.room_number }} szoba</h3>
-        <p><strong>Férőhely:</strong> {{ room.capacity }} fő</p>
-        <p><strong>Ár:</strong> {{ "{:,.0f}".format(room.price_per_night) }} Ft / éjszaka</p>
-        <p>{{ room.description }}</p>
+    <div class="room-card" style="border: none; border-radius: 30px; padding: 30px; background: white; box-shadow: 0 15px 35px rgba(214, 51, 132, 0.08); border: 1px solid #fce4ec; transition: transform 0.3s ease; position: relative; overflow: hidden;">
+        
+        <!-- Pretty Badge for Room Number -->
+        <div style="position: absolute; top: 0; right: 0; background: #fce4ec; color: #ad1457; padding: 10px 20px; border-bottom-left-radius: 20px; font-weight: bold; font-family: 'Dancing Script', cursive; font-size: 1.2rem;">
+            {{ room.room_number }}. szoba
+        </div>
+
+        <div style="font-size: 3.5rem; margin: 10px 0 20px 0; text-align: center; background: #fff5f8; border-radius: 20px; padding: 15px;">
+            {% if room.capacity >= 4 %} 👒👑 {% else %} 👒 {% endif %}
+        </div>
+
+        <h3 style="color: #ad1457; text-align: center; margin-bottom: 15px;">
+            {{ "Családi Lakosztály" if room.capacity >= 4 else "Boutique Szoba" }}
+        </h3>
+        
+        <p style="color: #4a148c; font-size: 0.95rem; text-align: center; margin-bottom: 20px; font-style: italic;">
+            "{{ room.description }}"
+        </p>
+
+        <div style="display: flex; justify-content: space-between; align-items: center; background: #fff5f8; padding: 15px; border-radius: 20px; margin-bottom: 20px;">
+            <span style="color: #880e4f; font-weight: bold;">💰 Ár:</span>
+            <span style="color: #d81b60; font-size: 1.2rem; font-weight: 800;">
+                {{ "{:,.0f}".format(room.price_per_night).replace(',', ' ') }} Ft <small style="font-weight: 400; font-size: 0.7em;">/ éj</small>
+            </span>
+        </div>
+
         {% if room.equipment %}
-            <p><small><strong>Felszereltség:</strong> {{ room.equipment }}</small></p>
+            <div style="margin-bottom: 25px; border-top: 1px dashed #f8bbd0; padding-top: 15px;">
+                <p style="color: #ad1457; font-size: 0.85em; font-weight: bold; margin-bottom: 8px;">✨ Felszereltség:</p>
+                <div style="display: flex; flex-wrap: wrap; gap: 5px;">
+                    {% for item in room.equipment.split(',') %}
+                        <span style="background: white; border: 1px solid #f8bbd0; color: #f06292; padding: 3px 10px; border-radius: 50px; font-size: 0.75rem;">🌸 {{ item.strip() }}</span>
+                    {% endfor %}
+                </div>
+            </div>
         {% endif %}
 
         <form method="POST" action="{{ url_for('guest.book_room') }}">
@@ -23,11 +57,18 @@
             <input type="hidden" name="arrival_date" value="{{ check_in.strftime('%Y-%m-%d') }}">
             <input type="hidden" name="departure_date" value="{{ check_out.strftime('%Y-%m-%d') }}">
             <input type="hidden" name="guests" value="{{ guests }}">
-            <button type="submit" class="btn btn-primary" style="width:100%">Lefoglalom</button>
+            <button type="submit" class="btn btn-primary" style="width:100%; padding: 15px; font-size: 1.1rem; border-radius: 50px; box-shadow: 0 8px 20px rgba(216, 27, 96, 0.2);">
+                Lefoglalom 🎀
+            </button>
         </form>
     </div>
     {% else %}
-        <p>Sajnos nincs szabad szobánk a megadott paraméterekkel.</p>
+        <div style="grid-column: 1 / -1; text-align: center; padding: 50px; background: white; border-radius: 30px; border: 2px dashed #f8bbd0;">
+            <span style="font-size: 4rem;">🥀</span>
+            <h2 style="color: #ad1457; font-family: 'Dancing Script', cursive;">Sajnos nem találtunk szabad szobát...</h2>
+            <p style="color: #880e4f;">Próbáljon meg más dátumot választani!</p>
+            <a href="{{ url_for('guest.index') }}" class="btn btn-primary" style="margin-top: 20px; padding: 12px 30px;">Vissza a kereséshez</a>
+        </div>
     {% endfor %}
 </div>
 {% endblock %}

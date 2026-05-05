@@ -1,41 +1,59 @@
-<!DOCTYPE html>
-<html lang="hu">
-<head>
-    <meta charset="UTF-8">
-    <title>HotelGuru - Szobalista</title>
-    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
-</head>
-<body>
-    <div class="container">
-        <h1>HotelGuru Szobakínálat</h1>
-        <table>
-            <thead>
-                <tr>
-                    <th>Szobaszám</th>
-                    <th>Férőhely</th>
-                    <th>Ár / éjszaka</th>
-                    <th>Állapot</th>
-                </tr>
-            </thead>
-            <tbody>
-                {% for room in rooms %}
-                <tr>
-                    <td><strong>{{ room.room_number }}</strong></td>
-                    <td>{{ room.capacity }} fő</td>
-                    <td class="price">{{ "{:,.0f}".format(room.price_per_night).replace(',', ' ') }} Ft</td>
-                    <td>
-                        {% if room.status and room.status.value == 'available' %}
-                            <span class="status-ok">Szabad</span>
-                        {% elif room.status and room.status.value == 'maintenance' %}
-                            <span class="status-no">Karbantartás</span>
-                        {% else %}
-                            <span class="status-no">Foglalt / Nem elérhető</span>
-                        {% endif %}
-                    </td>
-                </tr>
-                {% endfor %}
-            </tbody>
-        </table>
+{% extends "base.html" %}
+
+{% block title %}Szobakínálat 🎀 - HotelGuru{% endblock %}
+
+{% block content %}
+<div style="text-align: center; margin-bottom: 40px;">
+    <span style="font-size: 3rem;">🏰</span>
+    <h1 style="font-family: 'Dancing Script', cursive; color: #ad1457; font-size: 3.5rem; margin-top: 10px;">Mesés Szobáink</h1>
+    <p style="color: #880e4f; font-size: 1.1rem;">Válaszd ki a szívedhez legközelebb álló kuckót! ✨</p>
+</div>
+
+<!-- Soft Grid Layout -->
+<div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 25px;">
+    {% for room in rooms %}
+    <div style="background: white; border-radius: 25px; padding: 25px; box-shadow: 0 10px 25px rgba(240, 98, 146, 0.1); border: 1px solid #fce4ec; transition: transform 0.3s ease; text-align: center;">
+        
+        <!-- Room Icon/Placeholder -->
+        <div style="font-size: 4rem; margin-bottom: 15px; background: #fff5f8; border-radius: 20px; padding: 20px;">
+            {% if room.capacity >= 4 %} 👸👸 {% else %} 👸 {% endif %}
+        </div>
+
+        <h3 style="color: #ad1457; font-family: 'Dancing Script', cursive; font-size: 1.8rem; margin-bottom: 10px;">
+            {{ room.room_number }}. szoba
+        </h3>
+
+        <div style="margin-bottom: 15px;">
+            <span style="background: #f3e5f5; color: #7b1fa2; padding: 5px 15px; border-radius: 50px; font-size: 0.9rem; font-weight: bold;">
+                👥 {{ room.capacity }} fő részére
+            </span>
+        </div>
+
+        <p style="font-size: 1.4rem; color: #d81b60; font-weight: 800; margin-bottom: 20px;">
+            {{ "{:,.0f}".format(room.price_per_night).replace(',', ' ') }} Ft <small style="font-size: 0.6em; color: #880e4f;">/ éj</small>
+        </p>
+
+        <div style="margin-bottom: 10px;">
+            {% if room.status and room.status.value == 'available' %}
+                <span style="background: #e8f5e9; color: #2e7d32; padding: 8px 20px; border-radius: 50px; font-weight: bold; font-size: 0.9rem;">
+                    🌸 Szabad
+                </span>
+            {% elif room.status and room.status.value == 'maintenance' %}
+                <span style="background: #fff3e0; color: #ef6c00; padding: 8px 20px; border-radius: 50px; font-weight: bold; font-size: 0.9rem;">
+                    🛠️ Szépülünk
+                </span>
+            {% else %}
+                <span style="background: #ffebee; color: #c62828; padding: 8px 20px; border-radius: 50px; font-weight: bold; font-size: 0.9rem;">
+                    🥀 Foglalt
+                </span>
+            {% endif %}
+        </div>
     </div>
-</body>
-</html>
+    {% endfor %}
+</div>
+
+<!-- Decorative bottom element -->
+<div style="text-align: center; margin-top: 50px; color: #f8bbd0; font-size: 2rem;">
+    ✨ ✨ ✨
+</div>
+{% endblock %}

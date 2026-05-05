@@ -1,55 +1,133 @@
 {% extends "base.html" %}
 
-{% block title %}Admin Pult - HotelGuru{% endblock %}
+{% block title %}Admin Pult 👑 - HotelGuru{% endblock %}
 
 {% block content %}
-<div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; flex-wrap: wrap; gap: 10px;">
-    <h1>Szobák és Erőforrások kezelése</h1>
+<style>
+    /* Elegant Table Styling */
+    .admin-table {
+        width: 100%;
+        border-collapse: separate;
+        border-spacing: 0 12px;
+    }
+    .admin-table thead tr {
+        background: linear-gradient(90deg, #ad1457, #d81b60);
+        color: white;
+    }
+    .admin-table th {
+        padding: 15px;
+        text-transform: uppercase;
+        font-size: 0.85rem;
+        letter-spacing: 1px;
+    }
+    .admin-table th:first-child { border-radius: 20px 0 0 20px; }
+    .admin-table th:last-child { border-radius: 0 20px 20px 0; }
+
+    .admin-row {
+        background: white;
+        box-shadow: 0 4px 15px rgba(216, 27, 96, 0.08);
+        transition: transform 0.2s;
+    }
+    .admin-row:hover { transform: scale(1.01); }
+    .admin-row td {
+        padding: 15px;
+        border-top: 1px solid #fce4ec;
+        border-bottom: 1px solid #fce4ec;
+        vertical-align: middle;
+    }
+    .admin-row td:first-child { border-left: 1px solid #fce4ec; border-radius: 20px 0 0 20px; }
+    .admin-row td:last-child { border-right: 1px solid #fce4ec; border-radius: 0 20px 20px 0; }
+
+    /* Cute Status Badges */
+    .badge {
+        padding: 6px 14px;
+        border-radius: 50px;
+        font-size: 0.8rem;
+        font-weight: bold;
+        display: inline-block;
+    }
+    .bg-available { background: #e8f5e9; color: #2e7d32; }
+    .bg-maintenance { background: #fff3e0; color: #ef6c00; }
+    .bg-unavailable { background: #ffebee; color: #c62828; }
+    
+    /* Top Action Buttons */
+    .top-btn {
+        padding: 10px 18px;
+        border-radius: 50px;
+        font-weight: bold;
+        text-decoration: none;
+        transition: 0.3s;
+        box-shadow: 0 4px 10px rgba(0,0,0,0.05);
+    }
+    .top-btn:hover { transform: translateY(-2px); }
+</style>
+
+<div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 30px; flex-wrap: wrap; gap: 20px;">
+    <div>
+        <h1 style="font-family: 'Dancing Script', cursive; color: #ad1457; font-size: 3rem; margin: 0;">👑 Birodalmi Áttekintés</h1>
+        <p style="color: #880e4f; margin: 5px 0 0 0;">Szobák és Erőforrások kezelése ✨</p>
+    </div>
+    
     <div style="display: flex; gap: 10px; flex-wrap: wrap;">
-        <a href="{{ url_for('admin.admin_bookings') }}" class="btn btn-primary" style="background: #3498db; color: white; text-decoration: none; padding: 10px 15px; border-radius: 4px;">Foglalások kezelése</a>
-        <a href="{{ url_for('admin.admin_users') }}" class="btn" style="background: #9b59b6; color: white; text-decoration: none; padding: 10px 15px; border-radius: 4px;">Felhasználók</a>
-        <a href="{{ url_for('admin.admin_services') }}" class="btn" style="background: #f1c40f; color: #333; text-decoration: none; padding: 10px 15px; border-radius: 4px; font-weight: bold;">Szolgáltatások</a>
-        <a href="{{ url_for('admin.add_room') }}" class="btn btn-primary" style="background: #2ecc71; color: white; text-decoration: none; padding: 10px 15px; border-radius: 4px; font-weight: bold;">+ Új Szoba</a>
+        <a href="{{ url_for('admin.admin_bookings') }}" class="top-btn" style="background: #e3f2fd; color: #1565c0;">📖 Foglalások</a>
+        <a href="{{ url_for('admin.admin_users') }}" class="top-btn" style="background: #f3e5f5; color: #6a1b9a;">👥 Felhasználók</a>
+        <a href="{{ url_for('admin.admin_services') }}" class="top-btn" style="background: #fff8e1; color: #f57f17;">🛍️ Szolgáltatások</a>
+        <a href="{{ url_for('admin.add_room') }}" class="top-btn" style="background: linear-gradient(90deg, #d81b60, #ad1457); color: white;">🌸 + Új Szoba</a>
     </div>
 </div>
 
-<table class="table" style="width: 100%; border-collapse: collapse; background: white; box-shadow: 0 1px 3px rgba(0,0,0,0.1);">
-    <thead>
-        <tr style="background: #2c3e50; color: white;">
-            <th style="padding: 12px; text-align: left;">Szobaszám</th>
-            <th style="padding: 12px; text-align: left;">Férőhely</th>
-            <th style="padding: 12px; text-align: left;">Ár / Éjszaka</th>
-            <th style="padding: 12px; text-align: left;">Felszereltség</th>
-            <th style="padding: 12px; text-align: left;">Státusz</th>
-            <th style="padding: 12px; text-align: center;">Műveletek</th>
-        </tr>
-    </thead>
-    <tbody>
-        {% for room in rooms %}
-        <tr style="border-bottom: 1px solid #ddd;">
-            <td style="padding: 12px;"><strong>{{ room.room_number }}</strong></td>
-            <td style="padding: 12px;">{{ room.capacity }} fő</td>
-            <td style="padding: 12px;">{{ "{:,.0f}".format(room.price_per_night) }} Ft</td>
-            <td style="padding: 12px;"><small>{% for item in room.equipment_list %}{{ item }}{% if not loop.last %}, {% endif %}{% else %}-{% endfor %}</small></td>
-            <td style="padding: 12px;">
-                {% if room.status.value == 'available' %}
-                    <span style="color: #27ae60; font-weight: bold;">Szabad</span>
-                {% elif room.status.value == 'maintenance' %}
-                    <span style="color: #f39c12; font-weight: bold;">Karbantartás</span>
-                {% else %}
-                    <span style="color: #e74c3c; font-weight: bold;">Nem elérhető</span>
-                {% endif %}
-            </td>
-            <td style="padding: 12px; text-align: center;">
-                <a href="{{ url_for('admin.edit_room', room_id=room.id) }}" class="btn" style="background: #f39c12; color: white; padding: 5px 10px; text-decoration: none; margin-right: 5px; border-radius: 4px;">Szerkesztés</a>
-                <a href="{{ url_for('admin.delete_room', room_id=room.id) }}" class="btn" style="background: #c0392b; color: white; padding: 5px 10px; text-decoration: none; border-radius: 4px;">Törlés</a>
-            </td>
-        </tr>
-        {% else %}
-        <tr>
-            <td colspan="6" style="padding: 20px; text-align: center;">Nincsenek szobák az adatbázisban.</td>
-        </tr>
-        {% endfor %}
-    </tbody>
-</table>
+<div style="overflow-x: auto;">
+    <table class="admin-table">
+        <thead>
+            <tr>
+                <th>Szobaszám</th>
+                <th>Férőhely</th>
+                <th>Ár / Éjszaka</th>
+                <th>Felszereltség</th>
+                <th>Státusz</th>
+                <th style="text-align: center;">Műveletek</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for room in rooms %}
+            <tr class="admin-row">
+                <td style="color: #ad1457; font-size: 1.1rem;"><strong>🛌 {{ room.room_number }}</strong></td>
+                <td style="color: #4a148c; font-weight: bold;">👥 {{ room.capacity }} fő</td>
+                <td style="color: #d81b60; font-weight: bold;">{{ "{:,.0f}".format(room.price_per_night) }} Ft</td>
+                <td>
+                    <div style="display: flex; flex-wrap: wrap; gap: 4px;">
+                        {% for item in room.equipment_list %}
+                            <span style="background: #fff5f8; border: 1px solid #f8bbd0; color: #f06292; padding: 3px 8px; border-radius: 50px; font-size: 0.75rem;">✨ {{ item }}</span>
+                        {% else %}
+                            <span style="color: #ccc; font-style: italic;">—</span>
+                        {% endfor %}
+                    </div>
+                </td>
+                <td>
+                    {% if room.status.value == 'available' %}
+                        <span class="badge bg-available">Szabad</span>
+                    {% elif room.status.value == 'maintenance' %}
+                        <span class="badge bg-maintenance">Karbantartás</span>
+                    {% else %}
+                        <span class="badge bg-unavailable">Nem elérhető</span>
+                    {% endif %}
+                </td>
+                <td style="text-align: center;">
+                    <div style="display: flex; gap: 5px; justify-content: center;">
+                        <a href="{{ url_for('admin.edit_room', room_id=room.id) }}" class="btn" style="background: #fff9c4; color: #f57f17; padding: 6px 12px; text-decoration: none; border-radius: 50px; font-size: 0.85rem;" title="Szerkesztés">✏️</a>
+                        <a href="{{ url_for('admin.delete_room', room_id=room.id) }}" class="btn" style="background: #ffcdd2; color: #c62828; padding: 6px 12px; text-decoration: none; border-radius: 50px; font-size: 0.85rem;" title="Törlés">🗑️</a>
+                    </div>
+                </td>
+            </tr>
+            {% else %}
+            <tr>
+                <td colspan="6" style="padding: 40px; text-align: center; color: #ad1457; background: white; border-radius: 20px; border: 2px dashed #fce4ec;">
+                    <span style="font-size: 3rem;">☁️</span><br>
+                    <span style="font-family: 'Dancing Script', cursive; font-size: 2rem;">Nincsenek szobák az adatbázisban.</span>
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
 {% endblock %}

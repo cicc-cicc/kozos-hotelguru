@@ -1,30 +1,55 @@
 {% extends "base.html" %}
 
-{% block title %}Foglalás szerkesztése - HotelGuru{% endblock %}
+{% block title %}Foglalás szerkesztése ✨ - HotelGuru{% endblock %}
 
 {% block content %}
-<h1>Foglalás szerkesztése</h1>
-<form method="POST">
-    {{ form.hidden_tag() }}
-    <div>
-        {{ form.arrival_date.label }}<br>
-        {{ form.arrival_date(class='form-control') }}
-        {% for error in form.arrival_date.errors %}<span style="color:red">{{ error }}</span>{% endfor %}
+<div style="max-width: 500px; margin: 40px auto; background: white; padding: 40px; border-radius: 30px; box-shadow: 0 10px 30px rgba(240, 98, 146, 0.1); border: 1px solid #fce4ec;">
+    
+    <div style="text-align: center; margin-bottom: 30px;">
+        <span style="font-size: 2.5rem;">🪄</span>
+        <h1 style="color: #ad1457; font-family: 'Dancing Script', cursive; margin-top: 10px;">Tervek finomítása</h1>
+        <p style="color: #880e4f; font-size: 0.9rem;">Módosítsd a dátumokat vagy a vendégek számát!</p>
     </div>
-    <div>
-        {{ form.departure_date.label }}<br>
-        {{ form.departure_date(class='form-control') }}
-        {% for error in form.departure_date.errors %}<span style="color:red">{{ error }}</span>{% endfor %}
-    </div>
-    <div>
-        {{ form.guests.label }}<br>
-        {{ form.guests(class='form-control', min='1') }}
-        {% for error in form.guests.errors %}<span style="color:red">{{ error }}</span>{% endfor %}
-    </div>
-    <div style="margin-top:10px">
-        {{ form.submit(class='btn btn-primary') }}
-        <a href="{{ url_for('guest.my_bookings') }}">Mégse</a>
-    </div>
-</form>
 
+    <form method="POST">
+        {{ form.hidden_tag() }}
+        
+        <div class="form-group" style="margin-bottom: 20px;">
+            <label style="color: #ad1457; font-weight: bold; display: flex; align-items: center; gap: 8px;">
+                📅 {{ form.arrival_date.label }}
+            </label>
+            {{ form.arrival_date(class='form-control', style="margin-top: 8px; border: 2px solid #f8bbd0; border-radius: 15px; padding: 12px;") }}
+            {% for error in form.arrival_date.errors %}
+                <span style="color:#d81b60; font-size: 0.85em;">✨ {{ error }}</span>
+            {% endfor %}
+        </div>
+
+        <div class="form-group" style="margin-bottom: 20px;">
+            <label style="color: #ad1457; font-weight: bold; display: flex; align-items: center; gap: 8px;">
+                🌙 {{ form.departure_date.label }}
+            </label>
+            {{ form.departure_date(class='form-control', style="margin-top: 8px; border: 2px solid #f8bbd0; border-radius: 15px; padding: 12px;") }}
+            {% for error in form.departure_date.errors %}
+                <span style="color:#d81b60; font-size: 0.85em;">✨ {{ error }}</span>
+            {% endfor %}
+        </div>
+
+        <div class="form-group" style="margin-bottom: 30px;">
+            <label style="color: #ad1457; font-weight: bold; display: flex; align-items: center; gap: 8px;">
+                👥 {{ form.guests.label }}
+            </label>
+            {{ form.guests(class='form-control', min='1', style="margin-top: 8px; border: 2px solid #f8bbd0; border-radius: 15px; padding: 12px;") }}
+            {% for error in form.guests.errors %}
+                <span style="color:#d81b60; font-size: 0.85em;">✨ {{ error }}</span>
+            {% endfor %}
+        </div>
+
+        <div style="text-align: center; display: flex; flex-direction: column; gap: 15px;">
+            {{ form.submit(class='btn btn-primary', style="width: 100%; font-size: 1.1rem; padding: 15px;") }}
+            <a href="{{ url_for('guest.my_bookings') }}" style="color: #ad1457; text-decoration: none; font-weight: 500; font-size: 0.9rem;">
+                🎀 Mégse, maradjon minden így
+            </a>
+        </div>
+    </form>
+</div>
 {% endblock %}

@@ -4,85 +4,309 @@
     <meta charset="UTF-8">
     <title>Számla #{{ invoice.id }}</title>
     <style>
-        @page { size: A4; margin: 2cm; }
-        body { font-family: Helvetica, sans-serif; font-size: 14px; color: #333; }
-        .header { text-align: center; margin-bottom: 30px; border-bottom: 2px solid #0b5394; padding-bottom: 10px; }
-        .details-table { width: 100%; margin-bottom: 30px; }
-        .details-table td { width: 50%; vertical-align: top; }
-        .items-table { width: 100%; border-collapse: collapse; margin-bottom: 30px; }
-        .items-table th, .items-table td { border: 1px solid #ddd; padding: 8px; text-align: left; }
-        .items-table th { background-color: #f2f2f2; font-weight: bold; }
-        .total { text-align: right; font-size: 18px; font-weight: bold; margin-top: 15px; }
-        .status-paid { color: #27ae60; font-weight: bold; }
-        .status-unpaid { color: #e74c3c; font-weight: bold; }
+        /* --- Print & Page Settings --- */
+        @page { 
+            size: A4; 
+            margin: 1cm; /* Smaller margin to maximize page space */
+        }
+        
+        /* --- Base Typography & Colors --- */
+        body { 
+            font-family: 'Nunito', 'Segoe UI', Tahoma, sans-serif; 
+            font-size: 13px; /* Slightly smaller base font */
+            color: #6a1b4d; 
+            line-height: 1.4;
+            background-color: #fff0f5; 
+            margin: 0;
+            padding: 20px;
+        }
+
+        /* --- Main Card Container --- */
+        .invoice-card {
+            background-color: #ffffff;
+            border: 3px solid #ffb6c1; 
+            border-radius: 20px; /* Slightly less rounded to save space */
+            padding: 25px 30px; /* Reduced padding */
+            max-width: 750px;
+            margin: 0 auto;
+            box-shadow: 0 10px 25px rgba(255, 105, 180, 0.15); 
+            position: relative;
+        }
+
+        /* Print-specific optimizations to guarantee 1 page */
+        @media print {
+            body { 
+                background-color: #ffffff; 
+                padding: 0; 
+            }
+            .invoice-card { 
+                box-shadow: none; 
+                border: 2px solid #ffb6c1; /* Thinner border for print */
+                padding: 15px; 
+                margin: 0; 
+                border-radius: 15px;
+            }
+            /* Hide the ribbon in print so it doesn't get cut off by the top margin */
+            .invoice-card::before { display: none; } 
+        }
+
+        /* Cute decorative ribbon top (Screen only) */
+        .invoice-card::before {
+            content: '🎀';
+            position: absolute;
+            top: -18px;
+            left: 50%;
+            transform: translateX(-50%);
+            font-size: 28px;
+            background: #fff0f5;
+            border-radius: 50%;
+            padding: 0 10px;
+        }
+
+        /* --- Header Section --- */
+        .header {
+            text-align: center;
+            margin-bottom: 20px; /* Reduced margin */
+        }
+
+        .header h1 {
+            color: #ff69b4; 
+            font-size: 26px; /* Smaller header */
+            margin: 0;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            font-weight: 900;
+        }
+
+        .invoice-pill {
+            display: inline-block;
+            background-color: #ffe4e1; 
+            color: #d81b60;
+            padding: 6px 15px;
+            border-radius: 50px;
+            font-weight: bold;
+            font-size: 13px;
+            margin-top: 8px;
+            border: 2px dashed #ffb6c1;
+        }
+
+        /* --- Details Layout --- */
+        .layout-table {
+            width: 100%;
+            border-collapse: separate;
+            border-spacing: 15px 0; /* Reduced spacing */
+            margin-left: -15px;
+            margin-bottom: 15px; /* Reduced margin */
+        }
+
+        .layout-table td {
+            width: 50%;
+            vertical-align: top;
+        }
+
+        /* --- Cute Info Bubbles --- */
+        .info-bubble {
+            background-color: #fff5f8;
+            border: 2px solid #ffc0cb;
+            border-radius: 15px;
+            padding: 12px 15px; /* Reduced padding inside bubbles */
+        }
+
+        .info-title {
+            color: #ff69b4;
+            font-weight: 800;
+            font-size: 14px;
+            margin-bottom: 6px;
+            border-bottom: 2px dotted #ffb6c1;
+            padding-bottom: 4px;
+            display: inline-block;
+        }
+
+        /* --- Date Bar --- */
+        .date-bar {
+            background: linear-gradient(to right, #ffe4e1, #fff0f5);
+            border-radius: 12px;
+            padding: 10px 15px; /* Tighter padding */
+            text-align: center;
+            font-weight: bold;
+            color: #d81b60;
+            margin-bottom: 20px; /* Tighter margin */
+            font-size: 14px;
+            border: 1px solid #ffb6c1;
+        }
+
+        .date-bar span {
+            color: #6a1b4d;
+            font-weight: normal;
+        }
+
+        /* --- Items List --- */
+        .items-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-bottom: 20px;
+        }
+
+        .items-table th {
+            background-color: #ffb6c1;
+            color: #ffffff;
+            font-size: 12px;
+            text-transform: uppercase;
+            padding: 10px; /* Reduced padding */
+            text-align: left;
+            font-weight: 800;
+            letter-spacing: 1px;
+        }
+
+        .items-table th:first-child { border-top-left-radius: 10px; border-bottom-left-radius: 10px; }
+        .items-table th:last-child { border-top-right-radius: 10px; border-bottom-right-radius: 10px; }
+
+        .items-table td {
+            padding: 10px; /* Reduced padding */
+            border-bottom: 2px dotted #ffc0cb;
+            font-weight: 600;
+        }
+
+        .items-table td.money {
+            color: #d81b60;
+            text-align: right;
+            font-weight: 800;
+        }
+
+        /* --- Total Bubble --- */
+        .total-container {
+            width: 100%;
+            text-align: right;
+            margin-top: 15px;
+        }
+
+        .total-bubble {
+            display: inline-block;
+            background-color: #ff69b4;
+            color: #ffffff;
+            padding: 10px 25px; /* Tighter total box */
+            border-radius: 30px;
+            font-size: 18px;
+            font-weight: 900;
+            box-shadow: 0 4px 10px rgba(255, 105, 180, 0.3);
+        }
+
+        /* --- Footer & Status --- */
+        .footer-section {
+            margin-top: 25px; /* Pulled up closer */
+            text-align: center;
+        }
+
+        .status-badge {
+            display: inline-block;
+            padding: 6px 16px;
+            border-radius: 50px;
+            font-size: 14px;
+            font-weight: 900;
+            margin-bottom: 10px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .paid-badge { background-color: #e6fffa; color: #0d9488; border: 2px solid #5eead4; }
+        .unpaid-badge { background-color: #fff1f2; color: #e11d48; border: 2px solid #fda4af; }
+
+        .timestamp {
+            color: #b592a8;
+            font-size: 11px;
+            font-style: italic;
+        }
     </style>
 </head>
 <body>
-    <div class="header">
-        <h1>SZÁLLÁSHELY SZÁMLA / NYUGTA</h1>
-        <p>Bizonylatszám: INV-{{ booking.check_in.year }}-{{ "%04d" | format(invoice.id) }}</p>
-    </div>
+
+<div class="invoice-card">
     
-    <table class="details-table">
+    <div class="header">
+        <h1>Számla ✧</h1>
+        <div class="invoice-pill">
+            Bizonylatszám: INV-{{ booking.check_in.year }}-{{ "%04d" | format(invoice.id) }}
+        </div>
+    </div>
+
+    <!-- Provider and Guest Info -->
+    <table class="layout-table">
         <tr>
             <td>
-                <strong>Szolgáltató:</strong><br>
-                HotelGuru Kft.<br>
-                1000 Budapest, Példa u. 1.<br>
-                Adószám: 12345678-2-41
+                <div class="info-bubble">
+                    <div class="info-title">🌸 Szolgáltató</div>
+                    <div>
+                        <strong>HotelGuru Kft.</strong><br>
+                        1000 Budapest, Példa u. 1.<br>
+                        Adószám: 12345678-2-41
+                    </div>
+                </div>
             </td>
             <td>
-                <strong>Vevő (Vendég):</strong><br>
-                {{ user.username }}<br>
-                {{ user.email }}<br>
-                {{ user.phone or 'Nincs megadva telefon' }}<br>
-                {{ user.address or 'Nincs megadva cím' }}
+                <div class="info-bubble">
+                    <div class="info-title">💕 Vendég</div>
+                    <div>
+                        <strong>{{ user.username }}</strong><br>
+                        {{ user.email }}<br>
+                        {{ user.phone or 'Nincs megadva telefon' }}<br>
+                        {{ user.address or 'Nincs megadva cím' }}
+                    </div>
+                </div>
             </td>
         </tr>
     </table>
 
-    <p><strong>Érkezés:</strong> {{ booking.check_in.strftime('%Y-%m-%d') }} | <strong>Távozás:</strong> {{ booking.check_out.strftime('%Y-%m-%d') }}</p>
-    
+    <div class="date-bar">
+        Érkezés: <span>{{ booking.check_in.strftime('%Y-%m-%d') }}</span> 
+        &nbsp;&nbsp; ✈️ &nbsp;&nbsp; 
+        Távozás: <span>{{ booking.check_out.strftime('%Y-%m-%d') }}</span>
+    </div>
+
     <table class="items-table">
         <thead>
             <tr>
                 <th>Tétel megnevezése</th>
-                <th>Mennyiség</th>
-                <th>Egységár</th>
-                <th>Összesen</th>
+                <th style="text-align: center;">Mennyiség</th>
+                <th style="text-align: right;">Egységár</th>
+                <th style="text-align: right;">Összesen</th>
             </tr>
         </thead>
         <tbody>
-            <!-- Szoba alapár -->
             <tr>
                 <td>Szállás ({{ room.room_number }}. szoba)</td>
-                <td>{{ (booking.check_out - booking.check_in).days }} éj</td>
-                <td>{{ "{:,.0f}".format(room.price_per_night).replace(',', ' ') }} Ft</td>
-                <td>{{ "{:,.0f}".format((booking.check_out - booking.check_in).days * room.price_per_night).replace(',', ' ') }} Ft</td>
+                <td style="text-align: center;">{{ (booking.check_out - booking.check_in).days }} éj</td>
+                <td class="money">{{ "{:,.0f}".format(room.price_per_night).replace(',', ' ') }} Ft</td>
+                <td class="money">{{ "{:,.0f}".format((booking.check_out - booking.check_in).days * room.price_per_night).replace(',', ' ') }} Ft</td>
             </tr>
-            <!-- Extra szolgáltatások -->
             {% for bs in booking.booking_services %}
             <tr>
                 <td>{{ bs.service.name }}</td>
-                <td>{{ bs.quantity }} db</td>
-                <td>{{ "{:,.0f}".format(bs.service.price).replace(',', ' ') }} Ft</td>
-                <td>{{ "{:,.0f}".format(bs.service.price * bs.quantity).replace(',', ' ') }} Ft</td>
+                <td style="text-align: center;">{{ bs.quantity }} db</td>
+                <td class="money">{{ "{:,.0f}".format(bs.service.price).replace(',', ' ') }} Ft</td>
+                <td class="money">{{ "{:,.0f}".format(bs.service.price * bs.quantity).replace(',', ' ') }} Ft</td>
             </tr>
             {% endfor %}
         </tbody>
     </table>
 
-    <div class="total">
-        Mindösszesen fizetendő: {{ "{:,.0f}".format(invoice.total_amount).replace(',', ' ') }} Ft
+    <div class="total-container">
+        <div class="total-bubble">
+            Összesen: {{ "{:,.0f}".format(invoice.total_amount).replace(',', ' ') }} Ft
+        </div>
     </div>
-    <p>
-        Fizetési Státusz: 
+
+    <div class="footer-section">
         {% if invoice.paid %}
-            <span class="status-paid">FIZETVE</span>
+            <div class="status-badge paid-badge">✓ Sikeresen Fizetve</div>
         {% else %}
-            <span class="status-unpaid">NINCS FIZETVE</span>
+            <div class="status-badge unpaid-badge">✗ Fizetésre Vár</div>
         {% endif %}
-    </p>
-    <p><small>Kiállítás dátuma: {{ invoice.created_at.strftime('%Y-%m-%d %H:%M') }}</small></p>
+        
+        <br>
+        <span class="timestamp">Kiállítás dátuma: {{ invoice.created_at.strftime('%Y-%m-%d %H:%M') }}</span>
+    </div>
+
+</div>
+
 </body>
 </html>

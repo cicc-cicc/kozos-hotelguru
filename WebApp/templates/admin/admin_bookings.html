@@ -1,61 +1,152 @@
 {% extends "base.html" %}
 
-{% block title %}Foglalások - Admin{% endblock %}
+{% block title %}Foglalások 👑 - Admin{% endblock %}
 
 {% block content %}
-<div style="display:flex; justify-content:space-between; align-items:center;">
-    <h1>Foglalások kezelése</h1>
+<style>
+    /* Elegant Table Styling */
+    .admin-table {
+        width: 100%;
+        border-collapse: separate;
+        border-spacing: 0 12px;
+    }
+    .admin-table thead tr {
+        background: linear-gradient(90deg, #ad1457, #d81b60);
+        color: white;
+    }
+    .admin-table th {
+        padding: 15px;
+        text-transform: uppercase;
+        font-size: 0.85rem;
+        letter-spacing: 1px;
+    }
+    .admin-table th:first-child { border-radius: 20px 0 0 20px; }
+    .admin-table th:last-child { border-radius: 0 20px 20px 0; }
+
+    .admin-row {
+        background: white;
+        box-shadow: 0 4px 15px rgba(216, 27, 96, 0.08);
+        transition: transform 0.2s;
+    }
+    .admin-row:hover { transform: scale(1.01); }
+    .admin-row td {
+        padding: 15px;
+        border-top: 1px solid #fce4ec;
+        border-bottom: 1px solid #fce4ec;
+        vertical-align: middle;
+    }
+    .admin-row td:first-child { border-left: 1px solid #fce4ec; border-radius: 20px 0 0 20px; }
+    .admin-row td:last-child { border-right: 1px solid #fce4ec; border-radius: 0 20px 20px 0; }
+
+    /* Cute Status Badges */
+    .badge {
+        padding: 6px 12px;
+        border-radius: 50px;
+        font-size: 0.8rem;
+        font-weight: bold;
+        display: inline-block;
+    }
+    .bg-pending { background: #fff3e0; color: #e65100; }
+    .bg-confirmed { background: #e1f5fe; color: #0277bd; }
+    .bg-checked-in { background: #e8f5e9; color: #1b5e20; }
+    .bg-cancelled { background: #ffebee; color: #b71c1c; }
+    
+    /* Input Styling for Inline Forms */
+    .girly-input {
+        border: 1px solid #f8bbd0;
+        border-radius: 15px;
+        padding: 6px 10px;
+        font-size: 0.85rem;
+        outline: none;
+        background: #fff;
+    }
+</style>
+
+<div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 30px; flex-wrap: wrap; gap: 20px;">
     <div>
-        <a href="{{ url_for('admin.admin_bookings') }}" class="btn btn-primary">Frissít</a>
-        <a href="{{ url_for('admin.admin_users') }}" class="btn" style="margin-left:8px">Felhasználók</a>
-        <a href="{{ url_for('admin.admin_services') }}" class="btn" style="margin-left:8px">Szolgáltatások</a>
+        <h1 style="font-family: 'Dancing Script', cursive; color: #ad1457; font-size: 3rem; margin: 0;">👑 Admin - Foglalások</h1>
+        <p style="color: #880e4f; margin: 5px 0 0 0;">A birodalom áttekintése ✨</p>
+    </div>
+    <div style="display: flex; gap: 10px; flex-wrap: wrap;">
+        <a href="{{ url_for('admin.admin_bookings') }}" class="btn" style="background: #fce4ec; color: #ad1457; border-radius: 50px; font-weight: bold; border: 1px solid #f8bbd0;">🔄 Frissít</a>
+        <a href="{{ url_for('admin.admin_users') }}" class="btn" style="background: #e1bee7; color: #4a148c; border-radius: 50px; font-weight: bold;">👥 Felhasználók</a>
+        <a href="{{ url_for('admin.admin_services') }}" class="btn" style="background: #f8bbd0; color: #c2185b; border-radius: 50px; font-weight: bold;">🛍️ Szolgáltatások</a>
     </div>
 </div>
 
 {% if bookings %}
-<table style="width:100%; border-collapse:collapse">
-    <thead>
-        <tr>
-            <th style="padding:8px; border-bottom:1px solid #ddd">ID</th>
-            <th style="padding:8px; border-bottom:1px solid #ddd">Vendég</th>
-            <th style="padding:8px; border-bottom:1px solid #ddd">Szoba</th>
-            <th style="padding:8px; border-bottom:1px solid #ddd">Érkezés</th>
-            <th style="padding:8px; border-bottom:1px solid #ddd">Távozás</th>
-            <th style="padding:8px; border-bottom:1px solid #ddd">Összeg</th>
-            <th style="padding:8px; border-bottom:1px solid #ddd">Státusz</th>
-            <th style="padding:8px; border-bottom:1px solid #ddd">Műveletek</th>
-        </tr>
-    </thead>
-    <tbody>
-    {% for b in bookings %}
-        <tr>
-            <td style="padding:8px">{{ b.id }}</td>
-            <td style="padding:8px">{{ b.user.username if b.user else b.user_id }}</td>
-            <td style="padding:8px">{{ b.room.room_number if b.room else b.room_id }}</td>
-            <td style="padding:8px">{{ b.check_in.strftime('%Y-%m-%d') }}</td>
-            <td style="padding:8px">{{ b.check_out.strftime('%Y-%m-%d') }}</td>
-            <td style="padding:8px">{{ '%.0f' % (b.total_price or 0) }} Ft</td>
-            <td style="padding:8px">{{ b.status.value if b.status else '—' }}</td>
-            <td style="padding:8px">
-                <form method="POST" action="{{ url_for('admin.booking_action', booking_id=b.id) }}" style="display:inline">
-                    {{ forms[b.id].hidden_tag() }}
-                    {{ forms[b.id].action(class='form-control', style='display:inline-block; width:auto') }}
-                    {{ forms[b.id].submit(class='btn btn-primary', style='margin-left:6px') }}
-                </form>
-                <!-- Inline service add form -->
-                <form method="POST" action="{{ url_for('admin.booking_add_service', booking_id=b.id) }}" style="display:inline; margin-left:8px">
-                    {{ service_forms[b.id].hidden_tag() }}
-                    {{ service_forms[b.id].service_id(class='form-control', style='display:inline-block; width:160px') }}
-                    {{ service_forms[b.id].quantity(class='form-control', style='display:inline-block; width:80px; margin-left:6px') }}
-                    {{ service_forms[b.id].submit(class='btn btn-secondary', style='margin-left:6px') }}
-                </form>
-            </td>
-        </tr>
-    {% endfor %}
-    </tbody>
-</table>
+<div style="overflow-x: auto;">
+    <table class="admin-table">
+        <thead>
+            <tr>
+                <th>ID</th>
+                <th>Vendég</th>
+                <th>Szoba</th>
+                <th>Időszak</th>
+                <th>Összeg</th>
+                <th>Státusz</th>
+                <th style="text-align: center;">Műveletek</th>
+            </tr>
+        </thead>
+        <tbody>
+        {% for b in bookings %}
+            <tr class="admin-row">
+                <td style="color: #ad1457; font-weight: bold;">#{{ b.id }}</td>
+                <td style="color: #4a148c; font-weight: bold;">👑 {{ b.user.username if b.user else b.user_id }}</td>
+                <td><span style="background: #fff5f8; padding: 4px 10px; border-radius: 10px; font-weight: bold; color: #d81b60;">🛌 {{ b.room.room_number if b.room else b.room_id }}</span></td>
+                <td style="font-size: 0.9rem; color: #880e4f;">
+                    {{ b.check_in.strftime('%y.%m.%d') }} <span style="color: #f06292;">&rarr;</span> {{ b.check_out.strftime('%y.%m.%d') }}
+                </td>
+                <td style="font-weight: bold; color: #2e7d32;">{{ "{:,.0f}".format(b.total_price or 0).replace(',', ' ') }} Ft</td>
+                <td>
+                    {% if b.status %}
+                        {% if b.status.value == 'pending' %}
+                            <span class="badge bg-pending">Függőben</span>
+                        {% elif b.status.value == 'confirmed' %}
+                            <span class="badge bg-confirmed">Igazolva</span>
+                        {% elif b.status.value == 'checked_in' %}
+                            <span class="badge bg-checked-in">Bent lakik</span>
+                        {% elif b.status.value == 'cancelled' %}
+                            <span class="badge bg-cancelled">Lemondva</span>
+                        {% else %}
+                            <span class="badge" style="background: #eee; color: #666;">{{ b.status.value }}</span>
+                        {% endif %}
+                    {% else %}
+                        —
+                    {% endif %}
+                </td>
+                <td>
+                    <!-- Stack the two forms vertically so it looks neat -->
+                    <div style="display: flex; flex-direction: column; gap: 8px; align-items: flex-end;">
+                        
+                        <!-- Status Action Form -->
+                        <form method="POST" action="{{ url_for('admin.booking_action', booking_id=b.id) }}" style="display:flex; gap: 5px;">
+                            {{ forms[b.id].hidden_tag() }}
+                            {{ forms[b.id].action(class='girly-input', style='width: 140px;') }}
+                            {{ forms[b.id].submit(class='btn', style='background: #ad1457; color: white; padding: 6px 12px; border-radius: 15px; font-size: 0.8rem;') }}
+                        </form>
+
+                        <!-- Add Service Form -->
+                        <form method="POST" action="{{ url_for('admin.booking_add_service', booking_id=b.id) }}" style="display:flex; gap: 5px;">
+                            {{ service_forms[b.id].hidden_tag() }}
+                            {{ service_forms[b.id].service_id(class='girly-input', style='width: 120px;') }}
+                            {{ service_forms[b.id].quantity(class='girly-input', style='width: 50px;') }}
+                            <button type="submit" class="btn" style="background: #f06292; color: white; padding: 6px 10px; border-radius: 15px; font-size: 0.8rem;" title="Hozzáad">➕</button>
+                        </form>
+
+                    </div>
+                </td>
+            </tr>
+        {% endfor %}
+        </tbody>
+    </table>
+</div>
 {% else %}
-<p>Nincsenek foglalások.</p>
+<div style="text-align: center; padding: 60px; background: white; border-radius: 30px; margin-top: 20px; border: 2px dashed #f8bbd0;">
+    <span style="font-size: 4rem;">☁️</span>
+    <h2 style="color: #ad1457; font-family: 'Dancing Script', cursive;">Üres a naptár...</h2>
+    <p style="color: #880e4f;">Jelenleg nincsenek foglalások a rendszerben. ✨</p>
+</div>
 {% endif %}
 
 {% endblock %}

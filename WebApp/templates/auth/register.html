@@ -3,41 +3,106 @@
 {% block title %}Regisztráció - HotelGuru{% endblock %}
 
 {% block content %}
-<div style="max-width: 500px; margin: 0 auto;">
-    <h1>Vendég Regisztráció</h1>
-    <form method="POST" action="">
-        {{ form.hidden_tag() }}
-        <div class="form-group">
-            {{ form.username.label }}
-            {{ form.username(class="form-control") }}
-            {% for error in form.username.errors %}<span style="color:red">{{ error }}</span>{% endfor %}
+<div class="container main-wrap">
+
+    <!-- Cute Page Header -->
+    <div class="hero" style="padding: 20px 0 30px; background: transparent; border: none; margin-bottom: 0;">
+        <h1 style="display: flex; justify-content: center; align-items: center; gap: 10px; text-align: center;">
+            Vendég Regisztráció <span class="emoji-icon">🌸</span>
+        </h1>
+        <p style="text-align: center; color: var(--muted); margin-top: 5px;">
+            Hozd létre a fiókodat a foglalások egyszerű kezeléséhez
+        </p>
+    </div>
+
+    <!-- Centered Registration Card -->
+    <div class="card" style="max-width: 550px; margin: 0 auto 40px; padding: 35px 30px;">
+        <form method="POST" action="" class="stack" style="gap: 20px;">
+            {{ form.hidden_tag() }}
+            
+            <!-- Username Field -->
+            <div class="form-group stack" style="gap: 8px;">
+                <label style="font-weight: 600; color: #701a75; font-size: 0.95rem;">
+                    <span class="emoji-icon">👤</span> {{ form.username.label.text }}
+                </label>
+                {{ form.username(class="form-control", placeholder="Válassz egy szuper felhasználónevet...") }}
+                {% for error in form.username.errors %}
+                    <span style="color: #e11d48; font-size: 0.85rem; font-weight: 600;">{{ error }}</span>
+                {% endfor %}
+            </div>
+            
+            <!-- Email Field -->
+            <div class="form-group stack" style="gap: 8px;">
+                <label style="font-weight: 600; color: #701a75; font-size: 0.95rem;">
+                    <span class="emoji-icon">✉️</span> {{ form.email.label.text }}
+                </label>
+                {{ form.email(class="form-control", placeholder="pelda@email.com") }}
+                {% for error in form.email.errors %}
+                    <span style="color: #e11d48; font-size: 0.85rem; font-weight: 600;">{{ error }}</span>
+                {% endfor %}
+            </div>
+            
+            <!-- Passwords Row (Side-by-side on desktop, stacks on mobile) -->
+            <div style="display: flex; gap: 15px; flex-wrap: wrap;">
+                <div class="form-group stack" style="flex: 1; min-width: 200px; gap: 8px;">
+                    <label style="font-weight: 600; color: #701a75; font-size: 0.95rem;">
+                        <span class="emoji-icon">🗝️</span> {{ form.password.label.text }}
+                    </label>
+                    {{ form.password(class="form-control", placeholder="Jelszó") }}
+                    {% for error in form.password.errors %}
+                        <span style="color: #e11d48; font-size: 0.85rem; font-weight: 600;">{{ error }}</span>
+                    {% endfor %}
+                </div>
+                
+                <div class="form-group stack" style="flex: 1; min-width: 200px; gap: 8px;">
+                    <label style="font-weight: 600; color: #701a75; font-size: 0.95rem;">
+                        <span class="emoji-icon">🔐</span> {{ form.confirm_password.label.text }}
+                    </label>
+                    {{ form.confirm_password(class="form-control", placeholder="Jelszó megerősítése") }}
+                    {% for error in form.confirm_password.errors %}
+                        <span style="color: #e11d48; font-size: 0.85rem; font-weight: 600;">{{ error }}</span>
+                    {% endfor %}
+                </div>
+            </div>
+            
+            <!-- Phone Field -->
+            <div class="form-group stack" style="gap: 8px;">
+                <label style="font-weight: 600; color: #701a75; font-size: 0.95rem;">
+                    <span class="emoji-icon">📱</span> {{ form.phone.label.text }}
+                </label>
+                {{ form.phone(class="form-control", placeholder="Pl. +36 30 123 4567") }}
+                {% for error in form.phone.errors %}
+                    <span style="color: #e11d48; font-size: 0.85rem; font-weight: 600;">{{ error }}</span>
+                {% endfor %}
+            </div>
+            
+            <!-- Address Field -->
+            <div class="form-group stack" style="gap: 8px;">
+                <label style="font-weight: 600; color: #701a75; font-size: 0.95rem;">
+                    <span class="emoji-icon">🏠</span> {{ form.address.label.text }}
+                </label>
+                {{ form.address(class="form-control", placeholder="Irányítószám, Város, Utca, Házszám...") }}
+                {% for error in form.address.errors %}
+                    <span style="color: #e11d48; font-size: 0.85rem; font-weight: 600;">{{ error }}</span>
+                {% endfor %}
+            </div>
+            
+            <!-- Submit Button -->
+            <div style="margin-top: 15px;">
+                {{ form.submit(class="btn btn-primary btn-cta", style="width: 100%; font-size: 1.05rem;", value="Fiók Létrehozása ✨") }}
+            </div>
+        </form>
+
+        <!-- Login Link Area -->
+        <div style="text-align: center; margin-top: 25px; border-top: 2px dashed var(--border); padding-top: 20px;">
+            <p style="color: var(--muted); font-size: 0.95rem; margin: 0;">
+                Már van fiókod? <br>
+                <a href="{{ url_for('auth.login') }}" style="color: var(--primary); font-weight: 700; text-decoration: none; display: inline-block; margin-top: 5px; transition: opacity 0.2s ease;">
+                    Lépj be itt! 🎀
+                </a>
+            </p>
         </div>
-        <div class="form-group">
-            {{ form.email.label }}
-            {{ form.email(class="form-control") }}
-            {% for error in form.email.errors %}<span style="color:red">{{ error }}</span>{% endfor %}
-        </div>
-        <div class="form-group">
-            {{ form.password.label }}
-            {{ form.password(class="form-control") }}
-            {% for error in form.password.errors %}<span style="color:red">{{ error }}</span>{% endfor %}
-        </div>
-        <div class="form-group">
-            {{ form.confirm_password.label }}
-            {{ form.confirm_password(class="form-control") }}
-            {% for error in form.confirm_password.errors %}<span style="color:red">{{ error }}</span>{% endfor %}
-        </div>
-        <div class="form-group">
-            {{ form.phone.label }}
-            {{ form.phone(class="form-control", placeholder="+36301234567") }}
-            {% for error in form.phone.errors %}<span style="color:red">{{ error }}</span>{% endfor %}
-        </div>
-        <div class="form-group">
-            {{ form.address.label }}
-            {{ form.address(class="form-control") }}
-            {% for error in form.address.errors %}<span style="color:red">{{ error }}</span>{% endfor %}
-        </div>
-        {{ form.submit(class="btn btn-primary") }}
-    </form>
+    </div>
+
 </div>
 {% endblock %}
