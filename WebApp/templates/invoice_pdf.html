@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html lang="hu">
+<head>
+    <meta charset="UTF-8">
+    <title>Számla #{{ invoice.id }}</title>
+    <style>
+        @page { size: A4; margin: 2cm; }
+        body { font-family: Helvetica, sans-serif; font-size: 14px; color: #333; }
+        .header { text-align: center; margin-bottom: 30px; border-bottom: 2px solid #0b5394; padding-bottom: 10px; }
+        .details-table { width: 100%; margin-bottom: 30px; }
+        .details-table td { width: 50%; vertical-align: top; }
+        .items-table { width: 100%; border-collapse: collapse; margin-bottom: 30px; }
+        .items-table th, .items-table td { border: 1px solid #ddd; padding: 8px; text-align: left; }
+        .items-table th { background-color: #f2f2f2; font-weight: bold; }
+        .total { text-align: right; font-size: 18px; font-weight: bold; margin-top: 15px; }
+        .status-paid { color: #27ae60; font-weight: bold; }
+        .status-unpaid { color: #e74c3c; font-weight: bold; }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h1>SZÁLLÁSHELY SZÁMLA / NYUGTA</h1>
+        <p>Bizonylatszám: INV-{{ booking.check_in.year }}-{{ "%04d" | format(invoice.id) }}</p>
+    </div>
+    
+    <table class="details-table">
+        <tr>
+            <td>
+                <strong>Szolgáltató:</strong><br>
+                HotelGuru Kft.<br>
+                1000 Budapest, Példa u. 1.<br>
+                Adószám: 12345678-2-41
+            </td>
+            <td>
+                <strong>Vevő (Vendég):</strong><br>
+                {{ user.username }}<br>
+                {{ user.email }}<br>
+                {{ user.phone or 'Nincs megadva telefon' }}<br>
+                {{ user.address or 'Nincs megadva cím' }}
+            </td>
+        </tr>
+    </table>
+
+    <p><strong>Érkezés:</strong> {{ booking.check_in.strftime('%Y-%m-%d') }} | <strong>Távozás:</strong> {{ booking.check_out.strftime('%Y-%m-%d') }}</p>
+    
+    <table class="items-table">
+        <thead>
+            <tr>
+                <th>Tétel megnevezése</th>
+                <th>Mennyiség</th>
+                <th>Egységár</th>
+                <th>Összesen</th>
+            </tr>
+        </thead>
+        <tbody>
+            <!-- Szoba alapár -->
+            <tr>
+                <td>Szállás ({{ room.room_number }}. szoba)</td>
+                <td>{{ (booking.check_out - booking.check_in).days }} éj</td>
+                <td>{{ "{:,.0f}".format(room.price_per_night).replace(',', ' ') }} Ft</td>
+                <td>{{ "{:,.0f}".format((booking.check_out - booking.check_in).days * room.price_per_night).replace(',', ' ') }} Ft</td>
+            </tr>
+            <!-- Extra szolgáltatások -->
+            {% for bs in booking.booking_services %}
+            <tr>
+                <td>{{ bs.service.name }}</td>
+                <td>{{ bs.quantity }} db</td>
+                <td>{{ "{:,.0f}".format(bs.service.price).replace(',', ' ') }} Ft</td>
+                <td>{{ "{:,.0f}".format(bs.service.price * bs.quantity).replace(',', ' ') }} Ft</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+
+    <div class="total">
+        Mindösszesen fizetendő: {{ "{:,.0f}".format(invoice.total_amount).replace(',', ' ') }} Ft
+    </div>
+    <p>
+        Fizetési Státusz: 
+        {% if invoice.paid %}
+            <span class="status-paid">FIZETVE</span>
+        {% else %}
+            <span class="status-unpaid">NINCS FIZETVE</span>
+        {% endif %}
+    </p>
+    <p><small>Kiállítás dátuma: {{ invoice.created_at.strftime('%Y-%m-%d %H:%M') }}</small></p>
+</body>
+</html>
