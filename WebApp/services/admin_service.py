@@ -41,7 +41,7 @@ def delete_room(room):
     # Prevent accidental removal when there are active bookings
     if room.bookings and len(room.bookings) > 0:
         raise ValueError(
-            "A szobához kapcsolódó foglalások vannak. Előbb töröld a foglalásokat."
+            "A szoba nem törölhető, mert vannak hozzá tartozó foglalások. Kérlek, előbb töröld vagy kezeld őket."
         )
 
     deleted_number = room.room_number

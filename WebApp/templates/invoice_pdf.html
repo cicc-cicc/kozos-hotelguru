@@ -4,19 +4,31 @@
     <meta charset="UTF-8">
     <title>Számla #{{ invoice.id }}</title>
     <style>
+        /* --- Font Face Definition --- */
+        @font-face {
+            font-family: 'Nunito';
+            src: url('/static/fonts/Nunito-Regular.ttf');
+            font-weight: normal;
+        }
+        @font-face {
+            font-family: 'Nunito';
+            src: url('/static/fonts/Nunito-Bold.ttf');
+            font-weight: bold;
+        }
+
         /* --- Print & Page Settings --- */
-        @page { 
-            size: A4; 
+        @page {
+            size: A4;
             margin: 1cm; /* Smaller margin to maximize page space */
         }
-        
+
         /* --- Base Typography & Colors --- */
-        body { 
-            font-family: 'Nunito', 'Segoe UI', Tahoma, sans-serif; 
+        body {
+            font-family: 'Nunito', 'Segoe UI', Tahoma, sans-serif;
             font-size: 13px; /* Slightly smaller base font */
-            color: #6a1b4d; 
+            color: #6a1b4d;
             line-height: 1.4;
-            background-color: #fff0f5; 
+            background-color: #fff0f5;
             margin: 0;
             padding: 20px;
         }
@@ -24,30 +36,30 @@
         /* --- Main Card Container --- */
         .invoice-card {
             background-color: #ffffff;
-            border: 3px solid #ffb6c1; 
+            border: 3px solid #ffb6c1;
             border-radius: 20px; /* Slightly less rounded to save space */
             padding: 25px 30px; /* Reduced padding */
             max-width: 750px;
             margin: 0 auto;
-            box-shadow: 0 10px 25px rgba(255, 105, 180, 0.15); 
+            box-shadow: 0 10px 25px rgba(255, 105, 180, 0.15);
             position: relative;
         }
 
         /* Print-specific optimizations to guarantee 1 page */
         @media print {
-            body { 
-                background-color: #ffffff; 
-                padding: 0; 
+            body {
+                background-color: #ffffff;
+                padding: 0;
             }
-            .invoice-card { 
-                box-shadow: none; 
+            .invoice-card {
+                box-shadow: none;
                 border: 2px solid #ffb6c1; /* Thinner border for print */
-                padding: 15px; 
-                margin: 0; 
+                padding: 15px;
+                margin: 0;
                 border-radius: 15px;
             }
             /* Hide the ribbon in print so it doesn't get cut off by the top margin */
-            .invoice-card::before { display: none; } 
+            .invoice-card::before { display: none; }
         }
 
         /* Cute decorative ribbon top (Screen only) */
@@ -70,7 +82,7 @@
         }
 
         .header h1 {
-            color: #ff69b4; 
+            color: #ff69b4;
             font-size: 26px; /* Smaller header */
             margin: 0;
             text-transform: uppercase;
@@ -80,7 +92,7 @@
 
         .invoice-pill {
             display: inline-block;
-            background-color: #ffe4e1; 
+            background-color: #ffe4e1;
             color: #d81b60;
             padding: 6px 15px;
             border-radius: 50px;
@@ -221,7 +233,7 @@
 <body>
 
 <div class="invoice-card">
-    
+
     <div class="header">
         <h1>Számla ✧</h1>
         <div class="invoice-pill">
@@ -257,8 +269,8 @@
     </table>
 
     <div class="date-bar">
-        Érkezés: <span>{{ booking.check_in.strftime('%Y-%m-%d') }}</span> 
-        &nbsp;&nbsp; ✈️ &nbsp;&nbsp; 
+        Érkezés: <span>{{ booking.check_in.strftime('%Y-%m-%d') }}</span>
+        &nbsp;&nbsp; ✈️ &nbsp;&nbsp;
         Távozás: <span>{{ booking.check_out.strftime('%Y-%m-%d') }}</span>
     </div>
 
@@ -301,7 +313,7 @@
         {% else %}
             <div class="status-badge unpaid-badge">✗ Fizetésre Vár</div>
         {% endif %}
-        
+
         <br>
         <span class="timestamp">Kiállítás dátuma: {{ invoice.created_at.strftime('%Y-%m-%d %H:%M') }}</span>
     </div>

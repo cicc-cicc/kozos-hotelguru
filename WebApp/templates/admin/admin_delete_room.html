@@ -4,7 +4,7 @@
 
 {% block content %}
 <div style="max-width: 550px; margin: 40px auto; text-align: center; background: white; padding: 40px; border-radius: 30px; box-shadow: 0 10px 30px rgba(240, 98, 146, 0.15); border: 1px solid #fce4ec;">
-    
+
     <!-- Emotional/Themed Header -->
     <div style="font-size: 3rem; margin-bottom: 10px;">🥀</div>
     <h1 style="color: #ad1457; font-family: 'Dancing Script', cursive; font-size: 2.5rem; margin-top: 0;">Biztosan búcsút veszünk?</h1>
@@ -22,7 +22,7 @@
         {% endif %}
 
         <p style="margin-top: 20px; margin-bottom: 0; font-size: 0.9em; line-height: 1.6;">
-            <strong>🎀 FONTOS:</strong> A törlés visszavonhatatlan, és a rendszer automatikusan törölni fog minden kapcsolódó foglalást és számlát is. Kérlek, gondold át alaposan!
+            <strong>FIGYELEM:</strong> A szoba nem törölhető, amíg vannak rá foglalások. Kérlek, előbb töröld a foglalásokat.
         </p>
     </div>
 
@@ -33,7 +33,7 @@
             <a href="{{ url_for('admin.admin_dashboard') }}" class="btn" style="background: #fce4ec; color: #ad1457; text-decoration: none; padding: 12px 30px; border-radius: 50px; font-weight: bold; border: 1px solid #f8bbd0; flex: 1; min-width: 150px;">
                 🌸 Mégse, visszalépek
             </a>
-            
+
             <!-- Girly Destructive Button -->
             <button type="submit" class="btn" style="background: linear-gradient(90deg, #d81b60, #ad1457); color: white; padding: 12px 30px; border: none; border-radius: 50px; cursor: pointer; font-weight: bold; box-shadow: 0 4px 10px rgba(173, 20, 87, 0.2); flex: 1; min-width: 150px;">
                 Végleges törlés 🗑️
