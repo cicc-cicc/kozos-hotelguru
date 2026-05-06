@@ -1,0 +1,71 @@
+{
+  "openapi": "3.0.0",
+  "info": {
+    "title": "Közös HotelGuru API",
+    "version": "1.0.0",
+    "description": "Egyszerű OpenAPI-spec az alap végpontokhoz (generált, kézzel szerkeszthető)."
+  },
+  "servers": [
+    { "url": "http://localhost:5555" }
+  ],
+  "paths": {
+    "/api/v1/rooms": {
+      "get": {
+        "summary": "Lista lekérése szobákról",
+        "responses": {
+          "200": {
+            "description": "Sikeres válasz",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "rooms": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "id": { "type": "integer" },
+                          "room_number": { "type": "string" },
+                          "capacity": { "type": "integer" },
+                          "price_per_night": { "type": "number" }
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/bookings": {
+      "post": {
+        "summary": "Foglalás létrehozása",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "room_id": { "type": "integer" },
+                  "check_in": { "type": "string", "format": "date" },
+                  "check_out": { "type": "string", "format": "date" },
+                  "guests": { "type": "integer" }
+                },
+                "required": ["room_id", "check_in", "check_out"]
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": { "description": "Foglalás létrehozva" },
+          "400": { "description": "Hibás bemenet" },
+          "401": { "description": "Hitelesítés szükséges" }
+        }
+      }
+    }
+  }
+}

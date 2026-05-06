@@ -1,0 +1,58 @@
+<!doctype html>
+<html lang="hu">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>API Docs — HotelGuru</title>
+    <link rel="stylesheet" href="/static/style.css" />
+    <link rel="stylesheet" href="https://unpkg.com/swagger-ui-dist@4.18.3/swagger-ui.css" />
+    <style>
+      /* Tweak Swagger UI colors to match site palette */
+      .swagger-ui .topbar { background: transparent; border-bottom: none; }
+      .swagger-ui .scheme-container select, .swagger-ui .servers { color: #701a75; }
+      .swagger-ui .info h1, .swagger-ui .info .title { color: #701a75; }
+      .swagger-ui .opblock-summary { background: linear-gradient(90deg, #fce7f3, #fff); border: 1px solid #fce7f3; }
+      .swagger-ui .btn.authorize, .swagger-ui .try-out { background: linear-gradient(90deg,#f472b6,#db2777); color: #fff; border-radius: 999px; }
+      .swagger-ui .responses-inner { background: #fff; border: 1px solid var(--border); box-shadow: 0 8px 20px rgba(var(--shadow-rgb),0.06); }
+      /* Wrap content in our container */
+      .apidocs-wrap { max-width: 1200px; margin: 24px auto; padding: 0 20px; }
+      .apidocs-card { padding: 20px; border-radius: 18px; border: 2px solid var(--border); background: linear-gradient(135deg,#fff,#fff); box-shadow: 0 10px 30px rgba(var(--shadow-rgb),0.06); }
+    </style>
+  </head>
+  <body>
+    <header class="site-header">
+      <div class="inner">
+        <div class="brand">
+          <div class="logo">HG</div>
+          <div>
+            <h1>Közös HotelGuru API</h1>
+            <p class="muted">Interaktív API dokumentáció</p>
+          </div>
+        </div>
+        <nav>
+          <a href="/">Vissza a weboldalra</a>
+        </nav>
+      </div>
+    </header>
+
+    <main class="apidocs-wrap">
+      <div class="apidocs-card">
+        <div id="swagger-ui"></div>
+      </div>
+    </main>
+
+    <script src="https://unpkg.com/swagger-ui-dist@4.18.3/swagger-ui-bundle.js"></script>
+    <script>
+      window.onload = function() {
+        const ui = SwaggerUIBundle({
+          url: '/static/openapi.json',
+          dom_id: '#swagger-ui',
+          deepLinking: true,
+          presets: [SwaggerUIBundle.presets.apis],
+          layout: 'BaseLayout'
+        });
+        window.ui = ui;
+      };
+    </script>
+  </body>
+</html>

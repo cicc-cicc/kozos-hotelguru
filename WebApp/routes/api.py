@@ -1,4 +1,4 @@
-from flask import Blueprint, jsonify, request
+from flask import Blueprint, jsonify, request, render_template
 from flask_login import current_user
 from ..models import Room, User
 from .. import db
@@ -8,6 +8,12 @@ from werkzeug.security import check_password_hash
 from flask_jwt_extended import create_access_token, jwt_required, get_jwt_identity
 
 api_bp = Blueprint("api", __name__)
+
+
+@api_bp.route("/apidocs")
+def api_apidocs():
+    """Serve static Swagger UI pointing at the bundled OpenAPI JSON."""
+    return render_template("apidocs.html")
 
 
 @api_bp.route("/rooms", methods=["GET"])
