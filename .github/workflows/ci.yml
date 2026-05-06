@@ -42,7 +42,9 @@ jobs:
 
     - name: Run linters (pre-commit)
       run: |
-        # Use python -m pre_commit to avoid PATH issues on runners
+        # Ensure pre-commit is available and use python -m pre_commit to avoid PATH issues
+        python -m pip install --upgrade pip
+        python -m pip install pre-commit
         python -m pre_commit --version || true
         which pre-commit || true
         python -m pre_commit run --all-files
